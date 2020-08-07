@@ -10,8 +10,7 @@
 
 #-------------------------------- References --------------------------------#
 
-/reference:..\Libs\DataTypes\bin\DesktopGL\AnyCPU\Release\DataTypes.dll
-/reference:..\Libs\DataTypes\bin\DesktopGL\AnyCPU\Debug\DataTypes.dll
+/reference:..\..\GeonBit.UI.Lib\Libs\DataTypes.Core\bin\Debug\netcoreapp3.1\DataTypes.Core.dll
 
 #---------------------------------- Content ---------------------------------#
 
