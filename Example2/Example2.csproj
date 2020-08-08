@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Content\bin\**" />
+      <Compile Remove="Content\BuiltEffects\**" />
+      <Compile Remove="Content\example\**" />
+      <Compile Remove="Content\Fonts\**" />
+      <Compile Remove="Content\GeonBit.UI\**" />
+      <Compile Remove="Content\obj\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Content\bin\**" />
+      <EmbeddedResource Remove="Content\BuiltEffects\**" />
+      <EmbeddedResource Remove="Content\example\**" />
+      <EmbeddedResource Remove="Content\Fonts\**" />
+      <EmbeddedResource Remove="Content\GeonBit.UI\**" />
+      <EmbeddedResource Remove="Content\obj\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Content\bin\**" />
+      <None Remove="Content\BuiltEffects\**" />
+      <None Remove="Content\example\**" />
+      <None Remove="Content\Fonts\**" />
+      <None Remove="Content\GeonBit.UI\**" />
+      <None Remove="Content\obj\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\GeonBit.UI.Lib\GeonBit.UI.Lib.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.0.1375-develop" />
+      <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1375-develop" />
+    </ItemGroup>
+
+</Project>
