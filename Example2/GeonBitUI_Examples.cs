@@ -20,12 +20,14 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using System.IO;
 
 // using GeonBit UI elements
 using GeonBit.UI.Entities;
 using GeonBit.UI.Entities.TextValidators;
 using GeonBit.UI.DataTypes;
 using GeonBit.UI.Utils.Forms;
+using Markdig;
 
 namespace GeonBit.UI.Example
 {
@@ -266,6 +268,30 @@ namespace GeonBit.UI.Example
 
             if (initExamples)
             {
+                // example: welcome message from MarkdownGui
+                {
+                    MarkDownPanel panel = new MarkDownPanel(new Vector2(520, -1));
+                    panels.Add(panel);
+                    UserInterface.Active.AddEntity(panel);
+                    
+                    string textmd = "This is a text ::with special emphasis::{#myId .myemphasis .red}";
+                    //string text = "This is a text with some *emphasis*";
+                    var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseEmojiAndSmiley().Build();
+                    var resulthtml = Markdown.ToHtml(textmd, pipeline);
+                    /*FileStream example_welcome_message = new FileStream("user_data/panels/id_1/01_example_welcome.md", FileMode.Open, FileAccess.Read);
+                    using (StreamReader sr = new StreamReader(example_welcome_message)) {
+                        text = sr.ReadToEnd();
+                    }*/
+                    
+                    resulthtml = @"<!DOCTYPE html>
+<html>
+<body>"
++ resulthtml +
+@"</body>
+</html> ";
+                    
+                    panel.LoadFromHTML(this, resulthtml);
+                }
 
                 // example: welcome message
                 {

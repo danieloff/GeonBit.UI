@@ -33,6 +33,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\html-agility-pack\src\HtmlAgilityPack.NETStandard2_0\HtmlAgilityPack.NETStandard2_0.csproj" />
+      <ProjectReference Include="..\..\markdig\src\Markdig\Markdig.csproj" />
       <ProjectReference Include="..\GeonBit.UI.Lib\GeonBit.UI.Lib.csproj" />
     </ItemGroup>
 
