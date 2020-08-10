@@ -12,7 +12,11 @@
 // Since: 2016.
 //-----------------------------------------------------------------------------
 #endregion
+
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using GeonBit.UI.DataTypes;
@@ -46,6 +50,12 @@ namespace GeonBit.UI.Entities
         {
             Entity.MakeSerializable(typeof(Paragraph));
         }
+        
+        public Vector2 StartingOffset = Vector2.Zero;
+
+        public Vector2 EndingOffset = Vector2.Zero;
+        
+        public List<float> LineHeights = new List<float>();
 
         /// <summary>Default styling for paragraphs. Note: loaded from UI theme xml file.</summary>
         new public static StyleSheet DefaultStyle = new StyleSheet();
@@ -188,8 +198,7 @@ namespace GeonBit.UI.Entities
         /// <param name="size">Paragraph size (note: not font size, but the region that will contain the paragraph).</param>
         /// <param name="offset">Offset from anchor position.</param>
         public Paragraph(string text, Anchor anchor, Color color, float? scale = null, Vector2? size = null, Vector2? offset = null) :
-            this(text, anchor, size, offset)
-        {
+            this(text, anchor, size, offset) {
             SetStyleProperty(StylePropertyIds.FillColor, new StyleProperty(color));
             if (scale != null) { SetStyleProperty(StylePropertyIds.Scale, new StyleProperty((float)scale)); }
             UpdateFontPropertiesIfNeeded();
@@ -241,8 +250,9 @@ namespace GeonBit.UI.Entities
         /// <param name="text">Text content.</param>
         /// <param name="maxLineWidth">Max line width to wrap.</param>
         /// <param name="fontSize">Font scale (scale you are about to use when drawing the text).</param>
+        /// <<param name="currWidth">Starting spacing, for continuing from other paragraphs
         /// <returns>Text that is wrapped to fit the given length (by adding line breaks at the right places).</returns>
-        public string WrapText(SpriteFont font, string text, float maxLineWidth, float fontSize)
+        public string WrapText(SpriteFont font, string text, float maxLineWidth, float fontSize, float currWidth = 0)
         {
             // invalid width (can happen during init steps - skip
             if (maxLineWidth <= 0) { return text; }
@@ -257,9 +267,11 @@ namespace GeonBit.UI.Entities
                 string[] lines = text.Split('\n');
 
                 // iterate lines and wrap them
+                bool first = true;
                 foreach (string line in lines)
                 {
-                    ret.AppendLine(WrapText(font, line, maxLineWidth, fontSize));
+                    ret.AppendLine(WrapText(font, line, maxLineWidth, fontSize, first ? currWidth: 0.0f));
+                    first = false;
                 }
 
                 // remove the last extra linebreak that was added in this process and return.
@@ -272,7 +284,7 @@ namespace GeonBit.UI.Entities
             List<string> words = new List<string>(text.Split(' '));
 
             // iterate words
-            int currWidth = 0;
+            ///int currWidth = 0;
             for (int i = 0; i < words.Count; ++i)
             {
                 // is it last word?
@@ -280,17 +292,17 @@ namespace GeonBit.UI.Entities
 
                 // get current word and its width
                 string word = words[i];
-                int wordWidth = (int)((font.MeasureString(word).X + SingleCharacterSize.X) * fontSize);
+                float wordWidth = ((font.MeasureString(word).X + SingleCharacterSize.X) * fontSize);
 
                 // special case: word itself is longer than line width
                 if (BreakWordsIfMust && wordWidth >= maxLineWidth && word.Length >= 4)
                 {
                     // find breaking position
                     int breakPos = 0;
-                    int currWordWidth = (int)(SingleCharacterSize.X * fontSize);
+                    float currWordWidth = (SingleCharacterSize.X * fontSize);
                     foreach (char c in word)
                     {
-                        currWordWidth += (int)(font.MeasureString(c.ToString()).X * fontSize);
+                        currWordWidth += (font.MeasureString(c.ToString()).X * fontSize);
                         if (currWordWidth >= maxLineWidth)
                         {
                             break;
@@ -393,7 +405,7 @@ namespace GeonBit.UI.Entities
             // call base function
             base.UpdateDestinationRects();
 
-            // do extra preperation for text entities
+            // do extra preparation for text entities
             CalcTextActualRectWithWrap();
         }
 
@@ -440,7 +452,7 @@ namespace GeonBit.UI.Entities
             string newProcessedText = Text;
             if (WrapWords)
             {
-                newProcessedText = WrapText(_currFont, newProcessedText, _destRect.Width, _actualScale);
+                newProcessedText = WrapText(_currFont, newProcessedText, _destRect.Width, _actualScale, StartingOffset.X);
             }
 
             // if processed text changed
@@ -452,10 +464,53 @@ namespace GeonBit.UI.Entities
 
             // due to the mechanism of calculating destination rect etc based on parent and anchor,
             // to set text alignment all we need to do is keep the size the actual text size.
-            // so we just update _size every frame and the text alignemtn (left, right, center..) fix itself by the destination rect.
+            // so we just update _size every frame and the text alignment (left, right, center..) fix itself by the destination rect.
             _fontOrigin = Vector2.Zero;
             _position = new Vector2(_destRect.X, _destRect.Y);
-            Vector2 size = _currFont.MeasureString(_processedText);
+            
+            //get needed positions
+            var processedlines = _processedText.Split('\n');
+            LineHeights.Clear();
+
+            var sizex = 0.0f;
+            bool first = true;
+            for (int i=0; i<processedlines.Length; i++) {
+                var line = processedlines[i];
+                
+                var string_size = _currFont.MeasureString(line);
+
+                /*
+                var usedheight = string_size.Y;
+                var realheight = _currFont.LineSpacing;
+                //if (i + 1 < processedlines.Length) {
+                    usedheight = realheight;
+                //}
+                */
+                LineHeights.Add(_currFont.LineSpacing); //This appears to be constant
+                if (first) {
+                    sizex = Math.Max(sizex, string_size.X + StartingOffset.X);
+                    first = false;
+                }
+                sizex = Math.Max(sizex, string_size.X);
+            }
+
+            var lasty = 0.0f;
+            for (int i = 0; i < LineHeights.Count - 1; i++) {
+                lasty += LineHeights[i];
+            }
+
+            var ending1 = _currFont.MeasureString(processedlines.Last()).X;
+            if (processedlines.Length == 1) { //where the word hasn't even wrapped once...
+                ending1 += StartingOffset.X;
+            }
+            EndingOffset = new Vector2(ending1,
+                0);
+
+            float sizey = 0;
+            foreach (var entry in LineHeights) {
+                sizey += entry;
+            }
+            Vector2 size = new Vector2(sizex, sizey);
 
             // set position and origin based on anchor.
             // note: no top-left here because thats the default set above.
@@ -505,6 +560,11 @@ namespace GeonBit.UI.Entities
             {
                 _fontOrigin.X = size.X / 2;
                 _position.X = _destRect.X + _destRect.Width / 2;
+            }
+            
+            //shift up if continuation
+            if (StartingOffset.X != 0.0f) {
+                _position.Y -= LineHeights[0] * Scale + _scaledSpaceBefore.Y + _scaledSpaceAfter.Y;
             }
 
             // set actual height
@@ -572,7 +632,7 @@ namespace GeonBit.UI.Entities
                 spriteBatch.Draw(Resources.WhiteTexture, rect, backColor);
             }
 
-            // draw outilnes
+            // draw outlines
             int outlineWidth = OutlineWidth;
             if (outlineWidth > 0)
             {
@@ -583,8 +643,17 @@ namespace GeonBit.UI.Entities
             Color fillCol = UserInterface.Active.DrawUtils.FixColorOpacity(FillColor);
 
             // draw text itself
-            spriteBatch.DrawString(_currFont, _processedText, _position, fillCol,
+            var lines = _processedText.Split('\n');
+            
+            var offsety = 0.0f;
+
+            spriteBatch.DrawString(_currFont, lines[0], _position + new Vector2(StartingOffset.X, offsety), fillCol,
                 0, _fontOrigin, _actualScale, SpriteEffects.None, 0.5f);
+            for (int i = 1; i < lines.Length; i++) {
+                offsety += LineHeights[i] * Scale;
+                spriteBatch.DrawString(_currFont, lines[i], _position + new Vector2(0, offsety), fillCol,
+                    0, _fontOrigin, _actualScale, SpriteEffects.None, 0.5f);
+            }
 
             // call base draw function
             base.DrawEntity(spriteBatch, phase);

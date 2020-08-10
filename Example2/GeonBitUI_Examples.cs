@@ -274,7 +274,12 @@ namespace GeonBit.UI.Example
                     panels.Add(panel);
                     UserInterface.Active.AddEntity(panel);
                     
-                    string textmd = "This is a text ::with special emphasis::{#myId .myemphasis .red}";
+                    string textmd = 
+                        "This is a text ::with special emphasis::{.TechForPeace_Color_Red}, HOW COOL IS THAT!? Can it be ::looongg?::{.TechForPeace_Color_Blue}... and possibly even ::interesting???"
+                        + "::{.TechForPeace_Color_Yellow} I sure hope so!\n::THE END OF THIS STORY::{.TechForPeace_Color_Purple}";
+                    //string textmd = "This is a text ::with special emphasis::{.TechForPeace_Color_Red}, HOW COOL IS THAT!?";
+                    //string textmd = "::with special emphasis::{.TechForPeace_Color_Red}, HOW COOL IS THAT!?";
+                    //string textmd = "This is a text ::with special emphasis::{#myId .myemphasis .red}";
                     //string text = "This is a text with some *emphasis*";
                     var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseEmojiAndSmiley().Build();
                     var resulthtml = Markdown.ToHtml(textmd, pipeline);
@@ -283,12 +288,7 @@ namespace GeonBit.UI.Example
                         text = sr.ReadToEnd();
                     }*/
                     
-                    resulthtml = @"<!DOCTYPE html>
-<html>
-<body>"
-+ resulthtml +
-@"</body>
-</html> ";
+                    resulthtml = @"<!DOCTYPE html><html><body>" + resulthtml + "</body></html>";
                     
                     panel.LoadFromHTML(this, resulthtml);
                 }
