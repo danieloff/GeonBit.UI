@@ -278,8 +278,24 @@ namespace GeonBit.UI.Example
                     
                     string textmd = 
                         "This is a text ::with special emphasis::{.TechForPeace_Color_Red}, HOW COOL IS THAT!? Can it be ::looongg?::{.TechForPeace_Color_Blue}... and possibly even ::interesting???"
-                        + "::{.TechForPeace_Color_Yellow} I sure hope so!\n::THE END OF THIS STORY::{.TechForPeace_Color_Purple}";
-                    
+                        + "::{.TechForPeace_Color_Yellow} I sure hope so!\n::THE END OF THIS STORY::{.TechForPeace_Color_Purple}\n"
+                        //  "Paragraph 1\n"
+                        + "\n"
+                        + "Well maybe not yet...\n"
+                        +"\n"
+                        +"Paragraph 3\n";
+
+                    /*
+                    textmd = ""
+                        + "+---+---+---+\n"
+                        + "| AAAAA | B |\n"
+                        + "+ AAAAA +---+\n"
+                        + "| AAAAA | C |\n"
+                        + "+---+---+---+\n"
+                        + "| D | E | F |\n"
+                        + "+---+---+---+\n";
+                        */
+
                     var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseEmojiAndSmiley().Build();
                     var resulthtml = Markdown.ToHtml(textmd, pipeline);
                     if (resulthtml.EndsWith("\n"))
@@ -303,6 +319,8 @@ namespace GeonBit.UI.Example
                     // multiline
                     TextInput textMulti = new TextInput(true, new Vector2(0, 800), skin: PanelSkin.Golden);
                     textMulti.Value = textmd;
+                    //panel.AddChild(new Paragraph(textmd));
+                    //panel.AddChild(new Paragraph(textmd));
                     panel.AddChild(textMulti);
                 }
 

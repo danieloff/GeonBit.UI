@@ -61,7 +61,7 @@ namespace GeonBit.UI.Entities
             set
             {
                 _paragraphContinuation = value;
-                UpdateDestinationRects();
+                //UpdateDestinationRects();
 
 
                // MarkAsDirty();
@@ -285,9 +285,10 @@ namespace GeonBit.UI.Entities
 
                 // iterate lines and wrap them
                 bool first = true;
-                foreach (string line in lines)
-                {
-                    ret.AppendLine(WrapText(font, line, maxLineWidth, fontSize, first ? currWidth: 0.0f));
+                for (int i=0; i<lines.Length; i++) {
+                    var line = lines[i];
+                    ret.Append(WrapText(font, line, maxLineWidth, fontSize, first ? currWidth: 0.0f));
+                    ret.Append('\n');
                     first = false;
                 }
 
@@ -426,6 +427,20 @@ namespace GeonBit.UI.Entities
             CalcTextActualRectWithWrap();
         }
 
+        override public Rectangle CalcDestRect() {
+            Rectangle rect = base.CalcDestRect();
+            
+            //shift up if continuation
+            if (ParagraphContinuation && _currFont != null) {
+                var height = _currFont.LineSpacing; //TODO allow multiple fonts and heights
+                rect.Y -=  (int) (height * Scale + _scaledSpaceBefore.Y + _scaledSpaceAfter.Y);
+                //_fontOrigin.Y -= size.Y * (LineHeights[0] * Scale + _scaledSpaceBefore.Y + _scaledSpaceAfter.Y) /
+                //                 _destRect.Height;
+            }
+
+            return rect;
+        }
+
         /// <summary>
         /// Update font-related properties, if needed.
         /// </summary>
@@ -531,10 +546,10 @@ namespace GeonBit.UI.Entities
             float sizey = 0;
             for (int i = 0; i < LineHeights.Count; i++)
             {
-                if (_processedText.EndsWith("\n") && i + 1 == LineHeights.Count)
-                {
-                    break;
-                }
+                //if (_processedText.EndsWith("\n") && i + 1 == LineHeights.Count)
+                //{
+                //    break;
+                //}
                 var entry = LineHeights[i];
                 sizey += entry;
             }
@@ -590,12 +605,12 @@ namespace GeonBit.UI.Entities
                 _position.X = _destRect.X + _destRect.Width / 2;
             }
             
-            //shift up if continuation
+            /*//shift up if continuation
             if (ParagraphContinuation) {
                 _position.Y -= LineHeights[0] * Scale + _scaledSpaceBefore.Y + _scaledSpaceAfter.Y;
                 //_fontOrigin.Y -= size.Y * (LineHeights[0] * Scale + _scaledSpaceBefore.Y + _scaledSpaceAfter.Y) /
                 //                 _destRect.Height;
-            }
+            }*/
 
             // set actual height
             _actualDestRect.X = (int)_position.X - (int)(_fontOrigin.X * _actualScale);
@@ -698,7 +713,23 @@ namespace GeonBit.UI.Entities
         {
             // get outline color
             Color outlineColor = UserInterface.Active.DrawUtils.FixColorOpacity(OutlineColor);
-            DrawTextOutline(spriteBatch, _processedText, outlineWidth, _currFont, _actualScale, _position, outlineColor, _fontOrigin);
+            
+            
+            // draw text itself
+            var lines = _processedText.Split('\n');
+            
+            var offsety = 0.0f;
+            
+            
+            DrawTextOutline(spriteBatch, lines[0], outlineWidth, _currFont, _actualScale, _position + new Vector2(ParagraphContinuation? StartingOffset.X : 0.0f, offsety), outlineColor, _fontOrigin);
+
+            
+            for (int i = 1; i < lines.Length; i++) {
+                offsety += _currFont.LineSpacing * Scale;
+                
+                DrawTextOutline(spriteBatch, lines[i], outlineWidth, _currFont, _actualScale, _position + new Vector2(0, offsety), outlineColor, _fontOrigin);
+            }
+            
         }
 
         /// <summary>
