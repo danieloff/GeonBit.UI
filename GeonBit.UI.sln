@@ -1,21 +1,24 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.1209
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30330.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example1", "Example1\Example1.csproj", "{BD824DA4-2D9A-4A6F-A21D-892F9B910F26}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Example1", "Example1\Example1.csproj", "{BD824DA4-2D9A-4A6F-A21D-892F9B910F26}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeonBit.UI.Lib", "GeonBit.UI.Lib\GeonBit.UI.Lib.csproj", "{29AC0D0B-19FE-46E8-BE28-D8777088ED38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeonBit.UI.Lib", "GeonBit.UI.Lib\GeonBit.UI.Lib.csproj", "{29AC0D0B-19FE-46E8-BE28-D8777088ED38}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataTypes.Core", "GeonBit.UI.Lib\Libs\DataTypes.Core\DataTypes.Core.csproj", "{E5644C57-9310-4E43-9E08-732E9F736550}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTypes.Core", "GeonBit.UI.Lib\Libs\DataTypes.Core\DataTypes.Core.csproj", "{E5644C57-9310-4E43-9E08-732E9F736550}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example2", "Example2\Example2.csproj", "{21A9DD34-DEC3-4949-8B96-8210FA929FCF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Example2", "Example2\Example2.csproj", "{21A9DD34-DEC3-4949-8B96-8210FA929FCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Markdig", "..\markdig\src\Markdig\Markdig.csproj", "{43A12E35-22C7-47FD-B114-70732E56C2A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Markdig", "..\markdig\src\Markdig\Markdig.csproj", "{43A12E35-22C7-47FD-B114-70732E56C2A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HtmlAgilityPack.NETStandard2_0", "..\html-agility-pack\src\HtmlAgilityPack.NETStandard2_0\HtmlAgilityPack.NETStandard2_0.csproj", "{D83259C8-4774-4B5C-BCF9-C0ADC4327176}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HtmlAgilityPack.NETStandard2_0", "..\html-agility-pack\src\HtmlAgilityPack.NETStandard2_0\HtmlAgilityPack.NETStandard2_0.csproj", "{D83259C8-4774-4B5C-BCF9-C0ADC4327176}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\html-agility-pack\src\HtmlAgilityPack.Shared\HtmlAgilityPack.Shared.projitems*{d83259c8-4774-4b5c-bcf9-c0adc4327176}*SharedItemsImports = 5
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64

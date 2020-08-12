@@ -155,7 +155,7 @@ namespace GeonBit.UI.Entities
 
                     // get child height and check if should change this panel's height
                     var childDestRect = child.GetDestRectForAutoAnchors();
-                    var currHeight = (childDestRect.Bottom + child.SpaceAfter.Y - selfTop);
+                    var currHeight = (childDestRect.Bottom - selfTop); // + child.SpaceAfter.Y
                     didAdjustHeight = true;
                     if (currHeight > maxHeight)
                     {

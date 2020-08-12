@@ -28,17 +28,19 @@ namespace GeonBit.UI.Entities {
             //CalculateOffsets();
         }*/
 
-        public HTMLParagraph() : base(new Vector2(500, 500), Anchor.Auto, Vector2.Zero) { //grows infinitely if I don't specify a size?
+        public HTMLParagraph() : base(new Vector2(-1, -1), Anchor.Auto, Vector2.Zero) { //grows infinitely if I don't specify a size?
             
         }
         
         override internal protected void UpdateDestinationRects()
         {
-            // call base function
-            base.UpdateDestinationRects();
 
             // do extra preparation for text entities
             CalculateOffsets();
+            
+            
+            // call base function
+            base.UpdateDestinationRects();
         }
 
         public void CalculateOffsets() {

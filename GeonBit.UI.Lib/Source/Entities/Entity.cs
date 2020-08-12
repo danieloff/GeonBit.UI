@@ -1834,6 +1834,13 @@ namespace GeonBit.UI.Entities
                     ret.X += (int)_scaledSpaceBefore.X;
                     ret.Y += (int)_scaledSpaceBefore.Y;
                 }
+
+                Entity nextEntity = GetNextEntity(true);
+
+                if (nextEntity == null) { //TODO is this useful?
+                    //ret.Width -= (int)_scaledSpaceAfter.X;
+                    //ret.Height -= (int)_scaledSpaceAfter.Y;
+                }
             }
 
             // some extra logic for draggables
@@ -1972,6 +1979,43 @@ namespace GeonBit.UI.Entities
 
             // return the previous entity (or null if wasn't found)
             return prev;
+        }
+        
+        /// Return the entity before this one in parent container, aka the next older sibling.
+        /// </summary>
+        /// <returns>Entity before this in parent, or null if first in parent or if orphan entity.</returns>
+        /// <param name="skipInvisibles">If true, will skip invisible entities, eg will return the first visible older sibling.</param>
+        protected Entity GetNextEntity(bool skipInvisibles = false)
+        {
+            // no parent? skip
+            if (_parent == null) { return null; }
+
+            // get siblings and iterate them
+            List<Entity> siblings = _parent._children;
+            Entity next = null;
+            bool found = false;
+            foreach (Entity sibling in siblings)
+            {
+                // when getting to self, break the loop
+                if (sibling == this) {
+                    found = true;
+                    continue;
+                }
+
+                // if older sibling is invisible, skip it
+                if (skipInvisibles && !sibling.Visible)
+                {
+                    continue;
+                }
+                
+                if (found) {
+                    next = sibling;
+                    break;
+                }
+            }
+
+            // return the previous entity (or null if wasn't found)
+            return next;
         }
 
         /// <summary>

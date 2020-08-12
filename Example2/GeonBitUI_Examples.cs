@@ -89,8 +89,8 @@ namespace GeonBit.UI.Example
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // make the window fullscreen (but still with border and top control bar)
-            int _ScreenWidth = graphics.GraphicsDevice.Adapter.CurrentDisplayMode.Width * 2 / 3;
-            int _ScreenHeight = graphics.GraphicsDevice.Adapter.CurrentDisplayMode.Height * 2 / 3;
+            int _ScreenWidth = graphics.GraphicsDevice.Adapter.CurrentDisplayMode.Width * 6 / 7;
+            int _ScreenHeight = graphics.GraphicsDevice.Adapter.CurrentDisplayMode.Height - 120;
             graphics.PreferredBackBufferWidth = (int)_ScreenWidth;
             graphics.PreferredBackBufferHeight = (int)_ScreenHeight;
             graphics.IsFullScreen = false;
@@ -270,27 +270,40 @@ namespace GeonBit.UI.Example
             {
                 // example: welcome message from MarkdownGui
                 {
-                    MarkDownPanel panel = new MarkDownPanel(new Vector2(520, -1));
-                    panels.Add(panel);
-                    UserInterface.Active.AddEntity(panel);
+                    //create markdown render panel
+                    MarkDownPanel panelmd = new MarkDownPanel(new Vector2(400, -1));
+                    panels.Add(panelmd);
+                    UserInterface.Active.AddEntity(panelmd);
+                    panelmd.Anchor = Anchor.CenterLeft;
                     
                     string textmd = 
                         "This is a text ::with special emphasis::{.TechForPeace_Color_Red}, HOW COOL IS THAT!? Can it be ::looongg?::{.TechForPeace_Color_Blue}... and possibly even ::interesting???"
                         + "::{.TechForPeace_Color_Yellow} I sure hope so!\n::THE END OF THIS STORY::{.TechForPeace_Color_Purple}";
-                    //string textmd = "This is a text ::with special emphasis::{.TechForPeace_Color_Red}, HOW COOL IS THAT!?";
-                    //string textmd = "::with special emphasis::{.TechForPeace_Color_Red}, HOW COOL IS THAT!?";
-                    //string textmd = "This is a text ::with special emphasis::{#myId .myemphasis .red}";
-                    //string text = "This is a text with some *emphasis*";
+                    
                     var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseEmojiAndSmiley().Build();
                     var resulthtml = Markdown.ToHtml(textmd, pipeline);
-                    /*FileStream example_welcome_message = new FileStream("user_data/panels/id_1/01_example_welcome.md", FileMode.Open, FileAccess.Read);
-                    using (StreamReader sr = new StreamReader(example_welcome_message)) {
-                        text = sr.ReadToEnd();
-                    }*/
+                    if (resulthtml.EndsWith("\n"))
+                    {
+                       resulthtml = resulthtml.Remove(resulthtml.Length - 1);
+                    }
+
+                    resulthtml = "<!DOCTYPE html><html><body>" + resulthtml + "</body></html>";
                     
-                    resulthtml = @"<!DOCTYPE html><html><body>" + resulthtml + "</body></html>";
+                    panelmd.LoadFromHTML(this, resulthtml);
                     
-                    panel.LoadFromHTML(this, resulthtml);
+                    // create editor panel and add to list of panels and manager
+                    Panel panel = new Panel(new Vector2(600, -1));
+                    panels.Add(panel);
+                    UserInterface.Active.AddEntity(panel);
+                    panel.Anchor = Anchor.CenterRight;
+
+                    panel.AddChild(new Header("Editor"));
+                    panel.AddChild(new HorizontalLine());
+
+                    // multiline
+                    TextInput textMulti = new TextInput(true, new Vector2(0, 800), skin: PanelSkin.Golden);
+                    textMulti.Value = textmd;
+                    panel.AddChild(textMulti);
                 }
 
                 // example: welcome message
@@ -1410,6 +1423,9 @@ If you liked GeonBit.UI feel free to star the repo on GitHub. :)"));
                 panel.Visible = false;
             }
             panels[currExample].Visible = true;
+            if (currExample == 0) {
+                panels[currExample + 1].Visible = true;
+            }
 
             // disable / enable next and previous buttons
             nextExampleButton.Enabled = currExample != panels.Count - 1;

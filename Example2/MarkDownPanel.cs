@@ -17,12 +17,74 @@ using Microsoft.Xna.Framework.Content;
 
 namespace GeonBit.UI.Example {
     public class MarkDownPanel : Panel {
-        public HTMLParagraph Manager;
-        
+        //public HTMLParagraph Manager; //the sizing is simple, it doesn't work with an unsized inside of an unsized right now.
+
+        private List<Vector2> offsets = new List<Vector2>();
+
         public MarkDownPanel(Vector2 size, PanelSkin skin = PanelSkin.Default, Anchor anchor = Anchor.Center, Vector2? offset = null) :
             base(size, skin, anchor, offset)
         {
             
+        }
+
+        protected override void UpdateDestinationRects()
+        {
+
+            // do extra preparation for text entities
+            CalculateOffsets();
+
+
+            // call base function
+            base.UpdateDestinationRects();
+        }
+
+        public void CalculateOffsets()
+        {
+            offsets.Clear();
+            if (_children.Count == 0)
+            {
+                return;
+            }
+
+            Paragraph curr = null;
+            Paragraph next = null;
+            int i = 0;
+            int j = 0;
+
+            while (curr == null && i < _children.Count)
+            {
+                curr = _children[i] as Paragraph;
+                i++;
+            }
+
+            if (curr != null)
+            {
+                offsets.Add(Vector2.Zero);
+                curr.StartingOffset = offsets[j];
+                curr.CalcTextActualRectWithWrap();
+                offsets.Add(curr.EndingOffset);
+                j++;
+            }
+
+            while (curr != null)
+            {
+                while (next == null && i < _children.Count)
+                { //skip over things until I put more types in here to flow around. Right now just fancy text.
+                    next = _children[i] as Paragraph;
+                    i++;
+                }
+
+                if (next != null)
+                {
+                    next.StartingOffset = offsets[j];
+                    next.CalcTextActualRectWithWrap();
+                    offsets.Add(next.EndingOffset);
+                    j++;
+                }
+
+                curr = next;
+                next = null;
+            }
         }
 
         public override void Draw(SpriteBatch spriteBatch) {
@@ -66,6 +128,7 @@ To start the demo, please click the {{ITALIC}}'Next'{{DEFAULT}} button on the to
 
             Entity target = this;
             HTMLParagraph manager = null;
+            bool firstparagraph = true;
 
             //process current
             //Trace.WriteLine("----");
@@ -88,6 +151,8 @@ To start the demo, please click the {{ITALIC}}'Next'{{DEFAULT}} button on the to
                 var p = target.AddChild(new Paragraph(currenttext.Text));
                 p.FillColor = currentColor;//, Anchor.Auto, currentColor));
                 p.OutlineWidth = 0;
+                ((Paragraph)p).ParagraphContinuation = !firstparagraph;
+                firstparagraph = false;
             }
             //Trace.Write("\n<" + current.Name + ">\n");
             Trace.WriteLine("");
@@ -99,9 +164,9 @@ To start the demo, please click the {{ITALIC}}'Next'{{DEFAULT}} button on the to
                 //Trace.WriteLine("----");
                 Trace.Write("<"+child.Name+" ");
                 if (child.Name == "p") {
-                    manager = new HTMLParagraph();
-                    Manager = manager;
-                    target = target.AddChild(Manager);
+                    //manager = new HTMLParagraph();
+                    //Manager = manager;
+                    //target = target.AddChild(Manager);
                 }
                 foreach (var attr in child.Attributes) {
                     Trace.Write(attr.Name + " " + attr.Value + " ");
@@ -118,6 +183,8 @@ To start the demo, please click the {{ITALIC}}'Next'{{DEFAULT}} button on the to
                     var p = target.AddChild(new Paragraph(currenttext.Text));
                     p.FillColor = currentColor;
                     p.OutlineWidth = 0;
+                    ((Paragraph) p).ParagraphContinuation = !firstparagraph;
+                    firstparagraph = false;
                     /*if (manager != null) {
                         manager.AddChild(p);
                     }*/
@@ -151,9 +218,9 @@ To start the demo, please click the {{ITALIC}}'Next'{{DEFAULT}} button on the to
             
             Trace.WriteLine("End");
 
-            if (manager != null) {
-                manager.CalculateOffsets();
-            }
+            //if (manager != null) {
+            //    manager.CalculateOffsets();
+            //}
 
             //var htmlBody = htmlDoc.DocumentNode.SelectSingleNode("//body");
 

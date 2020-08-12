@@ -50,7 +50,24 @@ namespace GeonBit.UI.Entities
         {
             Entity.MakeSerializable(typeof(Paragraph));
         }
-        
+
+        private bool _paragraphContinuation = false;
+        public bool ParagraphContinuation
+        {
+            get
+            {
+                return _paragraphContinuation;
+            }
+            set
+            {
+                _paragraphContinuation = value;
+                UpdateDestinationRects();
+
+
+               // MarkAsDirty();
+            }
+        }
+
         public Vector2 StartingOffset = Vector2.Zero;
 
         public Vector2 EndingOffset = Vector2.Zero;
@@ -452,7 +469,7 @@ namespace GeonBit.UI.Entities
             string newProcessedText = Text;
             if (WrapWords)
             {
-                newProcessedText = WrapText(_currFont, newProcessedText, _destRect.Width, _actualScale, StartingOffset.X);
+                newProcessedText = WrapText(_currFont, newProcessedText, _destRect.Width, _actualScale, ParagraphContinuation ? StartingOffset.X : 0.0f);
             }
 
             // if processed text changed
@@ -488,7 +505,7 @@ namespace GeonBit.UI.Entities
                 */
                 LineHeights.Add(_currFont.LineSpacing); //This appears to be constant
                 if (first) {
-                    sizex = Math.Max(sizex, string_size.X + StartingOffset.X);
+                    sizex = Math.Max(sizex, string_size.X + (ParagraphContinuation? StartingOffset.X : 0.0f));
                     first = false;
                 }
                 sizex = Math.Max(sizex, string_size.X);
@@ -501,13 +518,24 @@ namespace GeonBit.UI.Entities
 
             var ending1 = _currFont.MeasureString(processedlines.Last()).X;
             if (processedlines.Length == 1) { //where the word hasn't even wrapped once...
-                ending1 += StartingOffset.X;
+                ending1 += ParagraphContinuation? StartingOffset.X: 0.0f;
+            }
+
+            if (processedlines.Length > 0 && processedlines.Last().Length == 0)
+            {
+                ending1 = 0; //special case of newline ending putting it on the next row.
             }
             EndingOffset = new Vector2(ending1,
                 0);
 
             float sizey = 0;
-            foreach (var entry in LineHeights) {
+            for (int i = 0; i < LineHeights.Count; i++)
+            {
+                if (_processedText.EndsWith("\n") && i + 1 == LineHeights.Count)
+                {
+                    break;
+                }
+                var entry = LineHeights[i];
                 sizey += entry;
             }
             Vector2 size = new Vector2(sizex, sizey);
@@ -563,8 +591,10 @@ namespace GeonBit.UI.Entities
             }
             
             //shift up if continuation
-            if (StartingOffset.X != 0.0f) {
+            if (ParagraphContinuation) {
                 _position.Y -= LineHeights[0] * Scale + _scaledSpaceBefore.Y + _scaledSpaceAfter.Y;
+                //_fontOrigin.Y -= size.Y * (LineHeights[0] * Scale + _scaledSpaceBefore.Y + _scaledSpaceAfter.Y) /
+                //                 _destRect.Height;
             }
 
             // set actual height
@@ -647,7 +677,7 @@ namespace GeonBit.UI.Entities
             
             var offsety = 0.0f;
 
-            spriteBatch.DrawString(_currFont, lines[0], _position + new Vector2(StartingOffset.X, offsety), fillCol,
+            spriteBatch.DrawString(_currFont, lines[0], _position + new Vector2(ParagraphContinuation? StartingOffset.X : 0.0f, offsety), fillCol,
                 0, _fontOrigin, _actualScale, SpriteEffects.None, 0.5f);
             for (int i = 1; i < lines.Length; i++) {
                 offsety += LineHeights[i] * Scale;
