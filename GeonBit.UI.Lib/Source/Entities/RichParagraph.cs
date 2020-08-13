@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using GeonBit.UI.DataTypes;
 using System.Text;
+using SpriteFontPlus;
 
 namespace GeonBit.UI.Entities
 {
@@ -347,7 +348,7 @@ namespace GeonBit.UI.Entities
                 int iTextIndex = 0;
                 Color currColor = Color.White;
                 Color currOutlineColor = Color.Black;
-                SpriteFont currFont = null;
+                DynamicSpriteFont currFont = null;
                 Vector2 characterSize = GetCharacterActualSize();
                 Vector2 currPosition = new Vector2(_position.X - characterSize.X, _position.Y);
                 int currOutlineWidth = 0;
@@ -426,7 +427,11 @@ namespace GeonBit.UI.Entities
                     DrawTextOutline(spriteBatch, currText, currOutlineWidth, currFont, _actualScale, currPosition + offset, currOutlineColor, _fontOrigin);
 
                     // fix color opacity and draw
-                    spriteBatch.DrawString(currFont, currText, currPosition + offset, currColor, 0, _fontOrigin, _actualScale, SpriteEffects.None, 0.5f);
+                    //TODO add featuresspriteBatch.DrawString(currFont, currText, currPosition + offset, currColor, 0, _fontOrigin, _actualScale, SpriteEffects.None, 0.5f);
+
+                    spriteBatch.DrawString(currFont, currText, currPosition + offset, currColor, new Vector2(_actualScale));
+
+                    //example public static float DrawString(this SpriteBatch batch, DynamicSpriteFont font, StringBuilder text, Vector2 pos, Color[] glyphColors, Vector2 scale)
                 }
             }
             // if there are no style-changing instructions, just draw the paragraph as-is

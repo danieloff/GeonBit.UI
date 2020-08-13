@@ -17,6 +17,10 @@ using GeonBit.UI.DataTypes;
 using System.Collections.Generic;
 using System.Linq;
 
+
+using SpriteFontPlus;
+using System.IO;
+
 namespace GeonBit.UI
 {
     /// <summary>
@@ -240,7 +244,8 @@ namespace GeonBit.UI
         public static Texture2D ArrowUp;
 
         /// <summary>Default font types.</summary>
-        public static SpriteFont[] Fonts;
+        ///NOT TODO public static SpriteFont[] Fonts;
+        public static DynamicSpriteFont[] Fonts;
 
         /// <summary>Effect for disabled entities (greyscale).</summary>
         public static Effect DisabledEffect;
@@ -254,17 +259,22 @@ namespace GeonBit.UI
         /// <summary>Root for geonbit.ui content</summary>
         internal static string _root;
 
+        /// <summary>Root for runtime program content</summary>
+        internal static string _runtimeroot;
+
         /// <summary>
         /// Load all GeonBit.UI resources.
         /// </summary>
         /// <param name="content">Content manager to use.</param>
+        /// <param name="program">Program name to use for runtime resources</param>
         /// <param name="theme">Which theme to load resources from.</param>
-        static public void LoadContent(ContentManager content, string theme = "default")
+        static public void LoadContent(ContentManager content, String program, string theme = "default")
         {
             InitialiseCharStringDict();
 
             // set resources root path and store content manager
             _root = "GeonBit.UI/themes/" + theme + "/";
+            _runtimeroot = "../data/" + program + "/";
             _content = content;
 
             // set Texture2D static fields
@@ -313,11 +323,24 @@ namespace GeonBit.UI
             }
 
             // load fonts
+            //NOT TODO
+            /*
             Fonts = new SpriteFont[Enum.GetValues(typeof(FontStyle)).Length];
             foreach (FontStyle style in Enum.GetValues(typeof(FontStyle)))
             {
                 Fonts[(int)style] = content.Load<SpriteFont>(_root + "fonts/" + style.ToString());
                 Fonts[(int)style].LineSpacing += 2;
+            }
+            */
+            Fonts = new DynamicSpriteFont[Enum.GetValues(typeof(FontStyle)).Length];
+            foreach (FontStyle style in Enum.GetValues(typeof(FontStyle)))
+            {
+                string proxyname = _root + "fonts/" + style.ToString() + "_md";
+                var proxydata = content.Load<FontData>(proxyname);
+                using (var stream = File.OpenRead(_runtimeroot + "fonts/" + proxydata.FontName))
+                {
+                    Fonts[(int)style] = DynamicSpriteFont.FromTtf(stream, 20); //TODO, default size?
+                }
             }
 
             // load buttons metadata

@@ -47,6 +47,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\SpriteFontPlus\src\SpriteFontPlus.MonoGame.csproj" />
       <ProjectReference Include="Libs\DataTypes.Core\DataTypes.Core.csproj" />
     </ItemGroup>
 

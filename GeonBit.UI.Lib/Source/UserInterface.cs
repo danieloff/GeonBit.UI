@@ -340,13 +340,13 @@ namespace GeonBit.UI
         /// </summary>
         /// <param name="contentManager">Content manager.</param>
         /// <param name="theme">Which UI theme to use (see options in Content/GeonBit.UI/themes/). This affect the appearance of all textures and effects.</param>
-        static public void Initialize(ContentManager contentManager, string theme = "hd")
+        static public void Initialize(ContentManager contentManager, string program, string theme = "hd")
         {
             // store the content manager
             _content = contentManager;
 
             // init resources (textures etc)
-            Resources.LoadContent(_content, theme);
+            Resources.LoadContent(_content, program, theme);
 
             // create a default active user interface
             Active = new UserInterface();
@@ -410,10 +410,11 @@ namespace GeonBit.UI
         /// Initialize UI manager (mostly load resources and set some defaults).
         /// </summary>
         /// <param name="contentManager">Content manager.</param>
+        /// <param name="program">Program name for runtime resources</param>
         /// <param name="theme">Which UI theme to use. This affect the appearance of all textures and effects.</param>
-        static public void Initialize(ContentManager contentManager, BuiltinThemes theme)
+        static public void Initialize(ContentManager contentManager, string program, BuiltinThemes theme)
         {
-            Initialize(contentManager, theme.ToString());
+            Initialize(contentManager, program, theme.ToString());
         }
 
         /// <summary>

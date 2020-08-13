@@ -21,6 +21,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using GeonBit.UI.DataTypes;
 using System.Text;
+using SpriteFontPlus;
 
 namespace GeonBit.UI.Entities
 {
@@ -94,10 +95,10 @@ namespace GeonBit.UI.Entities
 
         /// <summary>
         /// An optional font you can set to override the default fonts.
-        /// NOTE! Only monospace fonts are supported!
+        /// NOTE! Only monospace fonts are supported! ///TODO, allow non monospace!
         /// </summary>
         [System.Xml.Serialization.XmlIgnore]
-        public SpriteFont FontOverride = null;
+        public DynamicSpriteFont FontOverride = null;
 
         // the size of a single space character with current font.
         private Vector2 SingleCharacterSize;
@@ -143,7 +144,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Current font used.
         /// </summary>
-        protected SpriteFont _currFont;
+        protected DynamicSpriteFont _currFont; //TODO allow both types of font? Does it matter?
         
         /// <summary>
         /// Calculated, final text scale.
@@ -241,9 +242,9 @@ namespace GeonBit.UI.Entities
         /// Get the size, in pixels, of a single character in paragraph.
         /// </summary>
         /// <returns>Actual size, in pixels, of a single character.</returns>
-        public Vector2 GetCharacterActualSize()
+        public Vector2 GetCharacterActualSize() //TODO why does this need the curr font?
         {
-            SpriteFont font = GetCurrFont();
+            DynamicSpriteFont font = GetCurrFont();
             float scale = Scale * BaseSize * GlobalScale;
             return SingleCharacterSize * scale;
         }
@@ -269,7 +270,7 @@ namespace GeonBit.UI.Entities
         /// <param name="fontSize">Font scale (scale you are about to use when drawing the text).</param>
         /// <<param name="currWidth">Starting spacing, for continuing from other paragraphs
         /// <returns>Text that is wrapped to fit the given length (by adding line breaks at the right places).</returns>
-        public string WrapText(SpriteFont font, string text, float maxLineWidth, float fontSize, float currWidth = 0)
+        public string WrapText(DynamicSpriteFont font, string text, float maxLineWidth, float fontSize, float currWidth = 0)
         {
             // invalid width (can happen during init steps - skip
             if (maxLineWidth <= 0) { return text; }
@@ -409,7 +410,7 @@ namespace GeonBit.UI.Entities
         /// Get the currently active font for this paragraph.
         /// </summary>
         /// <returns>Current font.</returns>
-        protected SpriteFont GetCurrFont()
+        protected DynamicSpriteFont GetCurrFont()
         {
             return FontOverride ?? Resources.Fonts[(int)TextStyle];
         }
@@ -431,8 +432,9 @@ namespace GeonBit.UI.Entities
             Rectangle rect = base.CalcDestRect();
             
             //shift up if continuation
-            if (ParagraphContinuation && _currFont != null) {
-                var height = _currFont.LineSpacing; //TODO allow multiple fonts and heights
+            if (ParagraphContinuation && _currFont != null)
+            {
+                var height = _currFont.Size; //TODO _currFont.LineSpacing; //TODO allow multiple fonts and heights
                 rect.Y -=  (int) (height * Scale + _scaledSpaceBefore.Y + _scaledSpaceAfter.Y);
                 //_fontOrigin.Y -= size.Y * (LineHeights[0] * Scale + _scaledSpaceBefore.Y + _scaledSpaceAfter.Y) /
                 //                 _destRect.Height;
@@ -446,7 +448,7 @@ namespace GeonBit.UI.Entities
         /// </summary>
         private void UpdateFontPropertiesIfNeeded()
         {
-            SpriteFont font = GetCurrFont();
+            DynamicSpriteFont font = GetCurrFont();
             if (font != _currFont)
             {
                 // mark as dirty so we'll recalculate positions and line breaks
@@ -457,10 +459,11 @@ namespace GeonBit.UI.Entities
                 SingleCharacterSize = _currFont.MeasureString(" ");
 
                 // sanity test
-                if ((SingleCharacterSize.X * 2) != _currFont.MeasureString("!.").X)
+                //TODO FIX ALL MONOSPACE STUFF
+                /*if ((SingleCharacterSize.X * 2) != _currFont.MeasureString("!.").X)
                 {
                     throw new Exceptions.InvalidValueException("Cannot use non-monospace fonts!");
-                }
+                }*/
             }
         }
 
@@ -518,7 +521,8 @@ namespace GeonBit.UI.Entities
                     usedheight = realheight;
                 //}
                 */
-                LineHeights.Add(_currFont.LineSpacing); //This appears to be constant
+                //TODO this is zero with the dynamic font LineHeights.Add(_currFont.LineSpacing); //This appears to be constant
+                LineHeights.Add(_currFont.Size);
                 if (first) {
                     sizex = Math.Max(sizex, string_size.X + (ParagraphContinuation? StartingOffset.X : 0.0f));
                     first = false;
@@ -692,12 +696,14 @@ namespace GeonBit.UI.Entities
             
             var offsety = 0.0f;
 
-            spriteBatch.DrawString(_currFont, lines[0], _position + new Vector2(ParagraphContinuation? StartingOffset.X : 0.0f, offsety), fillCol,
-                0, _fontOrigin, _actualScale, SpriteEffects.None, 0.5f);
+            //spriteBatch.DrawString(_currFont, lines[0], _position + new Vector2(ParagraphContinuation? StartingOffset.X : 0.0f, offsety), fillCol,
+            //    0, _fontOrigin, _actualScale, SpriteEffects.None, 0.5f);
+            spriteBatch.DrawString(_currFont, lines[0], _position + new Vector2(ParagraphContinuation ? StartingOffset.X : 0.0f, offsety), fillCol, new Vector2(_actualScale));
             for (int i = 1; i < lines.Length; i++) {
                 offsety += LineHeights[i] * Scale;
-                spriteBatch.DrawString(_currFont, lines[i], _position + new Vector2(0, offsety), fillCol,
-                    0, _fontOrigin, _actualScale, SpriteEffects.None, 0.5f);
+                //spriteBatch.DrawString(_currFont, lines[i], _position + new Vector2(0, offsety), fillCol,
+                //    0, _fontOrigin, _actualScale, SpriteEffects.None, 0.5f);
+                spriteBatch.DrawString(_currFont, lines[i], _position + new Vector2(0, offsety), fillCol, new Vector2(_actualScale));
             }
 
             // call base draw function
@@ -730,6 +736,43 @@ namespace GeonBit.UI.Entities
                 DrawTextOutline(spriteBatch, lines[i], outlineWidth, _currFont, _actualScale, _position + new Vector2(0, offsety), outlineColor, _fontOrigin);
             }
             
+        }
+
+
+        /// <summary>
+        /// Draw text outline.
+        /// </summary>
+        /// <param name="spriteBatch">Sprite batch to use.</param>
+        /// <param name="text">Text to draw outline for.</param>
+        /// <param name="outlineWidth">Outline width.</param>
+        /// <param name="font">Text font.</param>
+        /// <param name="scale">Text absolute scale.</param>
+        /// <param name="position">Text position.</param>
+        /// <param name="outlineColor">Outline color.</param>
+        /// <param name="origin">Text origin.</param>
+        protected void DrawTextOutline(SpriteBatch spriteBatch, string text, int outlineWidth, DynamicSpriteFont font, float scale, Vector2 position, Color outlineColor, Vector2 origin)
+        {
+            // for not-too-thick outline we render just two corners
+            /*TODO
+             if (outlineWidth <= MaxOutlineWidthToOptimize)
+            {
+                spriteBatch.DrawString(font, text, position + Vector2.One * outlineWidth, outlineColor,
+                    0, origin, scale, SpriteEffects.None, 0.5f);
+                spriteBatch.DrawString(font, text, position - Vector2.One * outlineWidth, outlineColor,
+                    0, origin, scale, SpriteEffects.None, 0.5f);
+            }
+            // for really thick outline we need to cover the other corners as well
+            else
+            {
+                spriteBatch.DrawString(font, text, position + Vector2.UnitX * outlineWidth, outlineColor,
+                    0, origin, scale, SpriteEffects.None, 0.5f);
+                spriteBatch.DrawString(font, text, position - Vector2.UnitX * outlineWidth, outlineColor,
+                    0, origin, scale, SpriteEffects.None, 0.5f);
+                spriteBatch.DrawString(font, text, position + Vector2.UnitY * outlineWidth, outlineColor,
+                    0, origin, scale, SpriteEffects.None, 0.5f);
+                spriteBatch.DrawString(font, text, position - Vector2.UnitY * outlineWidth, outlineColor,
+                    0, origin, scale, SpriteEffects.None, 0.5f);
+            }*/
         }
 
         /// <summary>
