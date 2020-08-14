@@ -1,4 +1,7 @@
-﻿namespace GeonBit.UI.DataTypes
+﻿using System.Xml.Serialization;
+using Microsoft.Xna.Framework;
+
+namespace GeonBit.UI.DataTypes
 {
     /// <summary>
     /// Meta data we attach to different textures.
@@ -12,5 +15,9 @@
 
         /// <summary>Frame height, in percents relative to texture size (eg if texture height is 100 and frame height is 0.1, final frame height would be 10 pixels)</summary>
         public float FrameHeight;
+        
+        // default inner padding for frame
+        [XmlElement("Vector", IsNullable = true)]
+        public Vector2? InnerMargin = null;
     }
 }

@@ -59,6 +59,11 @@ namespace GeonBit.UI.Entities
             Entity.MakeSerializable(typeof(Panel));
         }
 
+        public override Vector2 InternalSize()
+        {
+            return base.Size - new Vector2(2 * InnerMargin.X, 2*InnerMargin.Y);
+        }
+
         /// <summary>Default styling for panels. Note: loaded from UI theme xml file.</summary>
         new public static StyleSheet DefaultStyle = new StyleSheet();
 
@@ -108,7 +113,7 @@ namespace GeonBit.UI.Entities
         /// <param name="skin">Panel skin (texture to use). Use PanelSkin.None for invisible panels.</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public Panel(Vector2 size, PanelSkin skin = PanelSkin.Default, Anchor anchor = Anchor.Center, Vector2? offset = null) :
+        public Panel(Vector2 size, PanelSkin skin, Anchor anchor = Anchor.Center, Vector2? offset = null, Point? innermargin = null) :
             base(size, skin, anchor, offset)
         {
             UpdateStyle(DefaultStyle);
@@ -116,6 +121,15 @@ namespace GeonBit.UI.Entities
             {
                 AdjustHeightAutomatically = true;
             }
+
+            Vector2? mg = null;
+            if ((int) skin > 0)
+            {
+                TextureData data = Resources.PanelData[(int) skin]; //TODO in base?
+                mg = data.InnerMargin;
+            }
+
+            InnerMargin = mg ?? new Vector2(0);
         }
 
         /// <summary>
@@ -145,8 +159,8 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create the panel with default params.
         /// </summary>
-        public Panel() :
-            this(new Vector2(500, 500))
+        public Panel(PanelSkin skin) :
+            this(new Vector2(500, 500), skin)
         {
         }
 
@@ -270,6 +284,8 @@ namespace GeonBit.UI.Entities
             ClearDirtyFlag(true);
         }
 
+        private Vector2 InnerMargin;
+
         /// <summary>
         /// Calculate and return the internal destination rectangle (note: this relay on the dest rect having a valid value first).
         /// </summary>
@@ -277,7 +293,11 @@ namespace GeonBit.UI.Entities
         override internal protected Rectangle CalcInternalRect()
         {
             base.CalcInternalRect();
+
+            Point imp = new Point((int) InnerMargin.X, (int) InnerMargin.Y);
             _destRectInternal.Width -= GetScrollbarWidth();
+            _destRectInternal.Location += imp;
+            _destRectInternal.Size -= new Point(2) * imp;
             return _destRectInternal;
         }
 

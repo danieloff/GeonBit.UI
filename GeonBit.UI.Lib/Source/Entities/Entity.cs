@@ -14,9 +14,13 @@
 #endregion
 using System.Reflection;
 using System.Collections.Generic;
+using System.Drawing;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using GeonBit.UI.DataTypes;
+using Color = Microsoft.Xna.Framework.Color;
+using Point = Microsoft.Xna.Framework.Point;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace GeonBit.UI.Entities
 {
@@ -156,10 +160,7 @@ namespace GeonBit.UI.Entities
         /// </summary>
         public IReadOnlyList<Entity> Children
         {
-            get
-            {
-                return _children.AsReadOnly() as IReadOnlyList<Entity>;
-            }
+            get { return _children.AsReadOnly() as IReadOnlyList<Entity>; }
         }
 
         // list of sorted children
@@ -270,7 +271,10 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Get overflow scrollbar value.
         /// </summary>
-        protected virtual Point OverflowScrollVal { get { return Point.Zero; } }
+        protected virtual Point OverflowScrollVal
+        {
+            get { return Point.Zero; }
+        }
 
         // optional min size.
         private Vector2? _minSize;
@@ -283,14 +287,30 @@ namespace GeonBit.UI.Entities
         /// This is especially useful for entities with size that depends on their parent entity size, for example
         /// if you define an entity to take 20% of its parent space but can't be less than 200 pixels width.
         /// </summary>
-        public Vector2? MinSize { get { return _minSize; } set { _minSize = value;  MarkAsDirty(); } }
+        public Vector2? MinSize
+        {
+            get { return _minSize; }
+            set
+            {
+                _minSize = value;
+                MarkAsDirty();
+            }
+        }
 
         /// <summary>
         /// If defined, will limit the maximum size of this entity when calculating size.
         /// This is especially useful for entities with size that depends on their parent entity size, for example
         /// if you define an entity to take 20% of its parent space but can't be more than 200 pixels width.
         /// </summary>
-        public Vector2? MaxSize { get { return _maxSize; } set { _maxSize = value; MarkAsDirty(); } }
+        public Vector2? MaxSize
+        {
+            get { return _maxSize; }
+            set
+            {
+                _maxSize = value;
+                MarkAsDirty();
+            }
+        }
 
         /// <summary>
         /// Every time we update destination rect and internal destination rect view the update function, we increase this counter.
@@ -305,8 +325,7 @@ namespace GeonBit.UI.Entities
         private uint _parentLastDestRectVersion = 0;
 
         /// <summary>Optional data you can attach to this entity and retrieve later (for example when handling events).</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public object AttachedData = null;
+        [System.Xml.Serialization.XmlIgnore] public object AttachedData = null;
 
         /// <summary>
         /// If true (default), will use the actual object size for collision detection. If false, will use the size property.
@@ -346,92 +365,70 @@ namespace GeonBit.UI.Entities
         public static StyleSheet DefaultStyle = new StyleSheet();
 
         /// <summary>Callback to execute when mouse button is pressed over this entity (called once when button is pressed).</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback OnMouseDown = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback OnMouseDown = null;
 
         /// <summary>Callback to execute when right mouse button is pressed over this entity (called once when button is pressed).</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback OnRightMouseDown = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback OnRightMouseDown = null;
 
         /// <summary>Callback to execute when mouse button is released over this entity (called once when button is released).</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback OnMouseReleased = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback OnMouseReleased = null;
 
         /// <summary>Callback to execute every frame while mouse button is pressed over the entity.</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback WhileMouseDown = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback WhileMouseDown = null;
 
         /// <summary>Callback to execute every frame while right mouse button is pressed over the entity.</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback WhileRightMouseDown = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback WhileRightMouseDown = null;
 
         /// <summary>Callback to execute every frame while mouse is hovering over the entity (not called while mouse button is down).</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback WhileMouseHover = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback WhileMouseHover = null;
 
         /// <summary>Callback to execute every frame while mouse is hovering over the entity, even if mouse is down.</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback WhileMouseHoverOrDown = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback WhileMouseHoverOrDown = null;
 
         /// <summary>Callback to execute when user clicks on this entity (eg release mouse over it).</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback OnClick = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback OnClick = null;
 
         /// <summary>Callback to execute when user clicks on this entity with right mouse button (eg release mouse over it).</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback OnRightClick = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback OnRightClick = null;
 
         /// <summary>Callback to execute when entity value changes (relevant only for entities with value).</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback OnValueChange = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback OnValueChange = null;
 
         /// <summary>Callback to execute when mouse start hovering over this entity (eg enters its region).</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback OnMouseEnter = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback OnMouseEnter = null;
 
         /// <summary>Callback to execute when mouse stop hovering over this entity (eg leaves its region).</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback OnMouseLeave = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback OnMouseLeave = null;
 
         /// <summary>Callback to execute when mouse wheel scrolls and this entity is the active entity.</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback OnMouseWheelScroll = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback OnMouseWheelScroll = null;
 
         /// <summary>Called when entity starts getting dragged (only if draggable).</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback OnStartDrag = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback OnStartDrag = null;
 
         /// <summary>Called when entity stop getting dragged (only if draggable).</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback OnStopDrag = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback OnStopDrag = null;
 
         /// <summary>Called every frame while the entity is being dragged.</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback WhileDragging = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback WhileDragging = null;
 
         /// <summary>Callback to execute every frame before this entity is rendered.</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback BeforeDraw = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback BeforeDraw = null;
 
         /// <summary>Callback to execute every frame after this entity is rendered.</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback AfterDraw = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback AfterDraw = null;
 
         /// <summary>Callback to execute every frame before this entity updates.</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback BeforeUpdate = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback BeforeUpdate = null;
 
         /// <summary>Callback to execute every frame after this entity updates.</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback AfterUpdate = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback AfterUpdate = null;
 
         /// <summary>Callback to execute every time the visibility of this entity changes (also invokes when parent becomes invisible / visible again).</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback OnVisiblityChange = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback OnVisiblityChange = null;
 
         /// <summary>Callback to execute every time this entity focus / unfocus.</summary>
-        [System.Xml.Serialization.XmlIgnore]
-        public EventCallback OnFocusChange = null;
+        [System.Xml.Serialization.XmlIgnore] public EventCallback OnFocusChange = null;
 
         /// <summary>
         /// Optional tooltip text to show if the user points on this entity for long enough.
@@ -464,10 +461,7 @@ namespace GeonBit.UI.Entities
         public bool IsFocused
         {
             // get if focused
-            get
-            {
-                return _isFocused;
-            }
+            get { return _isFocused; }
 
             // set if focused
             set
@@ -491,10 +485,7 @@ namespace GeonBit.UI.Entities
         /// </summary>
         public Rectangle InternalDestRect
         {
-            get
-            {
-                return _destRectInternal;
-            }
+            get { return _destRectInternal; }
         }
 
         // is this entity draggable?
@@ -595,7 +586,10 @@ namespace GeonBit.UI.Entities
             UserInterface.Active.OnEntitySpawn?.Invoke(this);
 
             // make parent dirty
-            if (_parent != null) { _parent.MarkAsDirty(); }
+            if (_parent != null)
+            {
+                _parent.MarkAsDirty();
+            }
         }
 
         /// <summary>
@@ -605,7 +599,8 @@ namespace GeonBit.UI.Entities
         /// <param name="state">State to get property for (if undefined will fallback to default state).</param>
         /// <param name="fallbackToDefault">If true and property not found for given state, will fallback to default state.</param>
         /// <returns>Style property value for given state or default, or null if undefined.</returns>
-        public StyleProperty GetStyleProperty(string property, EntityState state = EntityState.Default, bool fallbackToDefault = true)
+        public StyleProperty GetStyleProperty(string property, EntityState state = EntityState.Default,
+            bool fallbackToDefault = true)
         {
             return _style.GetStyleProperty(property, state, fallbackToDefault);
         }
@@ -617,10 +612,14 @@ namespace GeonBit.UI.Entities
         /// <param name="value">Property value.</param>
         /// <param name="state">State to set property for.</param>
         /// <param name="markAsDirty">If true, will mark this entity as dirty after this style change.</param>
-        public void SetStyleProperty(string property, StyleProperty value, EntityState state = EntityState.Default, bool markAsDirty = true)
+        public void SetStyleProperty(string property, StyleProperty value, EntityState state = EntityState.Default,
+            bool markAsDirty = true)
         {
             _style.SetStyleProperty(property, value, state);
-            if (markAsDirty) { MarkAsDirty(); }
+            if (markAsDirty)
+            {
+                MarkAsDirty();
+            }
         }
 
         /// <summary>
@@ -644,10 +643,16 @@ namespace GeonBit.UI.Entities
         }
 
         /// <summary>Get extra space after with current UI scale applied. </summary>
-        protected Vector2 _scaledSpaceAfter { get { return SpaceAfter * GlobalScale; } }
+        protected Vector2 _scaledSpaceAfter
+        {
+            get { return SpaceAfter * GlobalScale; }
+        }
 
         /// <summary>Get extra space before with current UI scale applied. </summary>
-        protected Vector2 _scaledSpaceBefore { get { return SpaceBefore * GlobalScale; } }
+        protected Vector2 _scaledSpaceBefore
+        {
+            get { return SpaceBefore * GlobalScale; }
+        }
 
         /// <summary>Get size with current UI scale applied. Note: doesn't effect relative sizes with values from 0.0 to 1.0.</summary>
         protected Vector2 _scaledSize
@@ -655,16 +660,22 @@ namespace GeonBit.UI.Entities
             get
             {
                 return new Vector2(
-                    _size.X < 1 ? _size.X : _size.X * GlobalScale, 
+                    _size.X < 1 ? _size.X : _size.X * GlobalScale,
                     _size.Y < 1 ? _size.Y : _size.Y * GlobalScale);
             }
         }
 
         /// <summary>Get offset with current UI scale applied. </summary>
-        protected Vector2 _scaledOffset { get { return _offset * GlobalScale; } }
+        protected Vector2 _scaledOffset
+        {
+            get { return _offset * GlobalScale; }
+        }
 
         /// <summary>Get offset with current UI scale applied. </summary>
-        protected Vector2 _scaledPadding { get { return Padding * GlobalScale; } }
+        protected Vector2 _scaledPadding
+        {
+            get { return Padding * GlobalScale; }
+        }
 
         /// <summary>
         /// Adds extra space outside the dest rect for collision detection.
@@ -679,7 +690,11 @@ namespace GeonBit.UI.Entities
         public bool Visible
         {
             get { return _visible; }
-            set { _visible = value; DoOnVisibilityChange(); }
+            set
+            {
+                _visible = value;
+                DoOnVisibilityChange();
+            }
         }
 
         /// <summary>
@@ -704,7 +719,12 @@ namespace GeonBit.UI.Entities
         public bool Draggable
         {
             get { return _draggable; }
-            set { _needToSetDragOffset = _draggable != value; _draggable = value; MarkAsDirty(); }
+            set
+            {
+                _needToSetDragOffset = _draggable != value;
+                _draggable = value;
+                MarkAsDirty();
+            }
         }
 
         /// <summary>
@@ -713,11 +733,13 @@ namespace GeonBit.UI.Entities
         public Entity Background
         {
             get { return _background; }
-            set {
+            set
+            {
                 if (value != null && value._parent != null)
                 {
                     throw new Exceptions.InvalidStateException("Cannot set background entity that have a parent!");
                 }
+
                 _background = value;
             }
         }
@@ -739,7 +761,7 @@ namespace GeonBit.UI.Entities
         /// <param name="identifier">Identifier to find.</param>
         /// <param name="recursive">If true, will search recursively in children of children. If false, will search only in direct children.</param>
         /// <returns>First found entity with given identifier and type, or null if nothing found.</returns>
-        public T Find<T> (string identifier, bool recursive = false) where T : Entity
+        public T Find<T>(string identifier, bool recursive = false) where T : Entity
         {
             // should we return any entity type?
             bool anyType = typeof(T) == typeof(Entity);
@@ -754,7 +776,7 @@ namespace GeonBit.UI.Entities
                 // check if identifier and type matches - if so, return it
                 if (child.Identifier == identifier && (anyType || (child.GetType() == typeof(T))))
                 {
-                    return (T)child;
+                    return (T) child;
                 }
 
                 // if recursive, search in child
@@ -804,8 +826,21 @@ namespace GeonBit.UI.Entities
         public Vector2 Size
         {
             get { return _size; }
-            set { if (_size != value) { _size = value; MarkAsDirty(); } }
+            set
+            {
+                if (_size != value)
+                {
+                    _size = value;
+                    MarkAsDirty();
+                }
+            }
         }
+
+        public virtual Vector2 InternalSize()
+        {
+            return Size;
+        }
+
 
         /// <summary>
         /// Extra space (in pixels) to reserve *after* this entity when using Auto Anchors.

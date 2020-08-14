@@ -35,6 +35,12 @@ namespace GeonBit.UI.Entities
 
         /// <summary>Special panel skin used for lists and input background.</summary>
         ListBackground = 4,
+
+        /// <summary>Dark panel skin theme
+        Dark = 5,
+        
+        /// <summary>Light panel skin theme
+        Light = 6,
     }
 
     /// <summary>
@@ -83,7 +89,7 @@ namespace GeonBit.UI.Entities
         /// <param name="skin">Panel skin (texture to use). Use PanelSkin.None for invisible panels.</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public PanelBase(Vector2 size, PanelSkin skin = PanelSkin.Default, Anchor anchor = Anchor.Center, Vector2? offset = null) :
+        public PanelBase(Vector2 size, PanelSkin skin, Anchor anchor = Anchor.Center, Vector2? offset = null) :
             base(size, anchor, offset)
         {
             _skin = skin;
@@ -93,8 +99,8 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create the panel with default params.
         /// </summary>
-        public PanelBase() :
-            this(new Vector2(500, 500))
+        public PanelBase(PanelSkin skin) :
+            this(new Vector2(500, 500), skin)
         {
         }
 
@@ -165,9 +171,10 @@ namespace GeonBit.UI.Entities
             }
 
             // check if need to update size
-            if ((Size.Y != maxHeight))
+            if ((InternalSize().Y != maxHeight))
             {
-                Size = new Vector2(Size.X, maxHeight / UserInterface.Active.GlobalScale);
+
+                Size = new Vector2(Size.X, maxHeight / UserInterface.Active.GlobalScale + (Size.Y - InternalSize().Y) / 2 );
                 UpdateDestinationRects();
                 foreach (var child in _children)
                 {

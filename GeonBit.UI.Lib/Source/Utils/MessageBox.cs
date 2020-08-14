@@ -122,14 +122,14 @@ namespace GeonBit.UI.Utils
         /// <param name="onDone">Optional callback to call when this msgbox closes.</param>
         /// <param name="parent">Parent to add message box to (if not defined will use root)</param>
         /// <returns>Message box handle.</returns>
-        public static MessageBoxHandle ShowMsgBox(string header, string text, MsgBoxOption[] options, Entities.Entity[] extraEntities = null, Vector2? size = null, System.Action onDone = null, Entities.Entity parent = null)
+        public static MessageBoxHandle ShowMsgBox(string header, string text, MsgBoxOption[] options, Entities.PanelSkin skin, Entities.Entity[] extraEntities = null, Vector2? size = null, System.Action onDone = null, Entities.Entity parent = null)
         {
             // object to return
             MessageBoxHandle ret = new MessageBoxHandle();
 
             // create panel for messagebox
             size = size ?? new Vector2(500, -1);
-            var panel = new Entities.Panel(size.Value);
+            var panel = new Entities.Panel(size.Value, skin);
             ret.Panel = panel;
             panel.AddChild(new Entities.Header(header));
             panel.AddChild(new Entities.HorizontalLine());
@@ -218,12 +218,12 @@ namespace GeonBit.UI.Utils
         /// <param name="extraEntities">Optional array of entities to add to msg box under the text and above the buttons.</param>
         /// <param name="onDone">Optional callback to call when this msgbox closes.</param>
         /// <returns>Message box panel.</returns>
-        public static MessageBoxHandle ShowMsgBox(string header, string text, string closeButtonTxt = null, Vector2? size = null, Entities.Entity[] extraEntities = null, System.Action onDone = null)
+        public static MessageBoxHandle ShowMsgBox(string header, string text, Entities.PanelSkin skin, string closeButtonTxt = null, Vector2? size = null, Entities.Entity[] extraEntities = null, System.Action onDone = null)
         {
             return ShowMsgBox(header, text, new MsgBoxOption[]
             {
                 new MsgBoxOption(closeButtonTxt ?? DefaultOkButtonText, null)
-            }, size: size ?? DefaultMsgBoxSize, extraEntities: extraEntities, onDone: onDone);
+            }, skin, size: size ?? DefaultMsgBoxSize, extraEntities: extraEntities, onDone: onDone);
         }
     }
 }
