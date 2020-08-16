@@ -7,6 +7,8 @@
 // Since: 2016.
 //-----------------------------------------------------------------------------
 #endregion
+
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -408,16 +410,26 @@ namespace GeonBit.UI
 
         }
 
+        private int CalculatePos(int x, int y, List<string> lines) {
+            int pos = 0;
+            for (var i = 0; i + 1 < y; i++) {
+                pos += lines[i].Length;
+            }
+
+            pos += x;
+            return pos;
+        }
+
         /// <summary>
         /// Get textual input from keyboard.
         /// If user enter keys it will push them into string, if delete or backspace will remove chars, etc.
         /// This also handles keyboard cooldown, to make it feel like windows-input.
         /// </summary>
         /// <param name="txt">String to push text input into.</param>
-        /// <param name="lineWidth">How many characters can fit in a line.</param>
+        /// <param name="breakidx">Where the current breaks are</param>
         /// <param name="pos">Position to insert / remove characters. -1 to push at the end of string. After done, will contain actual new caret position.</param>
         /// <returns>String after text input applied on it.</returns>
-        public string GetTextInput(string txt, int lineWidth, ref int pos)
+        public string GetTextInput(string txt, int[] breakidx, ref int pos)
         {
             // if need to skip due to cooldown time
             if (!_newKeyIsPressed && _keyboardInputCooldown > 0f)
@@ -436,26 +448,78 @@ namespace GeonBit.UI
             {
                 pos = txt.Length;
             }
+            
+            // split to lines
+            List<string> txtlines = new List<string>();
+            var startx = 0; 
+            foreach (var entry in breakidx) {
+                var end = entry;
+                txtlines.Add(txt.Substring(startx, end));
+                startx = end;
+            }
+            txtlines.Add(txt.Substring(startx));
+
+            var posy = 0;
+            var posx = pos;
+            while (posy < txtlines.Count && pos > txtlines[posy].Length) {
+                posx -= txtlines[posy].Length;
+                posy += 1;
+            }
 
             // handle special chars
             switch (_currCharacterInput)
             {
                 case (char)SpecialChars.ArrowLeft:
-                    if (--pos < 0) { pos = 0; }
+                    if (--posx < 0) {
+                        if (posy > 0) {
+                            posy--;
+                            posx = txtlines[posy].Length - 1;
+                        }
+                    }
+
+                    if (posx < 0) {
+                        posx = 0;
+                    }
+
+                    pos = CalculatePos(posx, posy, txtlines);
+                    
                     return txt;
 
                 case (char)SpecialChars.ArrowRight:
-                    if (++pos > txt.Length) { pos = txt.Length; }
+                    if (++posx > txtlines[posy].Length) {
+                        posx = txtlines[posy].Length;
+                        if (posy < txtlines.Count) {
+                            posx = 0;
+                            posy++;
+                        }
+                    }
+
+                    pos = CalculatePos(posx, posy, txtlines);
                     return txt;
 
                 case (char)SpecialChars.ArrowUp:
-                    pos -= lineWidth;
-                    if (pos < 0) { pos = 0; }
+                    posy -= 1;
+                    if (posy < 0) { posy = 0; }
+
+                    if (posx >= txtlines[posy].Length) {
+                        posx = txtlines[posy].Length - 1;
+                    }
+
+                    pos = CalculatePos(posx, posy, txtlines);
                     return txt;
 
                 case (char)SpecialChars.ArrowDown:
-                    pos += lineWidth;
-                    if (pos > txt.Length) { pos = txt.Length; }
+                    posy += 1;
+                    if (posy >= txtlines.Count) {
+                        posy = txtlines.Count - 1;
+                    }
+
+                    if (posx >= txtlines[posy].Length) {
+                        pos = txtlines[posy].Length - 1;
+                    }
+
+                    pos = CalculatePos(posx, posy, txtlines);
+
                     return txt;
 
                 case (char)SpecialChars.Backspace:

@@ -286,7 +286,14 @@ namespace GeonBit.UI.Entities
             }
 
             // get height of a single paragraph and calculate size from it
-            var height = _list.Count * (_paragraphs[0].GetCharacterActualSize().Y / GlobalScale + _paragraphs[0].SpaceAfter.Y) + Padding.Y * 2;
+            var height = 0.0f;
+            for (int i = 0; i < _paragraphs.Count; i++) {
+                //_list.Count * (_paragraphs[0].GetCharacterActualSize().Y / GlobalScale + _paragraphs[0].SpaceAfter.Y) + Padding.Y * 2;
+                height += _paragraphs[i].GetActualDestRect().Y + _paragraphs[i].SpaceAfter.Y;
+            }
+
+            height += Padding.Y * 2;
+            
             Size = new Vector2(Size.X, height);
         }
 
@@ -383,7 +390,7 @@ namespace GeonBit.UI.Entities
                 paragraph.ExtraMargin.Y = ExtraSpaceBetweenLines / 2 + 3;
                 paragraph.AttachedData = new ParagraphData(this, i++);
                 paragraph.UseActualSizeForCollision = false;
-                paragraph.Size = new Vector2(0, paragraph.GetCharacterActualSize().Y + ExtraSpaceBetweenLines);
+                paragraph.Size = new Vector2(0, paragraph.LineHeightY() + ExtraSpaceBetweenLines);
                 paragraph.BackgroundColorPadding = new Point((int)Padding.X, 5);
                 paragraph.BackgroundColorUseBoxSize = true;
                 paragraph._hiddenInternalEntity = true;
@@ -611,7 +618,8 @@ namespace GeonBit.UI.Entities
                     if (ClipTextIfOverflow)
                     {
                         // get width we need to clip and if we need to clip at all
-                        var charWidth = par.GetCharacterActualSize().X;
+                        //var charWidth = par.GetCharacterActualSize().X;
+                        /* TODO FIX THIS LOGIC
                         var toClip = (charWidth * par.Text.Length) - _destRectInternal.Width;
                         if (toClip > 0)
                         {
@@ -628,6 +636,7 @@ namespace GeonBit.UI.Entities
                                 par.Text = AddWhenClipping;
                             }
                         }
+                        */
                     }
 
                     // set locked state

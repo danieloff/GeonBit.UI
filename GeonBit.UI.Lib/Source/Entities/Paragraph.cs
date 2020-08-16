@@ -75,6 +75,10 @@ namespace GeonBit.UI.Entities
         
         public List<float> LineHeights = new List<float>();
 
+        public int LineHeightY() {
+            return _currFont.Size;
+        }
+
         /// <summary>Default styling for paragraphs. Note: loaded from UI theme xml file.</summary>
         new public static StyleSheet DefaultStyle = new StyleSheet();
 
@@ -101,7 +105,7 @@ namespace GeonBit.UI.Entities
         public DynamicSpriteFont FontOverride = null;
 
         // the size of a single space character with current font.
-        private Vector2 SingleCharacterSize;
+        //private Vector2 SingleCharacterSize;
 
         /// <summary>
         /// If true and have background color, will use the paragraph box size for it instead of the text actual size.
@@ -140,6 +144,12 @@ namespace GeonBit.UI.Entities
         /// Actual processed text to display (after word-wrap etc).
         /// </summary>
         protected string _processedText;
+        
+        /// <summary>
+        /// Glyph rectangles of actual processed text to display (after word-wrap etc).
+        /// </summary>
+        protected List<Rectangle> _processedGlyphRects;
+
 
         /// <summary>
         /// Current font used.
@@ -242,23 +252,24 @@ namespace GeonBit.UI.Entities
         /// Get the size, in pixels, of a single character in paragraph.
         /// </summary>
         /// <returns>Actual size, in pixels, of a single character.</returns>
-        public Vector2 GetCharacterActualSize() //TODO why does this need the curr font?
+        public Vector2 GetCharacterActualSize(int idx, string text) //TODO why does this need the curr font?
         {
             DynamicSpriteFont font = GetCurrFont();
             float scale = Scale * BaseSize * GlobalScale;
-            return SingleCharacterSize * scale;
+            var glyphrects = font.GetGlyphRectsFull(Vector2.Zero, text);
+            return new Vector2(glyphrects[idx].Size.X, glyphrects[idx].Size.Y) * scale;
         }
 
         /// <summary>
         /// Get how many characters can fit in a single line.
         /// </summary>
-        public int MaxCharactersInLine
+        /*public int MaxCharactersInLine
         {
             get
             {
                 return GetActualDestRect().Width / (int)GetCharacterActualSize().X;
             }
-        }
+        }*/
 
         /// <summary>
         /// Wrap text to fit destination rect.
@@ -311,17 +322,18 @@ namespace GeonBit.UI.Entities
 
                 // get current word and its width
                 string word = words[i];
-                float wordWidth = ((font.MeasureString(word).X + SingleCharacterSize.X) * fontSize);
+                float wordWidth = ((font.MeasureString(word + " ").X) * fontSize);
 
                 // special case: word itself is longer than line width
                 if (BreakWordsIfMust && wordWidth >= maxLineWidth && word.Length >= 4)
                 {
                     // find breaking position
                     int breakPos = 0;
-                    float currWordWidth = (SingleCharacterSize.X * fontSize);
-                    foreach (char c in word)
+                    //float currWordWidth = (SingleCharacterSize.X * fontSize);
+                    //foreach (char c in word)
+                    for (int j=1; j<=word.Length; j++)
                     {
-                        currWordWidth += (font.MeasureString(c.ToString()).X * fontSize);
+                        float currWordWidth = (font.MeasureString(word.Substring(0,j)).X * fontSize); //TODO this could be done much better with the glyph rects
                         if (currWordWidth >= maxLineWidth)
                         {
                             break;
@@ -456,7 +468,9 @@ namespace GeonBit.UI.Entities
 
                 // set font and get single character size
                 _currFont = font;
-                SingleCharacterSize = _currFont.MeasureString(" ");
+                Vector2 size = _currFont.MeasureString("G"); //TODO THIS IS WRONG
+                size.Y = _currFont.Size;
+                //SingleCharacterSize = size; //_currFont.MeasureString(" ");
 
                 // sanity test
                 //TODO FIX ALL MONOSPACE STUFF
@@ -465,6 +479,11 @@ namespace GeonBit.UI.Entities
                     throw new Exceptions.InvalidValueException("Cannot use non-monospace fonts!");
                 }*/
             }
+        }
+
+        private List<Rectangle> CalculateGlyphOffsets(string text) {
+            var rects = _currFont.GetGlyphRectsFull(Vector2.Zero, text); //TODO line by line?
+            return rects;
         }
 
         /// <summary>
@@ -494,6 +513,7 @@ namespace GeonBit.UI.Entities
             if (newProcessedText != _processedText)
             {
                 _processedText = newProcessedText;
+                _processedGlyphRects = CalculateGlyphOffsets(_processedText);
                 MarkAsDirty();
             }
 
@@ -698,12 +718,12 @@ namespace GeonBit.UI.Entities
 
             //spriteBatch.DrawString(_currFont, lines[0], _position + new Vector2(ParagraphContinuation? StartingOffset.X : 0.0f, offsety), fillCol,
             //    0, _fontOrigin, _actualScale, SpriteEffects.None, 0.5f);
-            spriteBatch.DrawString(_currFont, lines[0], _position + new Vector2(ParagraphContinuation ? StartingOffset.X : 0.0f, offsety), fillCol, new Vector2(_actualScale));
+            spriteBatch.DrawString(_currFont, lines[0], _position + new Vector2(ParagraphContinuation ? StartingOffset.X : 0.0f, offsety) -_fontOrigin, fillCol, new Vector2(_actualScale));
             for (int i = 1; i < lines.Length; i++) {
                 offsety += LineHeights[i] * Scale;
                 //spriteBatch.DrawString(_currFont, lines[i], _position + new Vector2(0, offsety), fillCol,
                 //    0, _fontOrigin, _actualScale, SpriteEffects.None, 0.5f);
-                spriteBatch.DrawString(_currFont, lines[i], _position + new Vector2(0, offsety), fillCol, new Vector2(_actualScale));
+                spriteBatch.DrawString(_currFont, lines[i], _position + new Vector2(0, offsety) - _fontOrigin, fillCol, new Vector2(_actualScale));
             }
 
             // call base draw function
@@ -731,7 +751,7 @@ namespace GeonBit.UI.Entities
 
             
             for (int i = 1; i < lines.Length; i++) {
-                offsety += _currFont.LineSpacing * Scale;
+                offsety += _currFont.Size * Scale; //LineSpacing
                 
                 DrawTextOutline(spriteBatch, lines[i], outlineWidth, _currFont, _actualScale, _position + new Vector2(0, offsety), outlineColor, _fontOrigin);
             }

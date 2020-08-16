@@ -349,8 +349,9 @@ namespace GeonBit.UI.Entities
                 Color currColor = Color.White;
                 Color currOutlineColor = Color.Black;
                 DynamicSpriteFont currFont = null;
-                Vector2 characterSize = GetCharacterActualSize();
-                Vector2 currPosition = new Vector2(_position.X - characterSize.X, _position.Y);
+                //Vector2 characterSize = GetCharacterActualSize();
+                //Vector2 csize = new Vector2(0, _processedGlyphRects[0].Height);//Vector2.Zero;
+                Vector2 currPosition = new Vector2(_position.X, _position.Y);
                 int currOutlineWidth = 0;
 
                 // function to reset styles back to defaults
@@ -360,12 +361,19 @@ namespace GeonBit.UI.Entities
                     currFont = _currFont;
                     currOutlineWidth = OutlineWidth;
                     currOutlineColor = UserInterface.Active.DrawUtils.FixColorOpacity(OutlineColor);
-                    characterSize = GetCharacterActualSize();
+                    //characterSize = GetCharacterActualSize();
+                    //csize = new Vector2(_processedGlyphRects[0].Width, _processedGlyphRects[0].Height);
                 };
                 ResetToDefaults();
 
-                foreach (char currCharacter in _processedText)
-                {
+                for(int i=0; i<_processedText.Length; i++) {
+                    char currCharacter = _processedText[i];
+                    Rectangle currRectangle = _processedGlyphRects[i];
+                    Rectangle prevRectangle = new Rectangle(0, 0, 0, _currFont.Size);
+                    if (i > 0) {
+                        prevRectangle = _processedGlyphRects[i - 1];
+                    }
+                    
                     // if we found style instruction:
                     RichParagraphStyleInstruction styleInstruction;
                     if (_styleInstructions.TryGetValue(iTextIndex, out styleInstruction))
@@ -404,13 +412,13 @@ namespace GeonBit.UI.Entities
                     // adjust character position
                     if (currCharacter == '\n')
                     {
-                        currPosition.X = _position.X - characterSize.X;
-                        currPosition.Y += currFont.LineSpacing * _actualScale;
+                        currPosition.X = _position.X - currRectangle.Width; //TODO
+                        currPosition.Y += currFont.Size * _actualScale; //LineSpacing
                     }
                     else
                     {
                         iTextIndex++;
-                        currPosition.X += characterSize.X;
+                        currPosition.X = _position.X + currRectangle.X;
                     }
 
                     // get current char as string

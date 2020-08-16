@@ -376,7 +376,8 @@ namespace GeonBit.UI.Entities
                 Vector2 relativeOffset = GetMousePos(-actualParagraphPos);
 
                 // calc caret position
-                Vector2 charSize = TextParagraph.GetCharacterActualSize();
+                /* TODO make the paragraph tell where it was hit
+                 Vector2 charSize = TextParagraph.GetCharacterActualSize();
                 int x = (int)(relativeOffset.X / charSize.X);
                 _caret = x;
 
@@ -403,7 +404,7 @@ namespace GeonBit.UI.Entities
                 if (_caret >= _value.Length)
                 {
                     _caret = -1;
-                }
+                }*/
             }
             // if don't click on the paragraph itself, reset caret position.
             else
@@ -433,7 +434,7 @@ namespace GeonBit.UI.Entities
             if (_multiLine && (_actualDisplayText != null) && (_destRectInternal.Height > 0))
             {
                 // get how many lines can fit in the textbox and how many lines display text actually have
-                int linesFit = _destRectInternal.Height / (int)(System.Math.Max(currParagraph.GetCharacterActualSize().Y, 1));
+                int linesFit = _destRectInternal.Height / (int)(System.Math.Max(currParagraph.LineHeightY(), 1));
                 int linesInText = _actualDisplayText.Split('\n').Length;
 
                 // if there are more lines than can fit, show scrollbar and manage scrolling:
@@ -564,7 +565,9 @@ namespace GeonBit.UI.Entities
 
                 // store old string and update based on user input
                 string oldVal = _value;
-                _value = KeyboardInput.GetTextInput(_value, TextParagraph.MaxCharactersInLine, ref pos);
+                int[] breakidx = { }; //no breaks for now TODO
+                _value = KeyboardInput.GetTextInput(_value, breakidx, ref pos);
+                //TODO for when there are breaks: TextParagraph.TrimToFit(_value);
 
                 // update caret position
                 _caret = pos;
