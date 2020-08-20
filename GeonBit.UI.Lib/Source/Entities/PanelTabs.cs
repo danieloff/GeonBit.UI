@@ -278,7 +278,7 @@ namespace GeonBit.UI.Entities
             newTab.panel.Visible = false;
 
             // attach callback to newly created button
-            newTab.button.OnValueChange = (Entity entity) => 
+            newTab.button.OnValueChange += (Entity entity) => 
             {
                 // get self as a button
                 Button self = (Button)(entity);

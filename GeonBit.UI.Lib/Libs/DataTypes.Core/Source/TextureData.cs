@@ -1,5 +1,6 @@
 ﻿using System.Xml.Serialization;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 
 namespace GeonBit.UI.DataTypes
 {
@@ -17,7 +18,8 @@ namespace GeonBit.UI.DataTypes
         public float FrameHeight;
         
         // default inner padding for frame
-        [XmlElement("Vector", IsNullable = true)]
+        [XmlElement("Vector")]
+        [ContentSerializer(Optional = true)]
         public Vector2? InnerMargin = null;
     }
 }

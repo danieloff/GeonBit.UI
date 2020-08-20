@@ -209,7 +209,7 @@ namespace GeonBit.UI.Entities
         private void InitEvents()
         {
             // add callback on list value change
-            _selectList.OnValueChange = (Entity entity) =>
+            _selectList.OnValueChange += (Entity entity) =>
             {
                 // hide list
                 ListVisible = false;
@@ -219,7 +219,7 @@ namespace GeonBit.UI.Entities
             };
 
             // on click, always hide the selectlist
-            _selectList.OnClick = (Entity entity) =>
+            _selectList.OnClick += (Entity entity) =>
             {
                 ListVisible = false;
             };
@@ -228,7 +228,7 @@ namespace GeonBit.UI.Entities
             _selectList.Visible = false;
 
             // setup the callback to show / hide the list when clicking the dropbox
-            _selectedTextPanel.OnClick = (Entity self) =>
+            _selectedTextPanel.OnClick += (Entity self) =>
             {
                 // change visibility
                 ListVisible = !ListVisible;

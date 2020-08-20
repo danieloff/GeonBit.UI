@@ -12,6 +12,8 @@
 // Since: 2016.
 //-----------------------------------------------------------------------------
 #endregion
+
+using System;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Drawing;
@@ -386,13 +388,48 @@ namespace GeonBit.UI.Entities
         [System.Xml.Serialization.XmlIgnore] public EventCallback WhileMouseHoverOrDown = null;
 
         /// <summary>Callback to execute when user clicks on this entity (eg release mouse over it).</summary>
-        [System.Xml.Serialization.XmlIgnore] public EventCallback OnClick = null;
+        //[System.Xml.Serialization.XmlIgnore] 
+        public event EventCallback OnClick = null;
+
+        public void SetOnClick(EventCallback value)
+        {
+            var item = OnClick;
+            if (item != null)
+            {
+                foreach (Delegate d in item.GetInvocationList())
+                {
+                    item -= (EventCallback)d;
+                }
+            }
+
+            item += value;
+        }
+
+        public void AddOnClick(EventCallback value)
+        {
+            OnClick += value;
+        }
 
         /// <summary>Callback to execute when user clicks on this entity with right mouse button (eg release mouse over it).</summary>
         [System.Xml.Serialization.XmlIgnore] public EventCallback OnRightClick = null;
 
         /// <summary>Callback to execute when entity value changes (relevant only for entities with value).</summary>
-        [System.Xml.Serialization.XmlIgnore] public EventCallback OnValueChange = null;
+        //[System.Xml.Serialization.XmlIgnore]
+        public event EventCallback OnValueChange = null;
+
+        public void SetOnValueChange(EventCallback value)
+        {
+            var item = OnValueChange;
+            if (item != null)
+            {
+                foreach (Delegate d in item.GetInvocationList())
+                {
+                    item -= (EventCallback)d;
+                }
+            }
+
+            item += value;
+        }
 
         /// <summary>Callback to execute when mouse start hovering over this entity (eg enters its region).</summary>
         [System.Xml.Serialization.XmlIgnore] public EventCallback OnMouseEnter = null;
