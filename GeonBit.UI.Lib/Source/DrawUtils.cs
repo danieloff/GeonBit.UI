@@ -544,7 +544,7 @@ namespace GeonBit.UI
         {
             // start drawing
             spriteBatch.Begin(SpriteSortMode.Deferred, UserInterface.Active.BlendState, UserInterface.Active.SamplerState,
-                DepthStencilState.None, RasterizerState.CullCounterClockwise,
+                DepthStencilState.None, UserInterface.Active.CurrentRasterizerState != null ? UserInterface.Active.CurrentRasterizerState : RasterizerState.CullCounterClockwise,
                 isDisabled ? Resources.DisabledEffect : null, UserInterface.Active.CurrentTransformMatrix);
 
             // update drawing target

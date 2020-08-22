@@ -229,6 +229,8 @@ namespace GeonBit.UI
         /// </summary>
         public Matrix? CurrentTransformMatrix { get; set; }
 
+        public RasterizerState CurrentRasterizerState { get; set; }
+
         /// <summary>Callback to execute when mouse button is pressed over an entity (called once when button is pressed).</summary>
         public EventCallback OnMouseDown = null;
 
