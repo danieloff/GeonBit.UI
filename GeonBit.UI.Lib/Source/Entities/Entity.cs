@@ -417,6 +417,11 @@ namespace GeonBit.UI.Entities
         //[System.Xml.Serialization.XmlIgnore]
         public event EventCallback OnValueChange = null;
 
+        public void AddOnValueChange(EventCallback value)
+        {
+            OnValueChange += value;
+        }
+        /*
         public void SetOnValueChange(EventCallback value)
         {
             var item = OnValueChange;
@@ -429,7 +434,7 @@ namespace GeonBit.UI.Entities
             }
 
             item += value;
-        }
+        }*/
 
         /// <summary>Callback to execute when mouse start hovering over this entity (eg enters its region).</summary>
         [System.Xml.Serialization.XmlIgnore] public EventCallback OnMouseEnter = null;
