@@ -466,18 +466,8 @@ namespace GeonBit.UI.Entities
                 // mark as dirty so we'll recalculate positions and line breaks
                 MarkAsDirty();
 
-                // set font and get single character size
+                // set font
                 _currFont = font;
-                Vector2 size = _currFont.MeasureString("G"); //TODO THIS IS WRONG
-                size.Y = _currFont.Size;
-                //SingleCharacterSize = size; //_currFont.MeasureString(" ");
-
-                // sanity test
-                //TODO FIX ALL MONOSPACE STUFF
-                /*if ((SingleCharacterSize.X * 2) != _currFont.MeasureString("!.").X)
-                {
-                    throw new Exceptions.InvalidValueException("Cannot use non-monospace fonts!");
-                }*/
             }
         }
 
