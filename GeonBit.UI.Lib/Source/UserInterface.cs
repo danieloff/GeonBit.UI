@@ -101,6 +101,7 @@ namespace GeonBit.UI
         /// The currently active user interface instance.
         /// </summary>
         public static UserInterface Active = null;
+        public GraphicsDeviceManager Graphics;
 
         /// <summary>
         /// The object that provide mouse input for GeonBit UI.
@@ -347,7 +348,7 @@ namespace GeonBit.UI
         /// </summary>
         /// <param name="contentManager">Content manager.</param>
         /// <param name="theme">Which UI theme to use (see options in Content/GeonBit.UI/themes/). This affect the appearance of all textures and effects.</param>
-        static public void Initialize(ContentManager contentManager, string program, string theme = "hd")
+        static public void Initialize(ContentManager contentManager, string program, string theme, GraphicsDeviceManager graphics)
         {
             // store the content manager
             _content = contentManager;
@@ -357,6 +358,8 @@ namespace GeonBit.UI
 
             // create a default active user interface
             Active = new UserInterface();
+
+            Active.Graphics = graphics;
         }
 
         /// <summary>
@@ -419,9 +422,9 @@ namespace GeonBit.UI
         /// <param name="contentManager">Content manager.</param>
         /// <param name="program">Program name for runtime resources</param>
         /// <param name="theme">Which UI theme to use. This affect the appearance of all textures and effects.</param>
-        static public void Initialize(ContentManager contentManager, string program, BuiltinThemes theme)
+        static public void Initialize(ContentManager contentManager, string program, BuiltinThemes theme, GraphicsDeviceManager graphics)
         {
-            Initialize(contentManager, program, theme.ToString());
+            Initialize(contentManager, program, theme.ToString(), graphics);
         }
 
         /// <summary>

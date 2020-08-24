@@ -8,6 +8,7 @@
 //-----------------------------------------------------------------------------
 #endregion
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using GeonBit.UI.DataTypes;
@@ -49,6 +50,7 @@ namespace GeonBit.UI.Entities
         /// <summary>Texture to draw.</summary>
         [System.Xml.Serialization.XmlIgnore]
         public Texture2D Texture;
+        public Texture2D Texture2;
 
         /// <summary>
         /// Get / set texture from name.
@@ -58,7 +60,7 @@ namespace GeonBit.UI.Entities
             get { return Texture.Name; }
             set { Texture = Resources._content.Load<Texture2D>(value); }
         }
-
+        
         /// <summary>Default styling for images. Note: loaded from UI theme xml file.</summary>
         new public static StyleSheet DefaultStyle = new StyleSheet();
 
@@ -82,6 +84,10 @@ namespace GeonBit.UI.Entities
 
             // update style
             UpdateStyle(DefaultStyle);
+        }
+
+        public Image(Stream m) : base() {
+            Texture2 = Texture2D.FromStream(UserInterface.Active.Graphics.GraphicsDevice, m);
         }
 
         /// <summary>
@@ -179,6 +185,8 @@ namespace GeonBit.UI.Entities
         /// <param name="phase">The phase we are currently drawing.</param>
         override protected void DrawEntity(SpriteBatch spriteBatch, DrawPhase phase)
         {
+            
+            
             // draw image based on DrawMode
             switch (DrawMode)
             {
