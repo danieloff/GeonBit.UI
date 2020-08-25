@@ -113,7 +113,7 @@ namespace GeonBit.UI.Entities
         /// <param name="skin">Panel skin (texture to use). Use PanelSkin.None for invisible panels.</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public Panel(Vector2 size, PanelSkin skin, Anchor anchor = Anchor.Center, Vector2? offset = null, Point? innermargin = null) :
+        public Panel(Vector2 size, PanelSkin skin, Anchor anchor = Anchor.Center, Vector2? offset = null, Vector2? innermargin = null) :
             base(size, skin, anchor, offset)
         {
             UpdateStyle(DefaultStyle);
@@ -129,7 +129,7 @@ namespace GeonBit.UI.Entities
                 mg = data.InnerMargin;
             }
 
-            InnerMargin = mg ?? new Vector2(0);
+            InnerMargin = innermargin ?? mg ?? new Vector2(0);
         }
 
         /// <summary>

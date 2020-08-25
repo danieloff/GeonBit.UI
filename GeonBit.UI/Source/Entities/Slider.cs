@@ -255,6 +255,10 @@ namespace GeonBit.UI.Entities
         /// <returns>Current value as percent between min and max (0f-1f).</returns>
         public float GetValueAsPercent()
         {
+            if (Max - Min == 0)
+            {
+                return 0.5f; //Middle when there is nothing to do...?
+            }
             return (float)(_value - Min) / (float)(Max - Min);
         }
 
