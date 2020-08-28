@@ -8,6 +8,8 @@
 #endregion
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.VectorDraw;
+using System;
 using System.Collections.Generic;
 
 namespace GeonBit.UI
@@ -17,6 +19,38 @@ namespace GeonBit.UI
     /// </summary>
     public class DrawUtils
     {
+        public static void DrawTriangles(PrimitiveBatch primitiveBatch, Vector2 position, Vector2[] outVertices, int[] outIndices, Color color, bool outline = true)
+        {
+            if (!primitiveBatch.IsReady())
+                throw new InvalidOperationException("BeginCustomDraw must be called before drawing anything.");
+
+            //int count = vertices.Length;
+
+            //if (count == 2)
+            //{
+            //    DrawPolygon(position, vertices, color);
+            //    return;
+            //}
+
+            Color colorFill = color * (outline ? 0.5f : 1.0f);
+
+            //Vector2[] outVertices;
+            //int[] outIndices;
+            //Triangulator.Triangulate(vertices, WindingOrder.CounterClockwise, out outVertices, out outIndices);
+
+            //var position = Vector2.Zero;
+
+            for (int i = 0; i < outIndices.Length - 2; i += 3)
+            {
+                primitiveBatch.AddVertex(new Vector2(outVertices[outIndices[i]].X + position.X, outVertices[outIndices[i]].Y + position.Y), colorFill, PrimitiveType.TriangleList);
+                primitiveBatch.AddVertex(new Vector2(outVertices[outIndices[i + 1]].X + position.X, outVertices[outIndices[i + 1]].Y + position.Y), colorFill, PrimitiveType.TriangleList);
+                primitiveBatch.AddVertex(new Vector2(outVertices[outIndices[i + 2]].X + position.X, outVertices[outIndices[i + 2]].Y + position.Y), colorFill, PrimitiveType.TriangleList);
+            }
+
+            //if (outline)
+            //    DrawPolygon(position, vertices, color);
+        }
+
         public static Microsoft.Xna.Framework.Color ColorFromHex(string hex)
         {
             var i = 0;
