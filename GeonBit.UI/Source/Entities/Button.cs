@@ -32,6 +32,8 @@ namespace GeonBit.UI.Entities
         Alternative = 1,
         /// <summary>Fancy button skin.</summary>
         Fancy = 2,
+        /// <summary>Invisible button skin.</summary>
+        None = 3,
     }
 
 
@@ -204,24 +206,27 @@ namespace GeonBit.UI.Entities
             // get mouse state for graphics
             EntityState state = _entityState;
             if (Checked) { state = EntityState.MouseDown; }
-           
-            // get texture based on skin and state
-            Texture2D texture = _customSkin == null ? Resources.ButtonTextures[_skin, state] : _customSkin[(int)state];
 
-            // get frame width
-            TextureData data = Resources.ButtonData[(int)_skin];
-            Vector2 frameSize = _customSkin == null ? new Vector2(data.FrameWidth, data.FrameHeight) : _customFrame;
+            if (_skin != ButtonSkin.None)
+            {
+                // get texture based on skin and state
+                Texture2D texture = _customSkin == null ? Resources.ButtonTextures[_skin, state] : _customSkin[(int)state];
 
-            // draw the button background with frame
-            if (frameSize.Length() > 0)
-            {
-                float scale = frameSize.Y > 0 ? Scale : 1f;
-                UserInterface.Active.DrawUtils.DrawSurface(spriteBatch, texture, _destRect, frameSize, 1, FillColor, scale);
-            }
-            // draw the button background without frame (just stretch texture)
-            else
-            {
-                UserInterface.Active.DrawUtils.DrawImage(spriteBatch, texture, _destRect, FillColor, 1);
+                // get frame width
+                TextureData data = Resources.ButtonData[(int)_skin];
+                Vector2 frameSize = _customSkin == null ? new Vector2(data.FrameWidth, data.FrameHeight) : _customFrame;
+
+                // draw the button background with frame
+                if (frameSize.Length() > 0)
+                {
+                    float scale = frameSize.Y > 0 ? Scale : 1f;
+                    UserInterface.Active.DrawUtils.DrawSurface(spriteBatch, texture, _destRect, frameSize, 1, FillColor, scale);
+                }
+                // draw the button background without frame (just stretch texture)
+                else
+                {
+                    UserInterface.Active.DrawUtils.DrawImage(spriteBatch, texture, _destRect, FillColor, 1);
+                }
             }
 
             // call base draw function

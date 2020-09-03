@@ -347,8 +347,11 @@ namespace GeonBit.UI
             ButtonData = new TextureData[Enum.GetValues(typeof(ButtonSkin)).Length];
             foreach (ButtonSkin skin in Enum.GetValues(typeof(ButtonSkin)))
             {
-                string skinName = skin.ToString().ToLowerInvariant();
-                ButtonData[(int)skin] = content.Load<TextureData>(_root + "textures/button_" + skinName + "_md");
+                if (skin != ButtonSkin.None)
+                {
+                    string skinName = skin.ToString().ToLowerInvariant();
+                    ButtonData[(int)skin] = content.Load<TextureData>(_root + "textures/button_" + skinName + "_md");
+                }
             }
 
             // load progress bar metadata
