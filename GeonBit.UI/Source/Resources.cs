@@ -260,7 +260,7 @@ namespace GeonBit.UI
         internal static string _root;
 
         /// <summary>Root for runtime program content</summary>
-        internal static string _runtimeroot;
+        public static string _runtimeroot;
 
         /// <summary>
         /// Load all GeonBit.UI resources.
@@ -272,9 +272,9 @@ namespace GeonBit.UI
         {
             InitialiseCharStringDict();
 
+            _runtimeroot = program;
             // set resources root path and store content manager
             _root = "GeonBit.UI/themes/" + theme + "/";
-            _runtimeroot = "../data/" + program + "/";
             _content = content;
 
             // set Texture2D static fields
