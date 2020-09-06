@@ -53,7 +53,6 @@ namespace GeonBit.UI.Entities
         /// <summary>Texture to draw.</summary>
         [System.Xml.Serialization.XmlIgnore]
         public Texture2D Texture;
-        public Texture2D Texture2;
 
         /// <summary>
         /// Get / set texture from name.
@@ -87,10 +86,6 @@ namespace GeonBit.UI.Entities
 
             // update style
             UpdateStyle(DefaultStyle);
-        }
-
-        public Image(Stream m) : base() {
-            Texture2 = Texture2D.FromStream(UserInterface.Active.Graphics.GraphicsDevice, m);
         }
 
         /// <summary>
