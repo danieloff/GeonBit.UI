@@ -102,6 +102,7 @@ namespace GeonBit.UI
         /// </summary>
         public static UserInterface Active = null;
         public GraphicsDeviceManager Graphics;
+        private IGame _igame;
 
         /// <summary>
         /// The object that provide mouse input for GeonBit UI.
@@ -348,7 +349,7 @@ namespace GeonBit.UI
         /// </summary>
         /// <param name="contentManager">Content manager.</param>
         /// <param name="theme">Which UI theme to use (see options in Content/GeonBit.UI/themes/). This affect the appearance of all textures and effects.</param>
-        static public void Initialize(ContentManager contentManager, string program, string theme, GraphicsDeviceManager graphics)
+        static public void Initialize(IGame igame, ContentManager contentManager, string program, string theme, GraphicsDeviceManager graphics)
         {
             // store the content manager
             _content = contentManager;
@@ -357,7 +358,7 @@ namespace GeonBit.UI
             Resources.LoadContent(_content, program, theme);
 
             // create a default active user interface
-            Active = new UserInterface();
+            Active = new UserInterface(igame);
 
             Active.Graphics = graphics;
         }
@@ -422,21 +423,22 @@ namespace GeonBit.UI
         /// <param name="contentManager">Content manager.</param>
         /// <param name="program">Program name for runtime resources</param>
         /// <param name="theme">Which UI theme to use. This affect the appearance of all textures and effects.</param>
-        static public void Initialize(ContentManager contentManager, string program, BuiltinThemes theme, GraphicsDeviceManager graphics)
+        static public void Initialize(IGame igame, ContentManager contentManager, string program, BuiltinThemes theme, GraphicsDeviceManager graphics)
         {
-            Initialize(contentManager, program, theme.ToString(), graphics);
+            Initialize(igame, contentManager, program, theme.ToString(), graphics);
         }
 
         /// <summary>
         /// Create the user interface instance.
         /// </summary>
-        public UserInterface()
+        public UserInterface(IGame igame)
         { 
             // sanity test
             if (_content == null)
             {
                 throw new Exceptions.InvalidStateException("Cannot create a UserInterface before calling UserInterface.Initialize()!");
             }
+            _igame = igame;
 
             // create default input providers
             MouseInputProvider = new DefaultInputProvider();
@@ -505,6 +507,10 @@ namespace GeonBit.UI
         /// <param name="entity">Entity to add.</param>
         public Entity AddEntity(Entity entity)
         {
+            if (_igame != null)
+            {
+                entity = _igame.AddEntity(entity);
+            }
             return Root.AddChild(entity);
         }
 
@@ -546,6 +552,13 @@ namespace GeonBit.UI
             // update root panel
             Entity target = null;
             bool wasEventHandled = false;
+
+            if (MouseInputProvider.AnyMouseButtonClicked() || MouseInputProvider.AnyMouseButtonDown()
+                || MouseInputProvider.AnyMouseButtonPressed() || MouseInputProvider.AnyMouseButtonReleased()
+                || MouseInputProvider.MousePositionDiff != Vector2.Zero)
+            {
+                Root.IsPainted = false;
+            }
             Root.Update(ref target, ref _dragTarget, ref wasEventHandled, Point.Zero);
 
             // set active entity

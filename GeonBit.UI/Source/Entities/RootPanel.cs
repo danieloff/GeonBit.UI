@@ -74,6 +74,7 @@ namespace GeonBit.UI.Entities
             // if not visible skip
             if (!Visible)
             {
+                IsPainted = true;
                 return;
             }
 
@@ -90,6 +91,7 @@ namespace GeonBit.UI.Entities
             foreach (Entity child in childrenSorted)
             {
                 child.Draw(spriteBatch);
+                OnAfterChildDraw(child, spriteBatch);
             }
 
             // do after draw event

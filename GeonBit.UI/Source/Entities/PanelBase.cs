@@ -122,6 +122,7 @@ namespace GeonBit.UI.Entities
             {
                 if (!SetHeightBasedOnChildren())
                 {
+                    IsPainted = true;
                     return;
                 }
             }

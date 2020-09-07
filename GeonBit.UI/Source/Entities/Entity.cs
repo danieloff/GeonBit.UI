@@ -258,6 +258,29 @@ namespace GeonBit.UI.Entities
         /// </summary>
         private bool _isDirty = true;
 
+        /// <summary>
+        /// Mark this if the entire entity has been painted once
+        /// </summary>
+        private bool _impainted = false;
+        public virtual bool IsPainted
+        {
+            get
+            {
+                foreach (var child in Children)
+                {
+                    if (! child.IsPainted)
+                    {
+                        return false;
+                    }
+                }
+                return _impainted;
+            }
+            set
+            {
+                _impainted = value;
+            }
+        }
+
         // entity current style properties
         private StyleSheet _style = new StyleSheet();
 
@@ -750,7 +773,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Get if this entity needs to recalculate destination rect.
         /// </summary>
-        protected bool IsDirty
+        public bool IsDirty
         {
             get { return _isDirty; }
         }
@@ -1136,8 +1159,11 @@ namespace GeonBit.UI.Entities
         /// <param name="anchor">New anchor to set.</param>
         private void SetAnchor(Anchor anchor)
         {
-            _anchor = anchor;
-            MarkAsDirty();
+            if (_anchor != anchor)
+            {
+                _anchor = anchor;
+                MarkAsDirty();
+            }
         }
 
         /// <summary>
@@ -1207,6 +1233,15 @@ namespace GeonBit.UI.Entities
             }
         }
 
+        private void SetChildrenPainted(bool value)
+        {
+            foreach (var child in Children)
+            {
+                child.IsPainted = value;
+                child.SetChildrenPainted(value);
+            }
+        }
+
         /// <summary>
         /// Draw this entity and its children.
         /// </summary>
@@ -1216,6 +1251,8 @@ namespace GeonBit.UI.Entities
             // if not visible skip
             if (!Visible)
             {
+                IsPainted = true;
+                SetChildrenPainted(true);
                 return;
             }
 
@@ -1322,6 +1359,7 @@ namespace GeonBit.UI.Entities
             foreach (Entity child in childrenSorted)
             {
                 child.Draw(spriteBatch);
+                OnAfterChildDraw(child, spriteBatch);
             }
 
             // do stuff after drawing children
@@ -1519,6 +1557,11 @@ namespace GeonBit.UI.Entities
         {
         }
 
+        virtual protected void OnAfterChildDraw(Entity child, SpriteBatch spriteBatch)
+        {
+            child.IsPainted = true;
+        }
+
         /// <summary>
         /// Called every frame after drawing is done.
         /// </summary>
@@ -1527,6 +1570,7 @@ namespace GeonBit.UI.Entities
         {
             AfterDraw?.Invoke(this);
             UserInterface.Active.AfterDraw?.Invoke(this);
+            IsPainted = true;
         }
 
         /// <summary>
@@ -1603,8 +1647,11 @@ namespace GeonBit.UI.Entities
         public void BringToFront()
         {
             Entity parent = _parent;
-            parent.RemoveChild(this);
-            parent.AddChild(this, InheritParentState);
+            if (this != parent.Children[parent.Children.Count - 1]) //TODO WHAT ABOUT PARENT STATE "INHERIT"?
+            {
+                parent.RemoveChild(this);
+                parent.AddChild(this, InheritParentState);
+            }
         }
 
         /// <summary>
@@ -2343,6 +2390,7 @@ namespace GeonBit.UI.Entities
         internal protected void MarkAsDirty()
         {
             _isDirty = true;
+            IsPainted = false;
         }
 
         /// <summary>
