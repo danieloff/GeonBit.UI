@@ -102,7 +102,7 @@ namespace GeonBit.UI
         /// </summary>
         public static UserInterface Active = null;
         public GraphicsDeviceManager Graphics;
-        private IGame _igame;
+        private IGameUI _igame;
 
         /// <summary>
         /// The object that provide mouse input for GeonBit UI.
@@ -349,7 +349,7 @@ namespace GeonBit.UI
         /// </summary>
         /// <param name="contentManager">Content manager.</param>
         /// <param name="theme">Which UI theme to use (see options in Content/GeonBit.UI/themes/). This affect the appearance of all textures and effects.</param>
-        static public void Initialize(IGame igame, ContentManager contentManager, string program, string theme, GraphicsDeviceManager graphics)
+        static public void Initialize(IGameUI igame, ContentManager contentManager, string program, string theme, GraphicsDeviceManager graphics)
         {
             // store the content manager
             _content = contentManager;
@@ -423,7 +423,7 @@ namespace GeonBit.UI
         /// <param name="contentManager">Content manager.</param>
         /// <param name="program">Program name for runtime resources</param>
         /// <param name="theme">Which UI theme to use. This affect the appearance of all textures and effects.</param>
-        static public void Initialize(IGame igame, ContentManager contentManager, string program, BuiltinThemes theme, GraphicsDeviceManager graphics)
+        static public void Initialize(IGameUI igame, ContentManager contentManager, string program, BuiltinThemes theme, GraphicsDeviceManager graphics)
         {
             Initialize(igame, contentManager, program, theme.ToString(), graphics);
         }
@@ -431,7 +431,7 @@ namespace GeonBit.UI
         /// <summary>
         /// Create the user interface instance.
         /// </summary>
-        public UserInterface(IGame igame)
+        public UserInterface(IGameUI igame)
         { 
             // sanity test
             if (_content == null)

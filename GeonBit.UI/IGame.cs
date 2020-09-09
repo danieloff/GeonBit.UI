@@ -1,12 +1,13 @@
 ﻿using GeonBit.UI.Entities;
+using GoodOrBad.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace GeonBit.UI
 {
-    public interface IGame
+    public interface IGameUI
     {
-       Entity AddEntity(Entity entity);
+        Entity AddEntity(Entity entity);
     }
 }

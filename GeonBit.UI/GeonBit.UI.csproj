@@ -8,6 +8,7 @@
     <PackageReference Include="MonoGame.Framework.Portable" Version="3.7.1.189" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\routes.goodorbad\GoodOrBad.Framework\GoodOrBad.Framework.csproj" />
     <ProjectReference Include="..\DataTypes.Core\DataTypes.Core.csproj" />
     <ProjectReference Include="..\..\SpriteFontPlus\src\SpriteFontPlus.MonoGame.csproj" />
   </ItemGroup>
