@@ -9,5 +9,10 @@ namespace GeonBit.UI
     public interface IGameUI
     {
         Entity AddEntity(Entity entity);
+
+        GoodOrBadGame Game
+        {
+            get;
+        }
     }
 }

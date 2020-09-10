@@ -102,7 +102,7 @@ namespace GeonBit.UI
         /// </summary>
         public static UserInterface Active = null;
         public GraphicsDeviceManager Graphics;
-        private IGameUI _igame;
+        public static IGameUI ActiveGame;
 
         /// <summary>
         /// The object that provide mouse input for GeonBit UI.
@@ -438,7 +438,7 @@ namespace GeonBit.UI
             {
                 throw new Exceptions.InvalidStateException("Cannot create a UserInterface before calling UserInterface.Initialize()!");
             }
-            _igame = igame;
+            ActiveGame = igame;
 
             // create default input providers
             MouseInputProvider = new DefaultInputProvider();
@@ -507,9 +507,9 @@ namespace GeonBit.UI
         /// <param name="entity">Entity to add.</param>
         public Entity AddEntity(Entity entity)
         {
-            if (_igame != null)
+            if (ActiveGame != null)
             {
-                entity = _igame.AddEntity(entity);
+                entity = ActiveGame.AddEntity(entity);
             }
             return Root.AddChild(entity);
         }
