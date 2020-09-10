@@ -10,7 +10,8 @@
 //-----------------------------------------------------------------------------
 #endregion
 using Microsoft.Xna.Framework;
-
+using Microsoft.Xna.Framework.Input;
+using System.Reflection;
 
 namespace GeonBit.UI
 {
@@ -40,6 +41,16 @@ namespace GeonBit.UI
         /// </summary>
         /// <param name="gameTime">Update frame game time.</param>
         void Update(GameTime gameTime);
+
+        KeyboardState OldKeyboardState
+        {
+            get;
+        }
+
+        KeyboardState NewKeyboardState
+        {
+            get;
+        }
 
         /// <summary>
         /// Get textual input from keyboard.

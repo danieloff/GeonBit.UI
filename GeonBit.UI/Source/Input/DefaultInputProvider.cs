@@ -24,6 +24,22 @@ namespace GeonBit.UI
         KeyboardState _newKeyboardState;
         KeyboardState _oldKeyboardState;
 
+        public KeyboardState OldKeyboardState
+        {
+            get
+            {
+                return _oldKeyboardState;
+            }
+        }
+
+        public KeyboardState NewKeyboardState
+        {
+            get
+            {
+                return _newKeyboardState;
+            }
+        }
+
         // store current & previous mouse states so we can detect key release and diff
         MouseState _newMouseState;
         MouseState _oldMouseState;
