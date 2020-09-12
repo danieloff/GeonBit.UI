@@ -69,7 +69,7 @@ namespace GeonBit.UI.Entities
         /// Draw this entity and its children.
         /// </summary>
         /// <param name="spriteBatch">SpriteBatch to use for drawing.</param>
-        override public void Draw(SpriteBatch spriteBatch)
+        override public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             // if not visible skip
             if (!Visible)
@@ -90,7 +90,7 @@ namespace GeonBit.UI.Entities
             // draw all children
             foreach (Entity child in childrenSorted)
             {
-                child.Draw(spriteBatch);
+                child.Draw(spriteBatch, gameTime);
                 OnAfterChildDraw(child, spriteBatch);
             }
 

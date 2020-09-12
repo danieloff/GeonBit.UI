@@ -115,7 +115,7 @@ namespace GeonBit.UI.Entities
         /// Draw this panel.
         /// </summary>
         /// <param name="spriteBatch">Spritebatch to use when drawing this panel.</param>
-        public override void Draw(SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             // adjust height automatically
             if (AdjustHeightAutomatically && Visible)
@@ -128,7 +128,7 @@ namespace GeonBit.UI.Entities
             }
 
             // call base drawing function
-            base.Draw(spriteBatch);
+            base.Draw(spriteBatch, gameTime);
         }
 
         /// <summary>

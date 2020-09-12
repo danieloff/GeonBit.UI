@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Input;
 using Routes.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
 namespace GeonBit.UI.Entities
@@ -18,12 +19,14 @@ namespace GeonBit.UI.Entities
         {
             var mcolor = new Color(Color.White, 0.0f);
             mcolor.A = (byte)(255 * 0.1f);
+            //mcolor.A = (byte)(255 * 0.3f);
+
 
             FillColor = mcolor;
         }
 
         //3d
-        public void Initialize(GoodOrBadGame game)
+        public void Init(GoodOrBadGame game)
         {
             _mapsphere = new EarthView();
             _mapsphere.LoadContent(game);
@@ -35,10 +38,17 @@ namespace GeonBit.UI.Entities
             _mapsphere.Update(game, gameTime);
         }
 
-        //3d
-        public void Draw(GoodOrBadGame game, SpriteBatch spriteBatch, GameTime gameTime)
+        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            _mapsphere.Draw(game, spriteBatch, gameTime);
+            //Draw(GoodOrBadGame.Active, spriteBatch, gameTime);
+            base.Draw(spriteBatch, gameTime);
+        }
+
+        //3d
+        public void Draw3d(SpriteBatch spriteBatch, GoodOrBadGame game, GameTime gameTime)
+        {
+            var rect = _destRectInternal;
+            _mapsphere.Draw(game, spriteBatch, gameTime, rect);
         }
 
         //2d ui
@@ -47,6 +57,13 @@ namespace GeonBit.UI.Entities
             var delta = UserInterface.Active.MouseInputProvider.MouseWheelChange;
             _mapsphere.Zoom(delta);
             base.DoOnMouseWheelScroll();
+        }
+
+        public override Rectangle CalcDestRect()
+        {
+            var rect = base.CalcDestRect();
+            _mapsphere.UpdateViewport(GoodOrBadGame.Active);
+            return rect;
         }
 
         override protected void DoBeforeUpdate()

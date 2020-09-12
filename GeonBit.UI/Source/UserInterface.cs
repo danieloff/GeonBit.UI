@@ -649,7 +649,7 @@ namespace GeonBit.UI
         /// If UseRenderTarget is false, this function should be called LAST in your draw function.
         /// </summary>
         /// <param name="spriteBatch">SpriteBatch to draw on.</param>
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             int newScreenWidth = spriteBatch.GraphicsDevice.Viewport.Width;
             int newScreenHeight = spriteBatch.GraphicsDevice.Viewport.Height;
@@ -687,7 +687,7 @@ namespace GeonBit.UI
             }
 
             // draw root panel
-            Root.Draw(spriteBatch);
+            Root.Draw(spriteBatch, gameTime);
 
             // draw cursor (unless using render targets and should draw cursor outside of it)
             if (ShowCursor && (IncludeCursorInRenderTarget || !UseRenderTarget))

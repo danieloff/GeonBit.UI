@@ -1246,7 +1246,7 @@ namespace GeonBit.UI.Entities
         /// Draw this entity and its children.
         /// </summary>
         /// <param name="spriteBatch">SpriteBatch to use for drawing.</param>
-        virtual public void Draw(SpriteBatch spriteBatch)
+        virtual public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             // if not visible skip
             if (!Visible)
@@ -1267,7 +1267,7 @@ namespace GeonBit.UI.Entities
             {
                 _background._parent = this;
                 _background._indexInParent = 0;
-                _background.Draw(spriteBatch);
+                _background.Draw(spriteBatch, gameTime);
                 _background._parent = null;
             }
 
@@ -1292,7 +1292,7 @@ namespace GeonBit.UI.Entities
             }
 
             // draw all child entities
-            DrawChildren(spriteBatch);
+            DrawChildren(spriteBatch, gameTime);
 
             // do after draw event
             OnAfterDraw(spriteBatch);
@@ -1347,7 +1347,7 @@ namespace GeonBit.UI.Entities
         /// Draw all children.
         /// </summary>
         /// <param name="spriteBatch"></param>
-        protected virtual void DrawChildren(SpriteBatch spriteBatch)
+        protected virtual void DrawChildren(SpriteBatch spriteBatch, GameTime gameTime)
         {
             // do stuff before drawing children
             BeforeDrawChildren(spriteBatch);
@@ -1358,7 +1358,7 @@ namespace GeonBit.UI.Entities
             // draw all children
             foreach (Entity child in childrenSorted)
             {
-                child.Draw(spriteBatch);
+                child.Draw(spriteBatch, gameTime);
                 OnAfterChildDraw(child, spriteBatch);
             }
 
