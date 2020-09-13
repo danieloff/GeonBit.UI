@@ -120,6 +120,9 @@ namespace GeonBit.UI.Entities
         /// <summary>Position of the older sibling bottom, eg align this entity based on its older sibling, but center on X axis.
         /// Use this property to place entities one after another but keep them aligned to center (especially paragraphs).</summary>
         AutoCenter,
+
+        /// <summary> Fill parent space </summary>
+        Fill,
     };
 
     /// <summary>
@@ -1162,6 +1165,10 @@ namespace GeonBit.UI.Entities
             if (_anchor != anchor)
             {
                 _anchor = anchor;
+                if (_anchor == Anchor.Fill)
+                {
+                    Size = new Vector2(0, 0);
+                }
                 MarkAsDirty();
             }
         }
@@ -1914,6 +1921,10 @@ namespace GeonBit.UI.Entities
                 case Anchor.Center:
                     ret.X = parent_center_x - ret.Width / 2 + (int)offset.X;
                     ret.Y = parent_center_y - ret.Height / 2 + (int)offset.Y;
+                    break;
+                case Anchor.Fill:
+                    ret.X = parent_left + (int)offset.X;
+                    ret.Y = parent_top + (int)offset.Y;
                     break;
             }
 

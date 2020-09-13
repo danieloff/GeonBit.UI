@@ -155,6 +155,15 @@ namespace GeonBit.UI.Entities
         /// Current font used.
         /// </summary>
         protected DynamicSpriteFont _currFont; //TODO allow both types of font? Does it matter?
+
+        public DynamicSpriteFont CurrentFont
+        {
+            get
+            {
+                return _currFont;
+            }
+        }
+           
         
         /// <summary>
         /// Calculated, final text scale.

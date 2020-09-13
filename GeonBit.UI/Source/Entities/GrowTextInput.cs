@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using GeonBit.UI.Entities.TextValidators;
+using System;
 
 namespace GeonBit.UI.Entities
 {
@@ -107,7 +108,7 @@ namespace GeonBit.UI.Entities
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
         /// <param name="skin">TextInput skin, eg which texture to use.</param>
-        public GrowTextInput(bool multiline, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null, PanelSkin skin = PanelSkin.ListBackground) :
+        public GrowTextInput(bool multiline, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null, PanelSkin skin = PanelSkin.ListBackground, Boolean growx = false) :
             base(size, skin, anchor, offset)
         {
             // set multiline mode
@@ -150,6 +151,11 @@ namespace GeonBit.UI.Entities
                 if (colorTextParagraph != null)
                 {
                     colorTextParagraph.EnableStyleInstructions = false;
+                }
+
+                if (growx)
+                {
+                    GrowX = true;
                 }
             }
         }
@@ -256,6 +262,21 @@ namespace GeonBit.UI.Entities
                 value = value ?? string.Empty;
                 _value = _multiLine ? value : value.Replace("\n", string.Empty);
                 FixCaretPosition();
+            }
+        }
+
+        bool _growx = false;
+
+        public bool GrowX
+        {
+            get
+            {
+                return _growx;
+            }
+            set
+            {
+                _growx = value;
+                TextParagraph.WrapWords = !_growx;
             }
         }
 
@@ -433,9 +454,34 @@ namespace GeonBit.UI.Entities
             // for multiline only - handle scrollbar visibility and max
             if (_multiLine && (_actualDisplayText != null) && (_destRectInternal.Height > 0))
             {
+
                 // get how many lines can fit in the textbox and how many lines display text actually have
                 int linesFit = _destRectInternal.Height / (int)(System.Math.Max(currParagraph.LineHeightY(), 1));
-                int linesInText = _actualDisplayText.Split('\n').Length;
+                var linesfull = _actualDisplayText.Split('\n');
+                int linesInText = linesfull.Length;
+
+                if (GrowX)
+                {
+                    var maxlen = 0.0f;
+                    if (TextParagraph.WrapWords == false)
+                    {
+                        foreach (var line in linesfull)
+                        {
+                            var len = TextParagraph.CurrentFont.MeasureString(line);
+                            if (len.X > maxlen)
+                            {
+                                maxlen = len.X;
+                            }
+                        }
+                    }
+
+                    if (maxlen != _destRectInternal.Width)
+                    {
+                        var diff = Size.X - _destRectInternal.Width;
+                        Size = new Vector2(maxlen + diff, Size.Y);
+                    }
+                }
+
 
                 // if there are more lines than can fit, show scrollbar and manage scrolling:
                 if (linesInText >= 1 && linesFit != linesInText)

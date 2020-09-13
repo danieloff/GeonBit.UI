@@ -18,9 +18,8 @@ namespace GeonBit.UI.Entities
         public MapControl(Vector2 size, PanelSkin skin) : base(size, skin)
         {
             var mcolor = new Color(Color.White, 0.0f);
-            mcolor.A = (byte)(255 * 0.1f);
+            //mcolor.A = (byte)(255 * 0.1f);
             //mcolor.A = (byte)(255 * 0.3f);
-
 
             FillColor = mcolor;
         }
