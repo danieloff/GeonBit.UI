@@ -542,6 +542,21 @@ namespace GeonBit.UI.Entities
             }
         }
 
+        public bool IsChildFocused
+        {
+            // get if focused
+            get {
+                foreach (var child in _children)
+                {
+                    if (child.IsFocused)
+                    {
+                        return true;
+                    }
+                }
+                return false; 
+            }
+        }
+
         /// <summary>Currently calculated destination rect (eg the region this entity is drawn on).</summary>
         internal Rectangle _destRect;
 

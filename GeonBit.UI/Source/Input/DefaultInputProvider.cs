@@ -60,6 +60,8 @@ namespace GeonBit.UI
         // last character that was pressed down
         char _currCharacterInput = (char)SpecialChars.Null;
 
+        bool _currCharacterInputShiftDown = false;
+
         // last key that provide character input and was pressed
         Keys _currCharacterInputKey = Keys.Escape;
 
@@ -219,6 +221,9 @@ namespace GeonBit.UI
             // set curr input key, but also keep the previous key in case we need to revert
             Keys prevKey = _currCharacterInputKey;
             _currCharacterInputKey = key;
+
+            bool prevShiftDown = _currCharacterInputShiftDown;
+            _currCharacterInputShiftDown = isShiftDown;
 
             // handle special keys and characters
             switch (key)
@@ -398,6 +403,7 @@ namespace GeonBit.UI
                 // not a special char - revert last character input key and continue processing.
                 default:
                     _currCharacterInputKey = prevKey;
+                    _currCharacterInputShiftDown = prevShiftDown;
                     break;
             };
 
@@ -424,6 +430,8 @@ namespace GeonBit.UI
             // fix case and set as current char pressed
             _currCharacterInput = (capsLock ? lastCharPressedStr.ToUpper() : lastCharPressedStr.ToLower())[0];
 
+            _currCharacterInputShiftDown = isShiftDown;
+
         }
 
         private int CalculatePos(int x, int y, List<string> lines) {
@@ -445,7 +453,7 @@ namespace GeonBit.UI
         /// <param name="breakidx">Where the current breaks are</param>
         /// <param name="pos">Position to insert / remove characters. -1 to push at the end of string. After done, will contain actual new caret position.</param>
         /// <returns>String after text input applied on it.</returns>
-        public string GetTextInput(string txt, int[] breakidx, ref int pos)
+        public string GetTextInput(string txt, List<bool> modifierstates, int[] breakidx, ref int pos)
         {
             // if need to skip due to cooldown time
             if (!_newKeyIsPressed && _keyboardInputCooldown > 0f)
@@ -539,15 +547,36 @@ namespace GeonBit.UI
                     return txt;
 
                 case (char)SpecialChars.Backspace:
-                    pos--;
-                    return (pos < txt.Length && pos >= 0 && txt.Length > 0) ? txt.Remove(pos, 1) : txt;
+                    {
+                        pos--;
+                        var txt2 = txt;
+                        if (pos < txt.Length && pos >= 0 && txt.Length > 0)
+                        {
+                            txt2 = txt.Remove(pos, 1);
+                            modifierstates.RemoveAt(pos);
+                        }
+                        return txt2;
+                    }
 
                 case (char)SpecialChars.Delete:
-                    return (pos < txt.Length && txt.Length > 0) ? txt.Remove(pos, 1) : txt;
+                    {
+                        var txt2 = txt;
+                        if (pos < txt.Length && txt.Length > 0)
+                        {
+                            txt2 = txt.Remove(pos, 1);
+                            modifierstates.RemoveAt(pos);
+                        }
+                        return txt2;
+                    }
             }
 
             // add current character
-            return txt.Insert(pos++, _currCharacterInput.ToString());
+            {
+                var txt2 = txt.Insert(pos, _currCharacterInput.ToString());
+                modifierstates.Insert(pos, _currCharacterInputShiftDown);
+                pos++;
+                return txt2;
+            }
         }
 
         /// <summary>

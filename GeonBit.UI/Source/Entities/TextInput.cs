@@ -566,7 +566,8 @@ namespace GeonBit.UI.Entities
                 // store old string and update based on user input
                 string oldVal = _value;
                 int[] breakidx = { }; //no breaks for now TODO
-                _value = KeyboardInput.GetTextInput(_value, breakidx, ref pos);
+                List<bool> modifiers = new List<bool>();
+                _value = KeyboardInput.GetTextInput(_value, modifiers, breakidx, ref pos);
                 //TODO for when there are breaks: TextParagraph.TrimToFit(_value);
 
                 // update caret position

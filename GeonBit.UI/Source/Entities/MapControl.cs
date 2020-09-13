@@ -69,7 +69,7 @@ namespace GeonBit.UI.Entities
         {
 
             // if focused, and got character input in this frame..
-            if (IsFocused)
+            if (IsFocused && !IsChildFocused)
             {
                 var dir = Vector2.Zero;
                 var keystate = KeyboardInput.NewKeyboardState;

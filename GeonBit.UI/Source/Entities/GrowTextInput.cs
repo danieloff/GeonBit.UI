@@ -11,6 +11,8 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using GeonBit.UI.Entities.TextValidators;
 using System;
+using Microsoft.Xna.Framework.Input;
+using System.Linq;
 
 namespace GeonBit.UI.Entities
 {
@@ -31,6 +33,10 @@ namespace GeonBit.UI.Entities
 
         // current text value
         string _value = string.Empty;
+        List<bool> _valuemodifiers = new List<bool>();
+
+
+        public event EventCallback OnSubmit = null;
 
         // current caret position (-1 is last character).
         int _caret = -1;
@@ -261,6 +267,11 @@ namespace GeonBit.UI.Entities
             {
                 value = value ?? string.Empty;
                 _value = _multiLine ? value : value.Replace("\n", string.Empty);
+                _valuemodifiers = new List<bool>();
+                for (var i=0;i<value.Length;i++)
+                {
+                    _valuemodifiers.Add(false);
+                }
                 FixCaretPosition();
             }
         }
@@ -361,12 +372,14 @@ namespace GeonBit.UI.Entities
             if (HideInputWithChar != null)
             {
                 var hiddenVal = new string(HideInputWithChar.Value, _value.Length);
-                TextParagraph.Text = hiddenVal.Insert(_caret >= 0 ? _caret : hiddenVal.Length, caretShow);
+                //TextParagraph.Text = hiddenVal.Insert(_caret >= 0 ? _caret : hiddenVal.Length, caretShow);
+                TextParagraph.Text = hiddenVal;
             }
             // set main text for regular text input
             else
             {
-                TextParagraph.Text = _value.Insert(_caret >= 0 ? _caret : _value.Length, caretShow);
+                //TextParagraph.Text = _value.Insert(_caret >= 0 ? _caret : _value.Length, caretShow);
+                TextParagraph.Text = _value;
             }
 
             // update placeholder text
@@ -378,6 +391,11 @@ namespace GeonBit.UI.Entities
 
             // get text to display
             return currParagraph.GetProcessedText();
+        }
+
+        protected void DoOnSubmit()
+        {
+            OnSubmit?.Invoke(this);
         }
 
         /// <summary>
@@ -533,7 +551,7 @@ namespace GeonBit.UI.Entities
         /// <param name="newVal">New text value, to check validity.</param>
         /// <param name="oldVal">Previous text value, before the change.</param>
         /// <returns>True if new input is valid, false otherwise.</returns>
-        private bool ValidateInput(ref string newVal, string oldVal)
+        private bool ValidateInput(ref string newVal, List<bool> modifiers, int pos, string oldVal)
         {
             // if new characters were added, and we now exceed characters limit, revet to previous value.
             if (CharactersLimit != 0 &&
@@ -545,6 +563,12 @@ namespace GeonBit.UI.Entities
 
             // if not multiline and got line break, revet to previous value
             if (!_multiLine && newVal.Contains("\n"))
+            {
+                newVal = oldVal;
+                return false;
+            }
+
+            if (pos > 0 && pos <= newVal.Length && newVal[pos-1] == '\n' && modifiers[pos-1] != true) //only accept shift enter, not enter
             {
                 newVal = oldVal;
                 return false;
@@ -605,9 +629,30 @@ namespace GeonBit.UI.Entities
             // animate caret
             _caretAnim += (float)UserInterface.Active.CurrGameTime.ElapsedGameTime.TotalSeconds * CaretBlinkingSpeed;
 
+            bool handled = false;
             // if focused, and got character input in this frame..
             if (IsFocused)
             {
+                // if focused, and got character input in this frame..
+                if (IsFocused)
+                {
+                    var oldkeystate = KeyboardInput.OldKeyboardState;
+                    var keystate = KeyboardInput.NewKeyboardState;
+                    if (oldkeystate.IsKeyDown(Keys.Enter) && !keystate.IsKeyDown(Keys.Enter))
+                    {
+                        if (!keystate.IsKeyDown(Keys.LeftShift) && !keystate.IsKeyDown(Keys.RightShift))
+                        {
+                            //fire submit event
+                            DoOnSubmit();
+                            handled = true;
+                        }
+                    }
+                }
+
+            }
+
+            if (IsFocused && !handled)
+            { 
                 // validate caret position
                 FixCaretPosition();
 
@@ -616,8 +661,9 @@ namespace GeonBit.UI.Entities
 
                 // store old string and update based on user input
                 string oldVal = _value;
+                List<bool> oldModifiers = new List<bool>(_valuemodifiers);
                 int[] breakidx = { }; //no breaks for now TODO
-                _value = KeyboardInput.GetTextInput(_value, breakidx, ref pos);
+                _value = KeyboardInput.GetTextInput(_value, _valuemodifiers, breakidx, ref pos);
                 //TODO for when there are breaks: TextParagraph.TrimToFit(_value);
 
                 // update caret position
@@ -627,9 +673,10 @@ namespace GeonBit.UI.Entities
                 if (_value != oldVal)
                 {
                     // if new characters were added and input is now illegal, revert to previous value
-                    if (!ValidateInput(ref _value, oldVal))
+                    if (!ValidateInput(ref _value, _valuemodifiers, pos, oldVal))
                     {
                         _value = oldVal;
+                        _valuemodifiers = oldModifiers;
                     }
 
                     // call change event
