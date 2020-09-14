@@ -1,5 +1,5 @@
 ﻿using GoodOrBad.Framework;
-using Microsoft.Xna.Framework;
+using Xna = Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Routes.Graphics;
@@ -7,32 +7,103 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using MatterHackers.VectorMath;
+
+using GameTime = Microsoft.Xna.Framework.GameTime;
+using MatterHackers.Agg.Image;
+using MatterHackers.Agg.VertexSource;
+using MatterHackers.Agg;
+using MonoGame.Extended;
 
 namespace GeonBit.UI.Entities
 {
     public class MapControl : Panel
     {
         private EarthView _mapsphere;
+        private ImageBuffer _basetexture;
+        //private Texture2D _overviewtexture;
+        private Image _overview;
+        private List<CylinderTextureInvisibleRegion> _regions;
 
         //2d ui
-        public MapControl(Vector2 size, PanelSkin skin) : base(size, skin)
+        public MapControl(Xna.Vector2 size, PanelSkin skin) : base(size, skin)
         {
-            var mcolor = new Color(Color.White, 0.0f);
+            var mcolor = new Xna.Color(Xna.Color.White, 0.0f);
             //mcolor.A = (byte)(255 * 0.1f);
             //mcolor.A = (byte)(255 * 0.3f);
 
             FillColor = mcolor;
+
+            _regions = new List<CylinderTextureInvisibleRegion>();
         }
 
         //3d
         public void Init(GoodOrBadGame game)
         {
+            _overview = new Image();
+            _overview.Anchor = Anchor.BottomRight;
+            this.AddChild(_overview);
+
             _mapsphere = new EarthView();
-            _mapsphere.LoadContent(game);
+            _mapsphere.OnInvisibleRegionsChange += OnInvisibleRegionsChange;
+            _mapsphere.OnEarthTextureChange += OnEarthTextureChange;
+            _mapsphere.Init(game); //this calls events on this control
+        }
+
+        private void ApplyRegionsToBase()
+        {
+            //copy the base texture
+            var cur = new ImageBuffer(_basetexture);
+
+            //draw on the regions
+            VertexStorage poly = new VertexStorage();
+            Graphics2D curGraphics2D = cur.NewGraphics2D();
+            foreach (var entry in _regions)
+            {
+                var pts = entry.points;
+                if (pts.Count > 0)
+                {
+                    var pt = pts[0];
+                    pt.X *= cur.Width;
+                    pt.Y = cur.Height - cur.Height*pt.Y;
+                    poly.MoveTo(pt.X, pt.Y);
+                }
+                for (var i = 1; i<pts.Count; i++)
+                {
+                    var pt = pts[i];
+                    pt.X *= cur.Width;
+                    pt.Y = cur.Height - cur.Height*pt.Y;
+                    poly.LineTo(pt.X, pt.Y);
+                }
+
+                curGraphics2D.Render(poly, Color.Red);
+            }
+
+            //assign to the overview texture
+            var overviewtexture = SKUtils.Texture2DFromImageBuffer(GoodOrBadGame.Active, cur);
+            _overview.Size = new Xna.Vector2(overviewtexture.Width, overviewtexture.Height);
+            _overview.Texture = overviewtexture;
+        }
+
+        private void OnEarthTextureChange(EarthView view)
+        {
+            var tex = view.CurrentTexture;
+
+            _basetexture = tex.Buffer;
+
+            ApplyRegionsToBase();
+        }
+
+        private void OnInvisibleRegionsChange(EarthView view)
+        {
+            _regions = view.InvisibleMapRegions;
+
+            //draw the lines on the overview texture
+            ApplyRegionsToBase();
         }
 
         //3d
-        public void Update(GoodOrBadGame game, GameTime gameTime)
+        public void Update3D(GoodOrBadGame game, GameTime gameTime)
         {
             _mapsphere.Update(game, gameTime);
         }
@@ -44,7 +115,7 @@ namespace GeonBit.UI.Entities
         }
 
         //3d
-        public void Draw3d(SpriteBatch spriteBatch, GoodOrBadGame game, GameTime gameTime)
+        public void Draw3D(SpriteBatch spriteBatch, GoodOrBadGame game, GameTime gameTime)
         {
             _mapsphere.Draw(game, spriteBatch, gameTime);
         }
@@ -57,7 +128,7 @@ namespace GeonBit.UI.Entities
             base.DoOnMouseWheelScroll();
         }
 
-        public override Rectangle CalcDestRect()
+        public override Xna.Rectangle CalcDestRect()
         {
             var rect = base.CalcDestRect();
             _mapsphere.UpdateViewport(rect);
