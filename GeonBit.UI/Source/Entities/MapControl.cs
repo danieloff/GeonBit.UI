@@ -46,8 +46,7 @@ namespace GeonBit.UI.Entities
         //3d
         public void Draw3d(SpriteBatch spriteBatch, GoodOrBadGame game, GameTime gameTime)
         {
-            var rect = _destRectInternal;
-            _mapsphere.Draw(game, spriteBatch, gameTime, rect);
+            _mapsphere.Draw(game, spriteBatch, gameTime);
         }
 
         //2d ui
@@ -61,7 +60,7 @@ namespace GeonBit.UI.Entities
         public override Rectangle CalcDestRect()
         {
             var rect = base.CalcDestRect();
-            _mapsphere.UpdateViewport(GoodOrBadGame.Active);
+            _mapsphere.UpdateViewport(rect);
             return rect;
         }
 
