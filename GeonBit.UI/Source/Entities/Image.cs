@@ -185,70 +185,75 @@ namespace GeonBit.UI.Entities
         /// <param name="spriteBatch">Sprite batch to draw on.</param>
         /// <param name="phase">The phase we are currently drawing.</param>
         override protected void DrawEntity(SpriteBatch spriteBatch, DrawPhase phase) {
-            // draw image based on DrawMode
-            switch (DrawMode) {
-                // panel mode
-                case ImageDrawMode.Panel:
-                    UserInterface.Active.DrawUtils.DrawSurface(spriteBatch, Texture, _destRect, FrameWidth, Scale,
-                        FillColor);
-                    break;
 
-                // stretch mode
-                case ImageDrawMode.Stretch:
-                    UserInterface.Active.DrawUtils.DrawImage(spriteBatch, Texture, _destRect, FillColor, Scale,
-                        SourceRectangle);
-                    break;
+            if (Texture != null)
+            {
+                // draw image based on DrawMode
+                switch (DrawMode)
+                {
+                    // panel mode
+                    case ImageDrawMode.Panel:
+                        UserInterface.Active.DrawUtils.DrawSurface(spriteBatch, Texture, _destRect, FrameWidth, Scale,
+                            FillColor);
+                        break;
 
-                case ImageDrawMode.ExactTopLeft:
-                    {
-                        var rectSource = new Rectangle(0, 0, Texture.Width, Texture.Height);
-                        var rectDest = new Rectangle(rectSource.X, rectSource.Y, rectSource.Width, rectSource.Height);
+                    // stretch mode
+                    case ImageDrawMode.Stretch:
+                        UserInterface.Active.DrawUtils.DrawImage(spriteBatch, Texture, _destRect, FillColor, Scale,
+                            SourceRectangle);
+                        break;
 
-                        rectDest.Location += _destRect.Location;
-                        UserInterface.Active.DrawUtils.DrawImage(spriteBatch, Texture, rectDest, FillColor, Scale, rectSource);
-                    }
-                    break;
-
-                case ImageDrawMode.Fit:
-                    {
-                        var sizew = Texture.Width;
-                        var sizeh = Texture.Height;
-                        var gw = _destRect.Width;
-                        var gh = _destRect.Height;
-
-                        if (gw < 1)
+                    case ImageDrawMode.ExactTopLeft:
                         {
-                            gw = 1;
-                        }
+                            var rectSource = new Rectangle(0, 0, Texture.Width, Texture.Height);
+                            var rectDest = new Rectangle(rectSource.X, rectSource.Y, rectSource.Width, rectSource.Height);
 
-                        if (gh < 1)
+                            rectDest.Location += _destRect.Location;
+                            UserInterface.Active.DrawUtils.DrawImage(spriteBatch, Texture, rectDest, FillColor, Scale, rectSource);
+                        }
+                        break;
+
+                    case ImageDrawMode.Fit:
                         {
-                            gh = 1;
+                            var sizew = Texture.Width;
+                            var sizeh = Texture.Height;
+                            var gw = _destRect.Width;
+                            var gh = _destRect.Height;
+
+                            if (gw < 1)
+                            {
+                                gw = 1;
+                            }
+
+                            if (gh < 1)
+                            {
+                                gh = 1;
+                            }
+
+                            int destw, desth;
+
+                            if (sizew * gh / gw < sizeh)
+                            {
+                                //image height is too big, chop it off
+                                desth = sizew * gh / gw;
+                                destw = sizew;
+                            }
+                            else
+                            {
+                                destw = sizeh * gw / gh;
+                                desth = sizeh;
+                            }
+
+                            var rectDest = new Rectangle(0, 0, gw, gh);
+                            var rectSource = new Rectangle((sizew - destw) / 2, (sizeh - desth) / 2, destw, desth);
+
+                            rectDest.Location += _destRect.Location;
+                            UserInterface.Active.DrawUtils.DrawImage(spriteBatch, Texture, rectDest, FillColor, Scale,
+                                rectSource);
                         }
-
-                        int destw, desth;
-
-                        if (sizew * gh / gw < sizeh)
-                        {
-                            //image height is too big, chop it off
-                            desth = sizew * gh / gw;
-                            destw = sizew;
-                        }
-                        else
-                        {
-                            destw = sizeh * gw / gh;
-                            desth = sizeh;
-                        }
-
-                        var rectDest = new Rectangle(0, 0, gw, gh);
-                        var rectSource = new Rectangle((sizew - destw) / 2, (sizeh - desth) / 2, destw, desth);
-
-                        rectDest.Location += _destRect.Location;
-                        UserInterface.Active.DrawUtils.DrawImage(spriteBatch, Texture, rectDest, FillColor, Scale,
-                            rectSource);
-                    }
-                    //spriteBatch.Draw(Texture, rectDest, rectSource, Color.White) 'rectSource, Color.White)
-                    break;
+                        //spriteBatch.Draw(Texture, rectDest, rectSource, Color.White) 'rectSource, Color.White)
+                        break;
+                }
             }
 
             // call base draw function
