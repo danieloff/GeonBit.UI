@@ -25,6 +25,7 @@ namespace GeonBit.UI.Entities
         private Label _fpslabel;
         private RawImgData _basetexture;
         private SKBitmap _cur;
+        private RawImgData _curbuffer;
         private SKCanvas _curGraphics2D;
 
         //private Texture2D _overviewtexture;
@@ -164,7 +165,7 @@ namespace GeonBit.UI.Entities
                 _cur = new SKBitmap(_basetexture.Width, _basetexture.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
                 _curGraphics2D = new SKCanvas(_cur);
             }
-            
+
             {
                 var ptraddr = _cur.GetPixels();
 
@@ -219,9 +220,18 @@ namespace GeonBit.UI.Entities
             }
 
             var spand = _cur.GetPixelSpan();
-            var data = spand.ToArray();
 
-            return new RawImgData(_cur.Width, _cur.Height, data);
+            if (_curbuffer == null || _curbuffer.Width != _cur.Width || _curbuffer.Height != _cur.Height)
+            {
+                var buff = spand.ToArray();
+                _curbuffer = new RawImgData(_cur.Width, _cur.Height, buff);
+            }
+            else
+            {
+                spand.CopyTo(_curbuffer.Data);
+            }
+
+            return _curbuffer;
         }
 
         private void OnEarthTextureChange(EarthView view)
