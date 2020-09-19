@@ -51,26 +51,6 @@ namespace GeonBit.UI
             //    DrawPolygon(position, vertices, color);
         }
 
-        public static Microsoft.Xna.Framework.Color ColorFromHex(string hex)
-        {
-            var i = 0;
-
-            if (hex.StartsWith("#"))
-            {
-                i += 1;
-            }
-              
-            var r = int.Parse(hex.Substring(i, 2), System.Globalization.NumberStyles.AllowHexSpecifier);
-            i += 2;
-            var g = int.Parse(hex.Substring(i, 2), System.Globalization.NumberStyles.AllowHexSpecifier);
-            i += 2; 
-            var b = int.Parse(hex.Substring(i, 2), System.Globalization.NumberStyles.AllowHexSpecifier);
-            i += 2;
-            var a = 255; // int.Parse(hex.Substring(i, 2), System.Globalization.NumberStyles.AllowHexSpecifier);
-
-            return new Microsoft.Xna.Framework.Color(r, g, b, a);
-        }
-
         // Stack of rendering targets
         private Stack<RenderTarget2D> _renderTargets = new Stack<RenderTarget2D>();
 

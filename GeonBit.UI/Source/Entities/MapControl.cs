@@ -35,9 +35,11 @@ namespace GeonBit.UI.Entities
         private ImageBuffer _curagg;
         private Graphics2D _curGraphics2DAGG;
         private bool _earthtexturechanged;
-        private Action _nextoverviewtexture;
+        private Task<RawImgData> _nextoverviewtexture;
         private double _nextoverviewtimer = 0.0;
         private bool _showoverlaps = true;
+        private bool _nextoverviewtexture_outofdate;
+        private bool _useskbitmap = true;
 
         //2d ui
         public MapControl(Xna.Vector2 size, PanelSkin skin) : base(size, skin)
@@ -52,6 +54,7 @@ namespace GeonBit.UI.Entities
             _regionsdirty = false;
             _earthtexturechanged = false;
             _waitregions = 0.0;
+            _nextoverviewtexture_outofdate = false;
         }
 
         //3d
@@ -73,27 +76,7 @@ namespace GeonBit.UI.Entities
             this.AddChild(_fpslabel);
         }
 
-        private void ApplyRegionsToFlatViewAGG()
-        {
-            if (_overview.Visible)
-            {
-                if (_showoverlaps)
-                {
-                    _nextoverviewtexture = this.SetBackgroundWithOverlaps;
-                }
-                else
-                {
-                    _nextoverviewtexture = this.SetBasicBackground;
-                }
-                if (_nextoverviewtimer == 0.0)
-                {
-                    _nextoverviewtimer = 0.33333;
-                }
-            }
-            
-        }
-
-        private void SetBackgroundWithOverlaps()
+        private RawImgData GetBackgroundWithOverlaps()
         {
             //copy the base texture
             if (_curagg == null || _curagg.Width != _basetexture.Width || _curagg.Height != _basetexture.Height)
@@ -129,168 +112,116 @@ namespace GeonBit.UI.Entities
                 _curGraphics2DAGG.Render(poly, Color.Green);
             }
 
-            //assign to the overview texture
-            var overviewtexture = _overview.Texture;
-            if (overviewtexture == null || overviewtexture.Width != _curagg.Width || overviewtexture.Height != _curagg.Height)
-            {
-                overviewtexture = new Texture2D(GoodOrBadGame.Active.GraphicsDevice, _curagg.Width, _curagg.Height);
-            }
-
             var data = _curagg.GetBuffer();
 
-            overviewtexture.SetData(data);
-            _overview.Texture = overviewtexture;
+            return new RawImgData(_curagg.Width, _curagg.Height, data);
         }
 
-        private void SetBasicBackground()
+        private RawImgData GetBasicBackground()
         {
-            var data = _basetexture.Data;
-
-            var overviewtexture = _overview.Texture;
-            if (overviewtexture == null || overviewtexture.Width != _basetexture.Width || overviewtexture.Height != _basetexture.Height)
-            {
-                _overview.Texture = new Texture2D(GoodOrBadGame.Active.GraphicsDevice, _basetexture.Width, _basetexture.Height);
-                overviewtexture = _overview.Texture;
-            }
-            overviewtexture.SetData(data);
+            return _basetexture;
         }
 
         private void ApplyRegionsToFlatView()
         {
-            ApplyRegionsToFlatViewAGG();
-        }
-
-        private void ApplyRegionsToFlatViewSK()
-        {
             if (_overview.Visible)
             {
-                //copy the base texture
-                if (_cur == null || _cur.Width != _basetexture.Width || _cur.Height != _basetexture.Height)
+                if (_nextoverviewtexture == null)
                 {
-                    //_cur = new ImageBuffer(_basetexture.Width, _basetexture.Height, 32, new BlenderRGBA()); //_basetexture.Copy();
-                    //_curGraphics2D = _cur.NewGraphics2D();
-                    _cur = new SKBitmap(_basetexture.Width, _basetexture.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
-                    _curGraphics2D = new SKCanvas(_cur);
+                    _nextoverviewtexture_outofdate = false;
+                    if (_showoverlaps)
+                    {
+                        if (_useskbitmap)
+                        {
+                            _nextoverviewtexture = Task.Run(this.GetBackgroundWithOverlapsSK);
+                        }
+                        else
+                        {
+                            _nextoverviewtexture = Task.Run(this.GetBackgroundWithOverlaps);
+                        }
+                    }
+                    else
+                    {
+                        _nextoverviewtexture = Task.Run(this.GetBasicBackground);
+                    }
+                    if (_nextoverviewtimer == 0.0)
+                    {
+                        _nextoverviewtimer = 0.33333;
+                    }
                 }
                 else
                 {
-                    //var src = _basetexture.GetBuffer();
-                    //var dst = _cur.GetBuffer();
-
-                    //Array.Copy(src, dst, dst.Length);
-
-                    var ptraddr = _cur.GetPixels();
-
-                    unsafe
-                    {
-                        var ptr = (byte*)ptraddr;
-                        var idx = 0;
-                        for (var row = 0; row < _basetexture.Height; row++)
-                        {
-                            for (var col = 0; col < _basetexture.Width * 4; col++)
-                            {
-                                *ptr++ = _basetexture.Data[idx++];
-                            }
-                        }
-                    }
+                    _nextoverviewtexture_outofdate = true;
                 }
-
-                /*else
-                {
-                    //_basetexture.GetBuffer().CopyTo(_cur.GetBuffer(), 0);
-                    //_basetexture.CopyTo(_cur);
-                    var addrsrc = _basetexture.GetPixels();
-                    var addrdst = _cur.GetPixels();
-
-                    var w = _cur.Width;
-                    var h = _cur.Height;
-
-                    unsafe
-                    {
-                        int* ptr = (int*)addrsrc.ToPointer();
-                        int* ptrdest = (int*)addrdst.ToPointer();
-
-                        for (int row = 0; row < h; row++)
-                        {
-                            for (int col = 0; col < w; col++)
-                            {
-                                *ptrdest++ = *ptr++;
-                            }
-                        }
-                    }
-                }*/
-
-                //_cur = new ImageBuffer(_basetexture);
-                //_curGraphics2D.Clear(new Color(0, 0, 0, 0));
-                //draw on the regions
-
-                foreach (var entry in _regions)
-                {
-                    SKPath poly = new SKPath();
-                    var pts = entry.points;
-                    if (pts.Count > 0)
-                    {
-                        var pt = pts[0];
-                        pt.X *= _cur.Width;
-                        pt.Y *= _cur.Height;
-                        poly.MoveTo((float)pt.X, (float)pt.Y);
-                    }
-                    for (var i = 1; i < pts.Count; i++)
-                    {
-                        var pt = pts[i];
-                        pt.X *= _cur.Width;
-                        pt.Y *= _cur.Height;
-                        poly.LineTo((float)pt.X, (float)pt.Y);
-                    }
-
-                    SKPaint paint = new SKPaint()
-                    {
-                        Style = SKPaintStyle.Fill,
-                        Color = SKColors.Cyan
-                    };
-
-                    _curGraphics2D.DrawPath(poly, paint);
-                }
-
-                /*
-                VertexStorage poly = new VertexStorage();
-                foreach (var entry in _regions)
-                {
-                    var pts = entry.points;
-                    if (pts.Count > 0)
-                    {
-                        var pt = pts[0];
-                        pt.X *= _cur.Width;
-                        pt.Y *= _cur.Height;
-                        poly.MoveTo(pt.X, pt.Y);
-                    }
-                    for (var i = 1; i < pts.Count; i++)
-                    {
-                        var pt = pts[i];
-                        pt.X *= _cur.Width;
-                        pt.Y *= _cur.Height;
-                        poly.LineTo(pt.X, pt.Y);
-                    }
-
-                    _curGraphics2D.Render(poly, Color.Green);
-                }
-                */
-
-                //assign to the overview texture
-                var overviewtexture = _overview.Texture;
-                if (overviewtexture == null || overviewtexture.Width != _cur.Width || overviewtexture.Height != _cur.Height)
-                {
-                    overviewtexture = new Texture2D(GoodOrBadGame.Active.GraphicsDevice, _cur.Width, _cur.Height);
-                }
-
-                //var curdata = _cur.GetBuffer();
-
-                var spand = _cur.GetPixelSpan();
-                var data = spand.ToArray();
-
-                overviewtexture.SetData(data);
-                _overview.Texture = overviewtexture;
             }
+        }
+
+        private RawImgData GetBackgroundWithOverlapsSK()
+        {
+            //copy the base texture
+            if (_cur == null || _cur.Width != _basetexture.Width || _cur.Height != _basetexture.Height)
+            {
+                _cur = new SKBitmap(_basetexture.Width, _basetexture.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
+                _curGraphics2D = new SKCanvas(_cur);
+            }
+            
+            {
+                var ptraddr = _cur.GetPixels();
+
+                unsafe
+                {
+                    var dstptr = (byte*)ptraddr;
+                    fixed (byte* srcptr = _basetexture.Data)
+                    {
+                        var bytesize = _basetexture.Data.Length;
+
+                        Buffer.MemoryCopy(srcptr, dstptr, bytesize, bytesize);
+                        /*for (var row = 0; row < _basetexture.Height; row++) //32bits at a time
+                        {
+                            for (var col = 0; col < _basetexture.Width; col++)
+                            {
+                                *ptr++ = *idx++;
+                            }
+                        }*/
+                    }
+                }
+            }
+
+            //_curGraphics2D.Clear(new Color(0, 0, 0, 0));
+            //draw on the regions
+
+            foreach (var entry in _regions)
+            {
+                SKPath poly = new SKPath();
+                var pts = entry.points;
+                if (pts.Count > 0)
+                {
+                    var pt = pts[0];
+                    pt.X *= _cur.Width;
+                    pt.Y *= _cur.Height;
+                    poly.MoveTo((float)pt.X, (float)pt.Y);
+                }
+                for (var i = 1; i < pts.Count; i++)
+                {
+                    var pt = pts[i];
+                    pt.X *= _cur.Width;
+                    pt.Y *= _cur.Height;
+                    poly.LineTo((float)pt.X, (float)pt.Y);
+                }
+
+                SKPaint paint = new SKPaint()
+                {
+                    Style = SKPaintStyle.Fill,
+                    Color = SKColors.Cyan
+                };
+
+                _curGraphics2D.DrawPath(poly, paint);
+            }
+
+            var spand = _cur.GetPixelSpan();
+            var data = spand.ToArray();
+
+            return new RawImgData(_cur.Width, _cur.Height, data);
         }
 
         private void OnEarthTextureChange(EarthView view)
@@ -365,10 +296,24 @@ namespace GeonBit.UI.Entities
 
             if (_nextoverviewtexture != null)
             {
+                if (_nextoverviewtexture != null && _nextoverviewtexture.IsCompleted)
+                {
+                    var img = _nextoverviewtexture.Result;
+
+                    //assign to the overview texture
+                    var overviewtexture = _overview.Texture;
+                    if (overviewtexture == null || overviewtexture.Width != img.Width || overviewtexture.Height != img.Height)
+                    {
+                        overviewtexture = new Texture2D(GoodOrBadGame.Active.GraphicsDevice, img.Width, img.Height);
+                        _overview.Texture = overviewtexture;
+                    }
+
+                    overviewtexture.SetData(img.Data);
+
+                    _nextoverviewtexture = null;
+                }
                 if (triggernextoverviewtimer)
                 {
-                    _nextoverviewtexture();
-                    _nextoverviewtexture = null;
                 }
                 
                 _nextoverviewtimer -= gameTime.GetElapsedSeconds();
@@ -376,6 +321,10 @@ namespace GeonBit.UI.Entities
                 {
                     _nextoverviewtimer = 0.0;
                 }
+            }
+            else if (_nextoverviewtexture_outofdate)
+            {
+                ApplyRegionsToFlatView();
             }
 
             _fpslabel.Text = "FPS: " + (int)(1.0 / gameTime.GetElapsedSeconds());
