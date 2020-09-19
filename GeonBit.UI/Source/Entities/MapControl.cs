@@ -356,7 +356,7 @@ namespace GeonBit.UI.Entities
         protected override void DoOnMouseWheelScroll()
         {
             var delta = UserInterface.Active.MouseInputProvider.MouseWheelChange;
-            _mapsphere.Zoom(delta);
+            _mapsphere.ZoomElevator(delta);
             base.DoOnMouseWheelScroll();
         }
 
@@ -407,13 +407,103 @@ namespace GeonBit.UI.Entities
                 {
                     zoom += 1;
                 }
-                
-                if (zoom != 0)
+
+                var forward = 0.0f;
+                if (keystate.IsKeyDown(Keys.Q))
                 {
-                    _mapsphere.Zoom(zoom);
+                    forward += 1;
+                }
+                if (keystate.IsKeyDown(Keys.Z))
+                {
+                    forward -= 1;
                 }
 
-                if (oldkeystate.IsKeyDown(Keys.O) && keystate.IsKeyUp(Keys.O))
+                if (forward != 0)
+                {
+                    _mapsphere.Forward(forward);
+                }
+
+                var strafe = 0.0f;
+                if (keystate.IsKeyDown(Keys.A))
+                {
+                    strafe += 1;
+                }
+                if (keystate.IsKeyDown(Keys.D))
+                {
+                    strafe -= 1;
+                }
+
+                if (strafe != 0)
+                {
+                    _mapsphere.Strafe(strafe);
+                }
+
+                var verticalstrafe = 0.0f;
+                if (keystate.IsKeyDown(Keys.W))
+                {
+                    verticalstrafe += 1;
+                }
+                if (keystate.IsKeyDown(Keys.S))
+                {
+                    verticalstrafe -= 1;
+                }
+
+                if (verticalstrafe != 0)
+                {
+                    _mapsphere.VerticalStrafe(verticalstrafe);
+                }
+
+                var pitch = 0.0f;
+                if (keystate.IsKeyDown(Keys.I))
+                {
+                    pitch -= 1;
+                }
+                if (keystate.IsKeyDown(Keys.K))
+                {
+                    pitch += 1;
+                }
+
+                if (pitch != 0)
+                {
+                    _mapsphere.Pitch(pitch);
+                }
+
+                var yaw = 0.0f;
+                if (keystate.IsKeyDown(Keys.J))
+                {
+                    yaw -= 1;
+                }
+                if (keystate.IsKeyDown(Keys.L))
+                {
+                    yaw += 1;
+                }
+
+                if (yaw != 0)
+                {
+                    _mapsphere.Yaw(yaw);
+                }
+
+                var roll = 0.0f;
+                if (keystate.IsKeyDown(Keys.U))
+                {
+                    roll -= 1;
+                }
+                if (keystate.IsKeyDown(Keys.O))
+                {
+                    roll += 1;
+                }
+
+                if (roll != 0)
+                {
+                    _mapsphere.Roll(roll);
+                }
+
+                if (zoom != 0)
+                {
+                    _mapsphere.ZoomElevator(zoom);
+                }
+
+                if (oldkeystate.IsKeyDown(Keys.F2) && keystate.IsKeyUp(Keys.F2))
                 {
                     _overview.Visible = !_overview.Visible;
                     if (_overview.Visible)
