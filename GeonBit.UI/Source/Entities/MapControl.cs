@@ -200,7 +200,7 @@ namespace GeonBit.UI.Entities
                 var points = entry.points;
                 var edgetexdir = entry.edgedirs;
 
-                var two = new Xna.Point(2, 2);
+                var two = new Vector2(2, 2);
 
                 for (var i = 0; i < points.Count; i++)
                 {
