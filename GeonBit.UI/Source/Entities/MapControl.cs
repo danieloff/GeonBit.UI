@@ -194,20 +194,27 @@ namespace GeonBit.UI.Entities
             foreach (var entry in _regions)
             {
                 SKPath poly = new SKPath();
-                var pts = entry.points;
-                if (pts.Count > 0)
+                // overlaps are holes
+                poly.FillType = SKPathFillType.EvenOdd;
+
+                var points = entry.points;
+                var edgetexdir = entry.edgedirs;
+
+                var two = new Xna.Point(2, 2);
+
+                for (var i = 0; i < points.Count; i++)
                 {
-                    var pt = pts[0];
+                    var pt = points[i];
                     pt.X *= _cur.Width;
                     pt.Y *= _cur.Height;
-                    poly.MoveTo((float)pt.X, (float)pt.Y);
-                }
-                for (var i = 1; i < pts.Count; i++)
-                {
-                    var pt = pts[i];
-                    pt.X *= _cur.Width;
-                    pt.Y *= _cur.Height;
-                    poly.LineTo((float)pt.X, (float)pt.Y);
+                    if (edgetexdir[i] == two)
+                    {
+                        poly.MoveTo((float)pt.X, (float)pt.Y);
+                    }
+                    else
+                    {
+                        poly.LineTo((float)pt.X, (float)pt.Y);
+                    }
                 }
 
                 SKPaint paint = new SKPaint()
