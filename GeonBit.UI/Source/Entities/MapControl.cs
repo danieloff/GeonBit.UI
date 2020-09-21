@@ -23,25 +23,37 @@ namespace GeonBit.UI.Entities
 
         private EarthView _mapsphere;
         private Label _fpslabel;
-        private RawImgData _basetexture;
-        private SKBitmap _cur;
-        private RawImgData _curbuffer;
-        private SKCanvas _curGraphics2D;
 
-        //private Texture2D _overviewtexture;
+        private RawImgData _baseoverviewbuffer;
+        private RawImgData _baseheatbuffer;
+
+        private SKBitmap _overviewsk;
+        private SKBitmap _heatsk;
+
+        private RawImgData _overviewbuffer;
+        private RawImgData _heatbuffer;
+
+        private SKCanvas _overviewskGraphics2D;
+        private SKCanvas _heatskGraphics2D;
+
         private Image _overview;
+        private Image _overviewheat;
+
+        private Task<RawImgData> _nextoverviewtexture;
+        private Task<RawImgData> _nextheattexture;
+
+        //private ImageBuffer _curagg;
+        //private Graphics2D _curGraphics2DAGG;
+
         private bool _regionsdirty;
         private List<CylinderTextureInvisibleRegion> _regions;
         private double _waitregions;
-        private ImageBuffer _curagg;
-        private Graphics2D _curGraphics2DAGG;
         private bool _earthtexturechanged;
-        private Task<RawImgData> _nextoverviewtexture;
         private double _nextoverviewtimer = 0.0;
         private bool _showoverlaps = true;
         private bool _nextoverviewtexture_outofdate;
+        private bool _nextheattexture_outofdate;
         private bool _useskbitmap = true;
-        private RawImgData _overviewbuffer;
         private bool _updatetexturesusingoverviewarea;
 
         //2d ui
@@ -58,17 +70,26 @@ namespace GeonBit.UI.Entities
             _earthtexturechanged = false;
             _waitregions = 0.0;
             _nextoverviewtexture_outofdate = false;
+            _nextheattexture_outofdate = false;
         }
 
         //3d
         public void Init(GoodOrBadGame game)
         {
             _overview = new Image();
-            _overview.Size = new Xna.Vector2(256, 256); // overviewtexture.Width, overviewtexture.Height);
+            _overview.Size = new Xna.Vector2(256, 256);
             _overview.Anchor = Anchor.BottomRight;
             _overview.Visible = false;
 
             this.AddChild(_overview);
+
+            _overviewheat = new Image();
+            _overviewheat.Size = new Xna.Vector2(256, 256);
+            _overviewheat.Anchor = Anchor.BottomRight;
+            _overviewheat.Offset = new Xna.Vector2(_overview.Size.X + _overview.Size.X / 4, 0);
+            _overviewheat.Visible = false;
+
+            this.AddChild(_overviewheat);
 
             _mapsphere = new EarthView();
             _mapsphere.OnInvisibleRegionsChange += OnInvisibleRegionsChange;
@@ -79,16 +100,17 @@ namespace GeonBit.UI.Entities
             this.AddChild(_fpslabel);
         }
 
+        /*
         private RawImgData GetBackgroundWithOverlaps()
         {
             //copy the base texture
-            if (_curagg == null || _curagg.Width != _basetexture.Width || _curagg.Height != _basetexture.Height)
+            if (_curagg == null || _curagg.Width != _baseoverviewbuffer.Width || _curagg.Height != _baseoverviewbuffer.Height)
             {
-                _curagg = new ImageBuffer(_basetexture.Width, _basetexture.Height, 32, new BlenderRGBA()); //_basetexture.Copy();
+                _curagg = new ImageBuffer(_baseoverviewbuffer.Width, _baseoverviewbuffer.Height, 32, new BlenderRGBA()); //_basetexture.Copy();
                 _curGraphics2DAGG = _curagg.NewGraphics2D();
             }
 
-            var src = _basetexture.Data;
+            var src = _baseoverviewbuffer.Data;
             var dst = _curagg.GetBuffer();
 
             Array.Copy(src, dst, dst.Length);
@@ -119,10 +141,11 @@ namespace GeonBit.UI.Entities
 
             return new RawImgData(_curagg.Width, _curagg.Height, data);
         }
+        */
 
         private RawImgData GetBasicBackground()
         {
-            return _basetexture;
+            return _baseoverviewbuffer;
         }
 
         private void ApplyRegionsToFlatView()
@@ -134,14 +157,7 @@ namespace GeonBit.UI.Entities
                     _nextoverviewtexture_outofdate = false;
                     if (_showoverlaps)
                     {
-                        if (_useskbitmap)
-                        {
-                            _nextoverviewtexture = Task.Run(this.GetBackgroundWithOverlapsSK);
-                        }
-                        //else
-                        //{
-                        //   _nextoverviewtexture = Task.Run(this.GetBackgroundWithOverlaps);
-                        //}
+                        _nextoverviewtexture = Task.Run(() => this.GetBackgroundWithOverlapsSK(ref _overviewsk, ref _overviewskGraphics2D, ref _overviewbuffer, _baseoverviewbuffer, null));
                     }
                     else
                     {
@@ -159,9 +175,25 @@ namespace GeonBit.UI.Entities
             }
         }
 
-        private RawImgData UpdateTexturesUsingOverviewArea(RawImgData basedata)
+        private void ApplyRegionsToHeatView()
+        { 
+            if (_overviewheat.Visible)
+            {
+                if (_nextheattexture == null)
+                {
+                    _nextheattexture_outofdate = false;
+                    _nextheattexture = Task.Run(() => this.GetBackgroundWithOverlapsSK(ref _heatsk,  ref _heatskGraphics2D, ref _heatbuffer, _baseheatbuffer, new SKColor(255, 255, 255, 255)));
+                }
+                else
+                {
+                    _nextheattexture_outofdate = true;
+                }
+            }
+        }
+
+        private RawImgData UpdateTexturesUsingOverviewArea(ref SKBitmap skb, ref SKCanvas skg, RawImgData outbuffer, RawImgData baseimg, SKColor? basecolor)
         {
-            var buff = basedata;
+            var buff = baseimg;
             var data = buff.Data;
 
             var xmin = buff.Width;
@@ -207,7 +239,6 @@ namespace GeonBit.UI.Entities
 
             if (xmin == 0 && xmax == buff.Width-1)
             {
-
                 for (var j = 0; j < buff.Width; j++)
                 {
                     bool verticaldivider = true;
@@ -238,40 +269,10 @@ namespace GeonBit.UI.Entities
             }
 
             //update the overview with the viewbox
-            //copy the overview texture
-            if (_cur == null || _cur.Width != buff.Width || _cur.Height != buff.Height)
-            {
-                _cur = new SKBitmap(buff.Width, buff.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
-                _curGraphics2D = new SKCanvas(_cur);
-            }
 
-            {
-                var ptraddr = _cur.GetPixels();
+            //copy the texture over
+            BeforeSkDraw(ref skb, ref skg, buff, null);
 
-                unsafe
-                {
-                    var dstptr = (byte*)ptraddr;
-                    fixed (byte* srcptr = buff.Data)
-                    {
-                        var bytesize = buff.Data.Length;
-
-                        Buffer.MemoryCopy(srcptr, dstptr, bytesize, bytesize);
-                        /*for (var row = 0; row < _basetexture.Height; row++) //32bits at a time
-                        {
-                            for (var col = 0; col < _basetexture.Width; col++)
-                            {
-                                *ptr++ = *idx++;
-                            }
-                        }*/
-                    }
-                }
-            }
-
-            //_curGraphics2D.Clear(new Color(0, 0, 0, 0));
-            //draw on the regions
-
-            //foreach (var entry in polys)
-            //{
             SKPath poly = new SKPath();
 
             if (split == false)
@@ -303,72 +304,87 @@ namespace GeonBit.UI.Entities
                 Color = SKColors.Blue
             };
 
-            _curGraphics2D.DrawPath(poly, paint);
+            skg.DrawPath(poly, paint);
             //}
 
-            var spand = _cur.GetPixelSpan();
+            AfterSkDraw(ref skb, ref outbuffer);
 
-            if (_curbuffer == null || _curbuffer.Width != _cur.Width || _curbuffer.Height != _cur.Height)
-            {
-                var buff2 = spand.ToArray();
-                _curbuffer = new RawImgData(_cur.Width, _cur.Height, buff2);
-            }
-            else
-            {
-                spand.CopyTo(_curbuffer.Data);
-            }
-
-            return _curbuffer;
+            return outbuffer;
         }
 
-        private RawImgData GetBackgroundWithOverlapsSK()
+        private void BeforeSkDraw(ref SKBitmap skb, ref SKCanvas skg, RawImgData baseimg, SKColor? color = null)
         {
-            //copy the base texture
-            if (_cur == null || _cur.Width != _basetexture.Width || _cur.Height != _basetexture.Height)
+            //check arguments
+            if (color == null && baseimg.Data == null)
             {
-                _cur = new SKBitmap(_basetexture.Width, _basetexture.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
-                _curGraphics2D = new SKCanvas(_cur);
+                throw new ArgumentException("Either color or img data must be valid");
             }
 
-
-
-            /*
+            //get the right dimesions in the bitmap
+            if (skb == null || skb.Width != baseimg.Width || skb.Height != baseimg.Height)
             {
-                var ptraddr = _cur.GetPixels();
+                skb = new SKBitmap(baseimg.Width, baseimg.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
+                skg = new SKCanvas(skb);
+            }
+            
+            //set the sk bitmap up with the right data
+            if (color == null)
+            {
+                var ptraddr = skb.GetPixels();
 
                 unsafe
                 {
                     var dstptr = (byte*)ptraddr;
-                    fixed (byte* srcptr = _basetexture.Data)
+                    fixed (byte* srcptr = baseimg.Data)
                     {
-                        var bytesize = _basetexture.Data.Length;
+                        var bytesize = baseimg.Data.Length;
 
                         Buffer.MemoryCopy(srcptr, dstptr, bytesize, bytesize);
                     }
                 }
-            }*/
-
+            }
+            else
             {
-                var ptraddr = _cur.GetPixels();
+                var ptraddr = skb.GetPixels();
 
                 unsafe
                 {
                     var dstptr = (uint*)ptraddr;
 
-                    var bytesize = _basetexture.Data.Length;
+                    var c = color.Value;
+
+                    uint colorint = (uint)((c.Red << (3 * 8)) + (c.Green << (2 * 8)) + (c.Blue << (1 * 8)) + c.Alpha);
+
+                    var bytesize = skb.ByteCount;
 
                     for (var i = 0; i < bytesize / 4; i++)
-                    { 
+                    {
                         *dstptr++ = 0xFFFFFFFF;
                     }
                 }
             }
+        }
 
+        private void AfterSkDraw(ref SKBitmap skb, ref RawImgData img)
+        {
+            var spand = skb.GetPixelSpan();
 
+            if (img == null || img.Width != skb.Width || img.Height != skb.Height)
+            {
+                var buff = spand.ToArray();
+                img = new RawImgData(skb.Width, skb.Height, buff);
+            }
+            else
+            {
+                spand.CopyTo(img.Data);
+            }
+        }
 
-            //_curGraphics2D.Clear(new SKColor(255, 255, 255, 255));
+        private RawImgData GetBackgroundWithOverlapsSK(ref SKBitmap skb, ref SKCanvas skg, ref RawImgData outbuffer, RawImgData baseimg, SKColor? basecolor)
+        {
+            BeforeSkDraw(ref skb, ref skg, baseimg, basecolor);
+   
             //draw on the regions
-
             foreach (var entry in _regions)
             {
                 SKPath poly = new SKPath();
@@ -383,8 +399,8 @@ namespace GeonBit.UI.Entities
                 for (var i = 0; i < points.Count; i++)
                 {
                     var pt = points[i];
-                    pt.X *= _cur.Width;
-                    pt.Y *= _cur.Height;
+                    pt.X *= skb.Width;
+                    pt.Y *= skb.Height;
                     if (edgetexdir[i] == two)
                     {
                         poly.MoveTo((float)pt.X, (float)pt.Y);
@@ -401,22 +417,12 @@ namespace GeonBit.UI.Entities
                     Color = SKColors.Cyan
                 };
 
-                _curGraphics2D.DrawPath(poly, paint);
+                skg.DrawPath(poly, paint);
             }
 
-            var spand = _cur.GetPixelSpan();
+            AfterSkDraw(ref skb, ref outbuffer);
 
-            if (_curbuffer == null || _curbuffer.Width != _cur.Width || _curbuffer.Height != _cur.Height)
-            {
-                var buff = spand.ToArray();
-                _curbuffer = new RawImgData(_cur.Width, _cur.Height, buff);
-            }
-            else
-            {
-                spand.CopyTo(_curbuffer.Data);
-            }
-
-            return _curbuffer;
+            return outbuffer;
         }
 
         private void OnEarthTextureChange(EarthView view)
@@ -462,9 +468,11 @@ namespace GeonBit.UI.Entities
 
                 var data = spand.ToArray();
 
-                _basetexture = new RawImgData(img1.Width, img1.Height, data);
+                _baseoverviewbuffer = new RawImgData(img1.Width, img1.Height, data);
+                _baseheatbuffer = new RawImgData(img1.Width, img1.Height, null);
 
                 ApplyRegionsToFlatView();
+                ApplyRegionsToHeatView();
             }
 
             if (_regionsdirty && _waitregions == 0.0)
@@ -479,6 +487,7 @@ namespace GeonBit.UI.Entities
 
                 //draw the lines on the overview texture, if we want to show them. Drawing takes more cpu!
                 ApplyRegionsToFlatView();
+                ApplyRegionsToHeatView();
             }
             else if (_waitregions > 0.0)
             {
@@ -522,19 +531,43 @@ namespace GeonBit.UI.Entities
                 ApplyRegionsToFlatView();
             }
 
+            if (_nextheattexture != null)
+            {
+                if (_nextheattexture != null && _nextheattexture.IsCompleted)
+                {
+                    var img = _nextheattexture.Result;
+
+                    //assign to the overview texture
+                    var tex = _overviewheat.Texture;
+                    if (tex == null || tex.Width != img.Width || tex.Height != img.Height)
+                    {
+                        tex = new Texture2D(GoodOrBadGame.Active.GraphicsDevice, img.Width, img.Height);
+                        _overviewheat.Texture = tex;
+                    }
+
+                    tex.SetData(img.Data);
+
+                    _nextheattexture = null;
+                }
+            }
+            else if (_nextheattexture_outofdate)
+            {
+                ApplyRegionsToHeatView();
+            }
+
             if (_updatetexturesusingoverviewarea)
             {
-                var img = UpdateTexturesUsingOverviewArea(_curbuffer);
+                var img = UpdateTexturesUsingOverviewArea(ref _heatsk, ref _heatskGraphics2D, _heatbuffer, _heatbuffer, null);
 
                 //assign to the overview texture
-                var overviewtexture = _overview.Texture;
-                if (overviewtexture == null || overviewtexture.Width != img.Width || overviewtexture.Height != img.Height)
+                var tex = _overviewheat.Texture;
+                if (tex == null || tex.Width != img.Width || tex.Height != img.Height)
                 {
-                    overviewtexture = new Texture2D(GoodOrBadGame.Active.GraphicsDevice, img.Width, img.Height);
-                    _overview.Texture = overviewtexture;
+                    tex = new Texture2D(GoodOrBadGame.Active.GraphicsDevice, img.Width, img.Height);
+                    _overview.Texture = tex;
                 }
 
-                overviewtexture.SetData(img.Data);
+                tex.SetData(img.Data);
 
                 _updatetexturesusingoverviewarea = false;
             }
@@ -709,6 +742,12 @@ namespace GeonBit.UI.Entities
                 {
                     _overview.Visible = !_overview.Visible;
                     if (_overview.Visible)
+                    {
+                        _regionsdirty = true;
+                    }
+
+                    _overviewheat.Visible = !_overviewheat.Visible;
+                    if (_overviewheat.Visible)
                     {
                         _regionsdirty = true;
                     }
