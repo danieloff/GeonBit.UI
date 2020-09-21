@@ -232,6 +232,7 @@ namespace GeonBit.UI.Entities
                 }
             }
 
+            //handle possible split
             bool split = false;
 
             var xdividemin = 0;
@@ -267,6 +268,9 @@ namespace GeonBit.UI.Entities
                     }
                 }
             }
+
+            //find power of two that covers the area
+            
 
             //update the overview with the viewbox
 
