@@ -320,6 +320,97 @@ namespace GeonBit.UI.Entities
                 xmax2 = cx + cw;
                 ymax2 = cy + ch;
             }
+            else
+            {
+                //find power of two that covers each area
+                { //area 1
+                    var w = buff.Width - 1 - xmax;
+                    var h = ymax - ymin;
+
+                    var bw = buff.Width;
+                    var bh = buff.Height;
+
+                    var cw = bw;
+                    var ch = bh;
+
+                    while (cw / 2 > w && ch / 2 > h)
+                    {
+                        cw /= 2;
+                        ch /= 2;
+                    }
+
+                    //found the power of two box, now find the actual boxes needed.
+                    var cx = xmax;
+                    var cy = ymin;
+
+                    var floorcx = cx / cw;
+                    var floorcy = cy / cw;
+
+                    var left = cw * floorcx;
+                    var bottom = ch * floorcy;
+
+
+                    if (left != cx)
+                    {
+                        cx = left;
+                        cw *= 2;
+                    }
+                    if (bottom != cy)
+                    {
+                        cy = bottom;
+                        ch *= 2;
+                    }
+
+                    xmin2 = cx;
+                    ymin2 = cy;
+                    xmax2 = cx + cw;
+                    ymax2 = cy + ch;
+                }
+
+                { //area 2
+                    var w = xmin - 0;
+                    var h = ymax - ymin;
+
+                    var bw = buff.Width;
+                    var bh = buff.Height;
+
+                    var cw = bw;
+                    var ch = bh;
+
+                    while (cw / 2 > w && ch / 2 > h)
+                    {
+                        cw /= 2;
+                        ch /= 2;
+                    }
+
+                    //found the power of two box, now find the actual boxes needed.
+                    var cx = 0;
+                    var cy = ymin;
+
+                    var floorcx = cx / cw;
+                    var floorcy = cy / cw;
+
+                    var left = cw * floorcx;
+                    var bottom = ch * floorcy;
+
+
+                    if (left != cx)
+                    {
+                        cx = left;
+                        cw *= 2;
+                    }
+                    if (bottom != cy)
+                    {
+                        cy = bottom;
+                        ch *= 2;
+                    }
+
+                    xmin2 = cx;
+                    ymin2 = cy;
+                    xmax2 = cx + cw;
+                    ymax2 = cy + ch;
+                }
+            }
             
 
             //update the overview with the viewbox
