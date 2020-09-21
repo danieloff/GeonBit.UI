@@ -14,6 +14,7 @@ using MatterHackers.Agg;
 using MonoGame.Extended;
 using SkiaSharp;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace GeonBit.UI.Entities
 {
@@ -269,7 +270,56 @@ namespace GeonBit.UI.Entities
                 }
             }
 
+            var xmin2 = xmin;
+            var ymin2 = ymin;
+            var xmax2 = xmax;
+            var ymax2 = ymax;
+
             //find power of two that covers the area
+            if (!split)
+            {
+                var w = xmax - xmin;
+                var h = ymax - ymin;
+
+                var bw = buff.Width;
+                var bh = buff.Height;
+
+                var cw = bw;
+                var ch = bh;
+
+                while (cw / 2 > w && ch / 2 > h)
+                {
+                    cw /= 2;
+                    ch /= 2;
+                }
+
+                //found the power of two box, now find the actual boxes needed.
+                var cx = xmin;
+                var cy = ymin;
+
+                var floorcx = cx / cw;
+                var floorcy = cy / cw;
+
+                var left = cw * floorcx;
+                var bottom = ch * floorcy;
+
+
+                if (left != cx)
+                {
+                    cx = left;
+                    cw *= 2;
+                }
+                if (bottom != cy)
+                {
+                    cy = bottom;
+                    ch *= 2;
+                }
+
+                xmin2 = cx;
+                ymin2 = cy;
+                xmax2 = cx + cw;
+                ymax2 = cy + ch;
+            }
             
 
             //update the overview with the viewbox
@@ -277,18 +327,49 @@ namespace GeonBit.UI.Entities
             //copy the texture over
             BeforeSkDraw(ref skb, ref skg, buff, null);
 
-            SKPath poly = new SKPath();
+            SKPaint paint = new SKPaint()
+            {
+                Style = SKPaintStyle.Stroke,
+                Color = SKColors.Blue
+            };
+
+            SKPaint paint2 = new SKPaint()
+            {
+                Style = SKPaintStyle.Stroke,
+                Color = SKColors.Red
+            };
 
             if (split == false)
             {
-                poly.MoveTo(xmin, ymin);
-                poly.LineTo(xmax, ymin);
-                poly.LineTo(xmax, ymax);
-                poly.LineTo(xmin, ymax);
-                poly.LineTo(xmin, ymin);
+                {
+
+                    SKPath poly = new SKPath();
+                    poly.MoveTo(xmin, ymin);
+                    poly.LineTo(xmax, ymin);
+                    poly.LineTo(xmax, ymax);
+                    poly.LineTo(xmin, ymax);
+                    poly.LineTo(xmin, ymin);
+
+                    skg.DrawPath(poly, paint);
+                }
+                {
+
+                    SKPath poly = new SKPath();
+
+                    poly.MoveTo(xmin2, ymin2);
+                    poly.LineTo(xmax2, ymin2);
+                    poly.LineTo(xmax2, ymax2);
+                    poly.LineTo(xmin2, ymax2);
+                    poly.LineTo(xmin2, ymin2);
+
+                    skg.DrawPath(poly, paint2);
+                }
+
             }
             else if (split == true)
             {
+                SKPath poly = new SKPath();
+
                 poly.MoveTo(0, ymin);
                 poly.LineTo(xdividemin, ymin);
                 poly.LineTo(xdividemin, ymax);
@@ -300,16 +381,10 @@ namespace GeonBit.UI.Entities
                 poly.LineTo(buff.Width, ymax);
                 poly.LineTo(xdividemax, ymax);
                 poly.LineTo(xdividemax, ymin);
+
+                skg.DrawPath(poly, paint);
             }
 
-            SKPaint paint = new SKPaint()
-            {
-                Style = SKPaintStyle.Stroke,
-                Color = SKColors.Blue
-            };
-
-            skg.DrawPath(poly, paint);
-            //}
 
             AfterSkDraw(ref skb, ref outbuffer);
 
