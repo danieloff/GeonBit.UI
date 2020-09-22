@@ -493,7 +493,7 @@ namespace GeonBit.UI.Entities
                         }
                     }
 
-                    if (maxlen != _destRectInternal.Width)
+                    if ((int)maxlen != _destRectInternal.Width) //do I want to round or something?
                     {
                         var diff = Size.X - _destRectInternal.Width;
                         Size = new Vector2(maxlen + diff, Size.Y);
