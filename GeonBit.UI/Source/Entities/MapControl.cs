@@ -287,9 +287,12 @@ namespace GeonBit.UI.Entities
                 var cw = bw;
                 var ch = bh;
 
-                while (cw / 2 > w && ch / 2 > h)
+                while (cw / 2 > w)
                 {
                     cw /= 2;
+                }
+                while (ch / 2 > h)
+                {
                     ch /= 2;
                 }
 
@@ -298,27 +301,32 @@ namespace GeonBit.UI.Entities
                 var cy = ymin;
 
                 var floorcx = cx / cw;
-                var floorcy = cy / cw;
+                var floorcy = cy / ch;
 
                 var left = cw * floorcx;
                 var bottom = ch * floorcy;
 
+                var right = left + cw - 1;
+                var top = bottom + ch - 1;
 
-                if (left != cx)
+                //make it bigger if shifting it caused a problem
+                if (right < xmax)
                 {
-                    cx = left;
+                    //cx = left;
                     cw *= 2;
+                    right = left + cw - 1;
                 }
-                if (bottom != cy)
+                if (top < ymax)
                 {
-                    cy = bottom;
+                    //cy = bottom;
                     ch *= 2;
+                    top = bottom + ch - 1;
                 }
 
-                xmin2 = cx;
-                ymin2 = cy;
-                xmax2 = cx + cw;
-                ymax2 = cy + ch;
+                xmin2 = left;
+                ymin2 = bottom;
+                xmax2 = right; //bounds coordinates are inclusive, 0-0 is length 1, 0-1 is length 2..
+                ymax2 = top;
             }
             else
             {
