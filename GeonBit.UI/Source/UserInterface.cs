@@ -14,7 +14,7 @@ using GeonBit.UI.Entities;
 using Microsoft.Xna.Framework.Content;
 using System.Runtime.Serialization;
 using System.Xml.Serialization;
-
+using GoodOrBad.Framework;
 
 namespace GeonBit.UI
 {
@@ -355,7 +355,7 @@ namespace GeonBit.UI
             _content = contentManager;
 
             // init resources (textures etc)
-            Resources.LoadContent(_content, program, theme);
+            Resources.LoadContent(_content, program, igame.Game, theme);
 
             // create a default active user interface
             Active = new UserInterface();

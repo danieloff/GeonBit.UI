@@ -19,6 +19,7 @@ using System.Linq;
 
 
 using SpriteFontPlus;
+using GoodOrBad.Framework;
 using System.IO;
 
 namespace GeonBit.UI
@@ -260,7 +261,7 @@ namespace GeonBit.UI
         internal static string _root;
 
         /// <summary>Root for runtime program content</summary>
-        public static string _runtimeroot;
+        ///todo android public static string _runtimeroot;
 
         /// <summary>
         /// Load all GeonBit.UI resources.
@@ -268,11 +269,11 @@ namespace GeonBit.UI
         /// <param name="content">Content manager to use.</param>
         /// <param name="program">Program name to use for runtime resources</param>
         /// <param name="theme">Which theme to load resources from.</param>
-        static public void LoadContent(ContentManager content, String program, string theme = "default")
+        static public void LoadContent(ContentManager content, String program, GoodOrBadGame game, string theme = "default")
         {
             InitialiseCharStringDict();
 
-            _runtimeroot = program;
+            ///todo android_runtimeroot = program;
             // set resources root path and store content manager
             _root = "GeonBit.UI/themes/" + theme + "/";
             _content = content;
@@ -337,7 +338,8 @@ namespace GeonBit.UI
             {
                 string proxyname = _root + "fonts/" + style.ToString() + "_md";
                 var proxydata = content.Load<FontData>(proxyname);
-                using (var stream = File.OpenRead(_runtimeroot + "fonts/" + proxydata.FontName))
+                //TODO FIX THIS CALL TO SOMETHING CLEANER
+                using (var stream = game.FileOpenAppData(program + "fonts/" + proxydata.FontName, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     Fonts[(int)style] = DynamicSpriteFont.FromTtf(stream, 20); //TODO, default size?
                 }
