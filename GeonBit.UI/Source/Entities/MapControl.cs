@@ -821,6 +821,11 @@ namespace GeonBit.UI.Entities
                     zoom += 1;
                 }
 
+                if (zoom != 0)
+                {
+                    _mapsphere.ZoomElevator(zoom);
+                }
+
                 var forward = 0.0f;
                 if (keystate.IsKeyDown(Keys.Q))
                 {
@@ -909,11 +914,6 @@ namespace GeonBit.UI.Entities
                 if (roll != 0)
                 {
                     _mapsphere.Roll(roll);
-                }
-
-                if (zoom != 0)
-                {
-                    _mapsphere.ZoomElevator(zoom);
                 }
 
                 if (oldkeystate.IsKeyDown(Keys.F2) && keystate.IsKeyUp(Keys.F2))
