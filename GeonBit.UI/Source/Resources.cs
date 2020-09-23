@@ -360,8 +360,9 @@ namespace GeonBit.UI
             ProgressBarData = content.Load<TextureData>(_root + "textures/progressbar_md");
 
             // load effects
-            DisabledEffect = content.Load<Effect>(_root + "effects/disabled");
-            SilhouetteEffect = content.Load<Effect>(_root + "effects/silhouette");
+            //TODO effects, work on the build system. Not needed right now
+            ///DisabledEffect = content.Load<Effect>(_root + "effects/disabled");
+            ///SilhouetteEffect = content.Load<Effect>(_root + "effects/silhouette");
 
             // load default styleSheets
             LoadDefaultStyles(ref Entity.DefaultStyle, "Entity", _root, content);
