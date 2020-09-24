@@ -1,20 +1,17 @@
 ﻿using GoodOrBad.Framework;
-using Xna = Microsoft.Xna.Framework;
+using MatterHackers.Agg;
+using MatterHackers.VectorMath;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended;
 using Routes.Graphics;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using MatterHackers.VectorMath;
-
-using GameTime = Microsoft.Xna.Framework.GameTime;
-using MatterHackers.Agg.Image;
-using MatterHackers.Agg.VertexSource;
-using MatterHackers.Agg;
-using MonoGame.Extended;
-using SkiaSharp;
+using System.Security.Policy;
 using System.Threading.Tasks;
-using System.Collections.Concurrent;
+using GameTime = Microsoft.Xna.Framework.GameTime;
+using Xna = Microsoft.Xna.Framework;
 
 namespace GeonBit.UI.Entities
 {
@@ -197,11 +194,14 @@ namespace GeonBit.UI.Entities
             var buff = baseimg;
             var data = buff.Data;
 
+            var zoom = 0;
+
             var xmin = buff.Width;
             var xmax = 0;
             var ymin = buff.Height;
             var ymax = 0;
 
+            bool found = false;
             for (var i = 0; i < buff.Height; i++)
             {
                 for (var j = 0; j < buff.Width; j++)
@@ -229,8 +229,13 @@ namespace GeonBit.UI.Entities
                         {
                             ymax = i;
                         }
+                        found = true;
                     }
                 }
+            }
+            //if (!found)
+            {
+                //that would be a problem
             }
 
             //handle possible split
@@ -286,7 +291,7 @@ namespace GeonBit.UI.Entities
             var ymax2_2 = ymax;
 
             //find power of two that covers the area
-            if (!split)
+            if (!split && found)
             {
                 var w = xmax - xmin + 1;
                 var h = ymax - ymin + 1;
@@ -297,16 +302,19 @@ namespace GeonBit.UI.Entities
                 var cw = bw;
                 var ch = bh;
 
-                while (cw/2 >= w)
+                while (cw / 2 >= w && ch / 2 >= h) //square textures for now...
                 {
                     cw /= 2;
-                }
-                var byfourw = (int)Math.Ceiling(cw / 2.0); //find the by four width, watch for zero
+                    zoom += 1;
+                    //}
 
-                while (ch/2 >= h)
-                {
+                    //while (ch/2 >= h)
+                    //{
                     ch /= 2;
+                    //zoomy += 1;
                 }
+
+                var byfourw = (int)Math.Ceiling(cw / 2.0); //find the by four width, watch for zero
                 var byfourh = (int)Math.Ceiling(ch / 2.0);
 
                 //found the power of two box, now find the actual boxes needed.
@@ -326,14 +334,20 @@ namespace GeonBit.UI.Entities
                 if (right < xmax)
                 {
                     //cx = left;
-                    cw += byfourw;
+                    cw *= 2;
+                    ch *= 2;
+                    zoom -= 1;
                     right = left + cw - 1;
+                    top = bottom + ch - 1;
                 }
                 if (top < ymax)
                 {
                     //cy = bottom;
-                    ch += byfourh;
+                    ch *= 2;
+                    cw *= 2;
+                    zoom -= 1;
                     top = bottom + ch - 1;
+                    right = left + cw - 1;
                 }
 
                 xmin2 = left;
@@ -341,7 +355,7 @@ namespace GeonBit.UI.Entities
                 xmax2 = right; //bounds coordinates are inclusive, 0-0 is length 1, 0-1 is length 2..
                 ymax2 = top;
             }
-            else
+            else if (found)
             {
                 //find power of two that covers each area
                 { //left
@@ -354,16 +368,19 @@ namespace GeonBit.UI.Entities
                     var cw = bw;
                     var ch = bh;
 
-                    while (cw / 2 >= w)
+                    while (cw / 2 >= w && ch / 2 >= h) //square textures for now...
                     {
                         cw /= 2;
-                    }
-                    var byfourw = (int)Math.Ceiling(cw / 2.0); //find the by four width, watch for zero
+                        zoom += 1;
+                        //}
 
-                    while (ch / 2 >= h)
-                    {
+                        //while (ch/2 >= h)
+                        //{
                         ch /= 2;
+                        //zoomy += 1;
                     }
+
+                    var byfourw = (int)Math.Ceiling(cw / 2.0); //find the by four width, watch for zero
                     var byfourh = (int)Math.Ceiling(ch / 2.0);
 
                     //found the power of two box, now find the actual boxes needed.
@@ -380,17 +397,23 @@ namespace GeonBit.UI.Entities
                     var top = bottom + ch - 1;
 
                     //make it bigger if shifting it caused a problem
-                    if (right < cx + w - 1)
+                    if (right < xdividemax + 1 + w)
                     {
                         //cx = left;
-                        cw += byfourw;
+                        cw *= 2;
+                        ch *= 2;
+                        zoom -= 1;
                         right = left + cw - 1;
+                        top = bottom + ch - 1;
                     }
                     if (top < ymax)
                     {
                         //cy = bottom;
-                        ch += byfourh;
+                        ch *= 2;
+                        cw *= 2;
+                        zoom -= 1;
                         top = bottom + ch - 1;
+                        right = left + cw - 1;
                     }
 
                     xmin2_2 = left;
@@ -461,6 +484,34 @@ namespace GeonBit.UI.Entities
                     ymax2_2 = top;
                 }
             }
+
+            //request more detail
+
+            int destzoom = _mapsphere.LowResZoomLevel ;
+            Point2D tilebottomleft;
+            //Point2D tiletopright;
+
+            if (!split && found)
+            {
+                var bl = new Vector2(xmin2 / (double)buff.Width, ymin2 / (double)buff.Height);
+                var tr = new Vector2(xmax2 / (double)buff.Width, ymax2 / (double)buff.Height);
+
+                Vector2 longlatbottomleft;
+                Vector2 longlattopright;
+
+                longlatbottomleft = new Vector2(GMath.texturextolongr(bl.X, _mapsphere.LowResZoomLevel), GMath.textureytolatr(bl.Y, _mapsphere.LowResZoomLevel));
+                longlattopright = new Vector2(GMath.texturextolongr(tr.X, _mapsphere.LowResZoomLevel), GMath.textureytolatr(tr.Y, _mapsphere.LowResZoomLevel));
+
+                tilebottomleft = new Point2D(GMath.long2tilex(longlatbottomleft.X, zoom), GMath.lat2tiley(longlatbottomleft.Y, zoom));
+                //tiletopright = new Point2D(GMath.lat2tiley(longlatbottomleft.X, zoom), GMath.lat2tiley(longlattopright.Y, zoom));
+
+
+                _mapsphere.SetHighResZone(tilebottomleft, zoom);
+            }
+            else
+            {
+                //throw new NotImplementedException("need to implement split zoom");
+            }
             
 
             //update the overview with the viewbox
@@ -480,7 +531,7 @@ namespace GeonBit.UI.Entities
                 Color = SKColors.Red
             };
 
-            if (split == false)
+            if (split == false && found)
             {
                 {
 
@@ -507,7 +558,7 @@ namespace GeonBit.UI.Entities
                 }
 
             }
-            else if (split == true)
+            else if (split == true && found)
             {
                 {   
                     // left
