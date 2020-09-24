@@ -8,6 +8,7 @@ using Routes.Graphics;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Security.Policy;
 using System.Threading.Tasks;
 using GameTime = Microsoft.Xna.Framework.GameTime;
@@ -314,6 +315,7 @@ namespace GeonBit.UI.Entities
                     //zoomy += 1;
                 }
 
+                zoom += 1;
                 var byfourw = (int)Math.Ceiling(cw / 2.0); //find the by four width, watch for zero
                 var byfourh = (int)Math.Ceiling(ch / 2.0);
 
@@ -327,8 +329,8 @@ namespace GeonBit.UI.Entities
                 var left = byfourw * floorcx;
                 var bottom = byfourh * floorcy;
 
-                var right = left + cw - 1;
-                var top = bottom + ch - 1;
+                var right = left + cw;
+                var top = bottom + ch;
 
                 //make it bigger if shifting it caused a problem
                 if (right < xmax)
@@ -337,8 +339,8 @@ namespace GeonBit.UI.Entities
                     cw *= 2;
                     ch *= 2;
                     zoom -= 1;
-                    right = left + cw - 1;
-                    top = bottom + ch - 1;
+                    right = left + cw;
+                    top = bottom + ch;
                 }
                 if (top < ymax)
                 {
@@ -346,14 +348,28 @@ namespace GeonBit.UI.Entities
                     ch *= 2;
                     cw *= 2;
                     zoom -= 1;
-                    top = bottom + ch - 1;
-                    right = left + cw - 1;
+                    top = bottom + ch;
+                    right = left + cw;
+                }
+
+                if (top > buff.Height)
+                {
+                    var diff = (buff.Height) - top;
+                    top += diff;
+                    bottom += diff;
+                }
+
+                if (right > buff.Width)
+                {
+                    var diff = (buff.Width) - right;
+                    right += diff;
+                    left += diff;
                 }
 
                 xmin2 = left;
                 ymin2 = bottom;
-                xmax2 = right; //bounds coordinates are inclusive, 0-0 is length 1, 0-1 is length 2..
-                ymax2 = top;
+                xmax2 = right - 1;
+                ymax2 = top - 1;
             }
             else if (found)
             {
@@ -380,6 +396,7 @@ namespace GeonBit.UI.Entities
                         //zoomy += 1;
                     }
 
+                    zoom += 1;
                     var byfourw = (int)Math.Ceiling(cw / 2.0); //find the by four width, watch for zero
                     var byfourh = (int)Math.Ceiling(ch / 2.0);
 
@@ -393,8 +410,8 @@ namespace GeonBit.UI.Entities
                     var left = byfourw * floorcx;
                     var bottom = byfourh * floorcy;
 
-                    var right = left + cw - 1;
-                    var top = bottom + ch - 1;
+                    var right = left + cw;
+                    var top = bottom + ch;
 
                     //make it bigger if shifting it caused a problem
                     if (right < xdividemax + 1 + w)
@@ -403,8 +420,8 @@ namespace GeonBit.UI.Entities
                         cw *= 2;
                         ch *= 2;
                         zoom -= 1;
-                        right = left + cw - 1;
-                        top = bottom + ch - 1;
+                        right = left + cw;
+                        top = bottom + ch;
                     }
                     if (top < ymax)
                     {
@@ -412,76 +429,26 @@ namespace GeonBit.UI.Entities
                         ch *= 2;
                         cw *= 2;
                         zoom -= 1;
-                        top = bottom + ch - 1;
-                        right = left + cw - 1;
+                        top = bottom + ch;
+                        right = left + cw;
+                    }
+
+                    if (top > buff.Height)
+                    {
+                        var diff = (buff.Height) - top;
+                        top += diff;
+                        bottom += diff;
                     }
 
                     xmin2_2 = left;
                     ymin2_2 = bottom;
-                    xmax2_2 = buff.Width; //bounds coordinates are inclusive, 0-0 is length 1, 0-1 is length 2..
-                    ymax2_2 = top;
+                    xmax2_2 = buff.Width - 1;
+                    ymax2_2 = top - 1;
 
                     xmin2_1 = 0;
                     ymin2_1 = bottom;
-                    xmax2_1 = right - buff.Width; //bounds coordinates are inclusive, 0-0 is length 1, 0-1 is length 2..
-                    ymax2_1 = top;
-                }
-
-                if (false)
-                { //area 2
-
-                    var w = buff.Width - (xdividemax + 1);
-                    var h = ymax - ymin + 1;
-
-                    var bw = buff.Width;
-                    var bh = buff.Height;
-
-                    var cw = bw;
-                    var ch = bh;
-
-                    while (cw / 2 >= w)
-                    {
-                        cw /= 2;
-                    }
-                    var byfourw = (int)Math.Ceiling(cw / 2.0); //find the by four width, watch for zero
-
-                    while (ch / 2 >= h)
-                    {
-                        ch /= 2;
-                    }
-                    var byfourh = (int)Math.Ceiling(ch / 2.0);
-
-                    //found the power of two box, now find the actual boxes needed.
-                    var cx = xdividemax;
-                    var cy = ymin;
-
-                    var floorcx = cx / byfourw;
-                    var floorcy = cy / byfourh;
-
-                    var left = byfourw * floorcx;
-                    var bottom = byfourh * floorcy;
-
-                    var right = left + cw - 1;
-                    var top = bottom + ch - 1;
-
-                    //make it bigger if shifting it caused a problem
-                    if (right < cx + w - 1)
-                    {
-                        //cx = left;
-                        cw += byfourw;
-                        right = left + cw - 1;
-                    }
-                    if (top < ymax)
-                    {
-                        //cy = bottom;
-                        ch += byfourh;
-                        top = bottom + ch - 1;
-                    }
-
-                    xmin2_2 = left;
-                    ymin2_2 = bottom;
-                    xmax2_2 = right; //bounds coordinates are inclusive, 0-0 is length 1, 0-1 is length 2..
-                    ymax2_2 = top;
+                    xmax2_1 = right - buff.Width - 1;
+                    ymax2_1 = top - 1;
                 }
             }
 
@@ -489,24 +456,18 @@ namespace GeonBit.UI.Entities
 
             int destzoom = _mapsphere.LowResZoomLevel ;
             Point2D tilebottomleft;
-            //Point2D tiletopright;
+            Point2D tiletopright;
 
             if (!split && found)
             {
                 var bl = new Vector2(xmin2 / (double)buff.Width, ymin2 / (double)buff.Height);
                 var tr = new Vector2(xmax2 / (double)buff.Width, ymax2 / (double)buff.Height);
 
-                Vector2 longlatbottomleft;
-                Vector2 longlattopright;
-
-                longlatbottomleft = new Vector2(GMath.texturextolongr(bl.X, _mapsphere.LowResZoomLevel), GMath.textureytolatr(bl.Y, _mapsphere.LowResZoomLevel));
-                longlattopright = new Vector2(GMath.texturextolongr(tr.X, _mapsphere.LowResZoomLevel), GMath.textureytolatr(tr.Y, _mapsphere.LowResZoomLevel));
-
-                tilebottomleft = new Point2D(GMath.long2tilex(longlatbottomleft.X, zoom), GMath.lat2tiley(longlatbottomleft.Y, zoom));
-                //tiletopright = new Point2D(GMath.lat2tiley(longlatbottomleft.X, zoom), GMath.lat2tiley(longlattopright.Y, zoom));
+                tilebottomleft = new Point2D((int)(bl.X * Math.Pow(2, zoom)), (int)(bl.Y * Math.Pow(2, zoom)));
+                tiletopright = new Point2D((int)(tr.X * Math.Pow(2, zoom)), (int)(tr.Y * Math.Pow(2, zoom))); //inclusive 
 
 
-                _mapsphere.SetHighResZone(tilebottomleft, zoom);
+                _mapsphere.SetHighResZone(tilebottomleft, tiletopright, zoom);
             }
             else
             {
@@ -544,6 +505,8 @@ namespace GeonBit.UI.Entities
 
                     skg.DrawPath(poly, paint);
                 }
+
+                //bounds
                 {
 
                     SKPath poly = new SKPath();
