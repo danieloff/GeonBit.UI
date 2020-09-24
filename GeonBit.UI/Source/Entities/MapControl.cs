@@ -275,11 +275,21 @@ namespace GeonBit.UI.Entities
             var xmax2 = xmax;
             var ymax2 = ymax;
 
+            var xmin2_1 = xmin;
+            var ymin2_1 = ymin;
+            var xmax2_1 = xmax;
+            var ymax2_1 = ymax;
+
+            var xmin2_2 = xmin;
+            var ymin2_2 = ymin;
+            var xmax2_2 = xmax;
+            var ymax2_2 = ymax;
+
             //find power of two that covers the area
             if (!split)
             {
-                var w = xmax - xmin;
-                var h = ymax - ymin;
+                var w = xmax - xmin + 1;
+                var h = ymax - ymin + 1;
 
                 var bw = buff.Width;
                 var bh = buff.Height;
@@ -287,24 +297,27 @@ namespace GeonBit.UI.Entities
                 var cw = bw;
                 var ch = bh;
 
-                while (cw / 2 > w)
+                while (cw/2 >= w)
                 {
                     cw /= 2;
                 }
-                while (ch / 2 > h)
+                var byfourw = (int)Math.Ceiling(cw / 2.0); //find the by four width, watch for zero
+
+                while (ch/2 >= h)
                 {
                     ch /= 2;
                 }
+                var byfourh = (int)Math.Ceiling(ch / 2.0);
 
                 //found the power of two box, now find the actual boxes needed.
                 var cx = xmin;
                 var cy = ymin;
 
-                var floorcx = cx / cw;
-                var floorcy = cy / ch;
+                var floorcx = cx / byfourw;
+                var floorcy = cy / byfourh;
 
-                var left = cw * floorcx;
-                var bottom = ch * floorcy;
+                var left = byfourw * floorcx;
+                var bottom = byfourh * floorcy;
 
                 var right = left + cw - 1;
                 var top = bottom + ch - 1;
@@ -313,13 +326,13 @@ namespace GeonBit.UI.Entities
                 if (right < xmax)
                 {
                     //cx = left;
-                    cw *= 2;
+                    cw += byfourw;
                     right = left + cw - 1;
                 }
                 if (top < ymax)
                 {
                     //cy = bottom;
-                    ch *= 2;
+                    ch += byfourh;
                     top = bottom + ch - 1;
                 }
 
@@ -331,9 +344,9 @@ namespace GeonBit.UI.Entities
             else
             {
                 //find power of two that covers each area
-                { //area 1
-                    var w = buff.Width - 1 - xmax;
-                    var h = ymax - ymin;
+                { //left
+                    var w = xdividemin + (buff.Width - (xdividemax + 1));
+                    var h = ymax - ymin + 1;
 
                     var bw = buff.Width;
                     var bh = buff.Height;
@@ -341,43 +354,61 @@ namespace GeonBit.UI.Entities
                     var cw = bw;
                     var ch = bh;
 
-                    while (cw / 2 > w && ch / 2 > h)
+                    while (cw / 2 >= w)
                     {
                         cw /= 2;
+                    }
+                    var byfourw = (int)Math.Ceiling(cw / 2.0); //find the by four width, watch for zero
+
+                    while (ch / 2 >= h)
+                    {
                         ch /= 2;
                     }
+                    var byfourh = (int)Math.Ceiling(ch / 2.0);
 
                     //found the power of two box, now find the actual boxes needed.
-                    var cx = xmax;
+                    var cx = xdividemax + 1;
                     var cy = ymin;
 
-                    var floorcx = cx / cw;
-                    var floorcy = cy / cw;
+                    var floorcx = cx / byfourw;
+                    var floorcy = cy / byfourh;
 
-                    var left = cw * floorcx;
-                    var bottom = ch * floorcy;
+                    var left = byfourw * floorcx;
+                    var bottom = byfourh * floorcy;
 
+                    var right = left + cw - 1;
+                    var top = bottom + ch - 1;
 
-                    if (left != cx)
+                    //make it bigger if shifting it caused a problem
+                    if (right < cx + w - 1)
                     {
-                        cx = left;
-                        cw *= 2;
+                        //cx = left;
+                        cw += byfourw;
+                        right = left + cw - 1;
                     }
-                    if (bottom != cy)
+                    if (top < ymax)
                     {
-                        cy = bottom;
-                        ch *= 2;
+                        //cy = bottom;
+                        ch += byfourh;
+                        top = bottom + ch - 1;
                     }
 
-                    xmin2 = cx;
-                    ymin2 = cy;
-                    xmax2 = cx + cw;
-                    ymax2 = cy + ch;
+                    xmin2_2 = left;
+                    ymin2_2 = bottom;
+                    xmax2_2 = buff.Width; //bounds coordinates are inclusive, 0-0 is length 1, 0-1 is length 2..
+                    ymax2_2 = top;
+
+                    xmin2_1 = 0;
+                    ymin2_1 = bottom;
+                    xmax2_1 = right - buff.Width; //bounds coordinates are inclusive, 0-0 is length 1, 0-1 is length 2..
+                    ymax2_1 = top;
                 }
 
+                if (false)
                 { //area 2
-                    var w = xmin - 0;
-                    var h = ymax - ymin;
+
+                    var w = buff.Width - (xdividemax + 1);
+                    var h = ymax - ymin + 1;
 
                     var bw = buff.Width;
                     var bh = buff.Height;
@@ -385,38 +416,49 @@ namespace GeonBit.UI.Entities
                     var cw = bw;
                     var ch = bh;
 
-                    while (cw / 2 > w && ch / 2 > h)
+                    while (cw / 2 >= w)
                     {
                         cw /= 2;
+                    }
+                    var byfourw = (int)Math.Ceiling(cw / 2.0); //find the by four width, watch for zero
+
+                    while (ch / 2 >= h)
+                    {
                         ch /= 2;
                     }
+                    var byfourh = (int)Math.Ceiling(ch / 2.0);
 
                     //found the power of two box, now find the actual boxes needed.
-                    var cx = 0;
+                    var cx = xdividemax;
                     var cy = ymin;
 
-                    var floorcx = cx / cw;
-                    var floorcy = cy / cw;
+                    var floorcx = cx / byfourw;
+                    var floorcy = cy / byfourh;
 
-                    var left = cw * floorcx;
-                    var bottom = ch * floorcy;
+                    var left = byfourw * floorcx;
+                    var bottom = byfourh * floorcy;
 
+                    var right = left + cw - 1;
+                    var top = bottom + ch - 1;
 
-                    if (left != cx)
+                    //make it bigger if shifting it caused a problem
+                    if (right < cx + w - 1)
                     {
-                        cx = left;
-                        cw *= 2;
+                        //cx = left;
+                        cw += byfourw;
+                        right = left + cw - 1;
                     }
-                    if (bottom != cy)
+                    if (top < ymax)
                     {
-                        cy = bottom;
-                        ch *= 2;
+                        //cy = bottom;
+                        ch += byfourh;
+                        top = bottom + ch - 1;
                     }
 
-                    xmin2 = cx;
-                    ymin2 = cy;
-                    xmax2 = cx + cw;
-                    ymax2 = cy + ch;
+                    xmin2_2 = left;
+                    ymin2_2 = bottom;
+                    xmax2_2 = right; //bounds coordinates are inclusive, 0-0 is length 1, 0-1 is length 2..
+                    ymax2_2 = top;
                 }
             }
             
@@ -467,21 +509,61 @@ namespace GeonBit.UI.Entities
             }
             else if (split == true)
             {
-                SKPath poly = new SKPath();
+                {   
+                    // left
+                    {
+                        SKPath poly = new SKPath();
 
-                poly.MoveTo(0, ymin);
-                poly.LineTo(xdividemin, ymin);
-                poly.LineTo(xdividemin, ymax);
-                poly.LineTo(0, ymax);
-                poly.LineTo(0, ymin);
+                        poly.MoveTo(0, ymin);
+                        poly.LineTo(xdividemin, ymin);
+                        poly.LineTo(xdividemin, ymax);
+                        poly.LineTo(0, ymax);
+                        poly.LineTo(0, ymin);
 
-                poly.MoveTo(xdividemax, ymin);
-                poly.LineTo(buff.Width, ymin);
-                poly.LineTo(buff.Width, ymax);
-                poly.LineTo(xdividemax, ymax);
-                poly.LineTo(xdividemax, ymin);
+                        skg.DrawPath(poly, paint);
+                    }
 
-                skg.DrawPath(poly, paint);
+                    //left bounds
+                    {
+                        SKPath poly = new SKPath();
+
+                        poly.MoveTo(xmin2_1, ymin2_1);
+                        poly.LineTo(xmax2_1, ymin2_1);
+                        poly.LineTo(xmax2_1, ymax2_1);
+                        poly.LineTo(xmin2_1, ymax2_1);
+                        poly.LineTo(xmin2_1, ymin2_1);
+
+                        skg.DrawPath(poly, paint2);
+                    }
+                }
+                {
+                    //right
+                    {
+
+                        SKPath poly = new SKPath();
+
+                        poly.MoveTo(xdividemax, ymin);
+                        poly.LineTo(buff.Width-1, ymin);
+                        poly.LineTo(buff.Width-1, ymax);
+                        poly.LineTo(xdividemax, ymax);
+                        poly.LineTo(xdividemax, ymin);
+
+                        skg.DrawPath(poly, paint);
+                    }
+
+                    //right bounds
+                    {
+                        SKPath poly = new SKPath();
+
+                        poly.MoveTo(xmin2_2, ymin2_2);
+                        poly.LineTo(xmax2_2, ymin2_2);
+                        poly.LineTo(xmax2_2, ymax2_2);
+                        poly.LineTo(xmin2_2, ymax2_2);
+                        poly.LineTo(xmin2_2, ymin2_2);
+
+                        skg.DrawPath(poly, paint2);
+                    }
+                }
             }
 
 
