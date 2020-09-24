@@ -91,7 +91,7 @@ namespace GeonBit.UI.Entities
 
             _mapsphere = new EarthView();
             _mapsphere.OnInvisibleRegionsChange += OnInvisibleRegionsChange;
-            _mapsphere.OnEarthTextureHighResChange += OnEarthTextureChange;
+            _mapsphere.OnEarthTextureLowResChange += OnEarthLowResTextureChange;
             _mapsphere.Init(game); //this calls events on this control
 
             _fpslabel = new Label("FPS: 0", Anchor.TopLeft);
@@ -736,7 +736,7 @@ namespace GeonBit.UI.Entities
             return outbuffer;
         }
 
-        private void OnEarthTextureChange(EarthView view)
+        private void OnEarthLowResTextureChange(EarthView view)
         {
             _earthtexturechanged = true;
         }
@@ -763,7 +763,7 @@ namespace GeonBit.UI.Entities
             {
 
                 _earthtexturechanged = false;
-                var tex = _mapsphere.CurrentTextureHighRes;
+                var tex = _mapsphere.CurrentTextureLowRes;
 
                 var raw = tex.Buffer;
 
