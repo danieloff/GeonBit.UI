@@ -454,7 +454,7 @@ namespace GeonBit.UI.Entities
 
             //request more detail
 
-            int destzoom = _mapsphere.LowResZoomLevel;
+            //int destzoom = _mapsphere.LowResZoomLevel;
             Point2D tilebottomleft;
             Point2D tiletopright;
 
