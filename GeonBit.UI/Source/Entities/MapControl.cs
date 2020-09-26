@@ -291,6 +291,13 @@ namespace GeonBit.UI.Entities
             var xmax2_2 = xmax;
             var ymax2_2 = ymax;
 
+            double left, bottom, right, top;
+
+            left = 0;
+            bottom = 0;
+            right = 0;
+            top = 0;
+
             //find power of two that covers the area
             if (!split && found)
             {
@@ -303,21 +310,16 @@ namespace GeonBit.UI.Entities
                 var cw = bw;
                 var ch = bh;
 
-                while (cw / 2 > w && ch / 2 > h) //square textures for now...
+                while (cw / 2 >= w && ch / 2 >= h) //square textures for now...
                 {
                     cw /= 2;
                     ch /= 2;
                     zoom += 1;
-                    //}
-
-                    //while (ch/2 >= h)
-                    //{
-                    //zoomy += 1;
                 }
 
                 zoom += 2;
-                var byfourw = (int)Math.Ceiling(cw / 4.0); //find the by four width, watch for zero
-                var byfourh = (int)Math.Ceiling(ch / 4.0);
+                var byfourw = (cw / 4.0); //find the by four width, watch for zero
+                var byfourh = (ch / 4.0);
 
                 //found the power of two box, now find the actual boxes needed.
                 var cx = xmin;
@@ -326,30 +328,48 @@ namespace GeonBit.UI.Entities
                 var floorcx = cx / byfourw;
                 var floorcy = cy / byfourh;
 
-                var left = byfourw * floorcx;
-                var bottom = byfourh * floorcy;
+                left = byfourw * floorcx;
+                bottom = byfourh * floorcy;
 
-                var right = left + cw;
-                var top = bottom + ch;
+                right = left + cw;
+                top = bottom + ch;
 
                 //make it bigger if shifting it caused a problem
                 if (right < xmax)
                 {
                     //cx = left;
-                    cw *= 2;
-                    ch *= 2;
+                    //cw *= 2;
+                    //ch *= 2;
                     zoom -= 1;
-                    right = left + cw;
-                    top = bottom + ch;
+                    left -= byfourw;
+                    bottom -= byfourh;
+                    right = left + byfourw;
+                    top = bottom + byfourh;
                 }
                 if (top < ymax)
                 {
                     //cy = bottom;
-                    ch *= 2;
-                    cw *= 2;
+                    //ch *= 2;
+                    //cw *= 2;
                     zoom -= 1;
-                    top = bottom + ch;
-                    right = left + cw;
+                    left -= byfourw;
+                    bottom -= byfourh;
+                    top = bottom + byfourw;
+                    right = left + byfourh;
+                }
+
+                if (left < 0)
+                {
+                    var diff = -left;
+                    left += diff;
+                    right += diff;
+                }
+
+                if (bottom < 0) //should these wrap instead of shifting?
+                {
+                    var diff = -bottom;
+                    top += diff;
+                    bottom += diff;
                 }
 
                 if (top > buff.Height)
@@ -366,10 +386,11 @@ namespace GeonBit.UI.Entities
                     left += diff;
                 }
 
-                xmin2 = left;
-                ymin2 = bottom;
-                xmax2 = right - 1;
-                ymax2 = top - 1;
+                //for drawing
+                xmin2 = (int)left;
+                ymin2 = (int)bottom;
+                xmax2 = (int)right - 1;
+                ymax2 = (int)top - 1;
             }
             else if (found)
             {
@@ -402,11 +423,11 @@ namespace GeonBit.UI.Entities
                     var floorcx = cx / byfourw;
                     var floorcy = cy / byfourh;
 
-                    var left = byfourw * floorcx;
-                    var bottom = byfourh * floorcy;
+                    left = byfourw * floorcx;
+                    bottom = byfourh * floorcy;
 
-                    var right = left + cw;
-                    var top = bottom + ch;
+                    right = left + cw;
+                    top = bottom + ch;
 
                     //make it bigger if shifting it caused a problem
                     if (right < xdividemax + 1 + w)
@@ -435,15 +456,15 @@ namespace GeonBit.UI.Entities
                         bottom += diff;
                     }
 
-                    xmin2_2 = left;
-                    ymin2_2 = bottom;
-                    xmax2_2 = buff.Width - 1;
-                    ymax2_2 = top - 1;
+                    xmin2_2 = (int)left;
+                    ymin2_2 = (int)bottom;
+                    xmax2_2 = (int)buff.Width - 1;
+                    ymax2_2 = (int)top - 1;
 
-                    xmin2_1 = 0;
-                    ymin2_1 = bottom;
-                    xmax2_1 = right - buff.Width - 1;
-                    ymax2_1 = top - 1;
+                    xmin2_1 = (int)0;
+                    ymin2_1 = (int)bottom;
+                    xmax2_1 = (int)right - buff.Width - 1;
+                    ymax2_1 = (int)top - 1;
                 }
             }
 
@@ -455,14 +476,14 @@ namespace GeonBit.UI.Entities
 
             if (!split && found)
             {
-                var bl = new Vector2(xmin2 / (double)buff.Width, ymin2 / (double)buff.Height);
-                var tr = new Vector2(xmax2 / (double)buff.Width, ymax2 / (double)buff.Height);
+                var bl = new Vector2(left / (double)buff.Width, bottom / (double)buff.Height);
+                var tr = new Vector2(right / (double)buff.Width, top / (double)buff.Height);
 
                 tilebottomleft = new Point2D((int)(bl.X * Math.Pow(2, zoom)), (int)(bl.Y * Math.Pow(2, zoom)));
-                tiletopright = new Point2D((int)(tr.X * Math.Pow(2, zoom)), (int)(tr.Y * Math.Pow(2, zoom))); //inclusive 
+                tiletopright = new Point2D((int)(tr.X * Math.Pow(2, zoom)), (int)(tr.Y * Math.Pow(2, zoom))); //exclusive 
 
 
-                var extrazoomside = tiletopright.x + 1 - tilebottomleft.x; //better be a whole number, assuming square zoom for now
+                var extrazoomside = tiletopright.x - tilebottomleft.x; //better be a whole number, assuming square zoom for now
 
                 _mapsphere.SetHighResZone(tilebottomleft, tiletopright, zoom);
             }
