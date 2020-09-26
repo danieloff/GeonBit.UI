@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Policy;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using GameTime = Microsoft.Xna.Framework.GameTime;
 using Xna = Microsoft.Xna.Framework;
 
@@ -40,6 +41,7 @@ namespace GeonBit.UI.Entities
 
         private Task<RawImgData> _nextoverviewtexture;
         private Task<RawImgData> _nextheattexture;
+        private Task<RawImgData> _nexttextureusingheatregions;
 
         //private ImageBuffer _curagg;
         //private Graphics2D _curGraphics2DAGG;
@@ -50,10 +52,13 @@ namespace GeonBit.UI.Entities
         private bool _earthtexturechanged;
         private double _nextoverviewtimer = 0.0;
         private bool _showoverlaps = true;
+
         private bool _nextoverviewtexture_outofdate;
         private bool _nextheattexture_outofdate;
+        private bool _nexttextureusingheatregions_outofdate;
+
         private bool _useskbitmap = true;
-        private bool _updatetexturesusingoverviewarea;
+        //private bool _updatetexturesusingoverviewarea;
 
         //2d ui
         public MapControl(Xna.Vector2 size, PanelSkin skin) : base(size, skin)
@@ -70,6 +75,7 @@ namespace GeonBit.UI.Entities
             _waitregions = 0.0;
             _nextoverviewtexture_outofdate = false;
             _nextheattexture_outofdate = false;
+            _nexttextureusingheatregions_outofdate = false;
         }
 
         //3d
@@ -176,7 +182,7 @@ namespace GeonBit.UI.Entities
 
         private void ApplyRegionsToHeatView()
         { 
-            if (_overviewheat.Visible)
+            if (false && _overviewheat.Visible)
             {
                 if (_nextheattexture == null)
                 {
@@ -190,7 +196,28 @@ namespace GeonBit.UI.Entities
             }
         }
 
-        private RawImgData UpdateTexturesUsingOverviewArea(ref SKBitmap skb, ref SKCanvas skg, RawImgData outbuffer, RawImgData baseimg, SKColor? basecolor)
+        private void UpdateMapTextureUsingHeatRegions()
+        {
+            //if (_overviewheat.Visible)
+            {
+                if (_nexttextureusingheatregions == null)
+                {
+                    _nexttextureusingheatregions_outofdate = false;
+                    _nexttextureusingheatregions = Task.Run(() => {
+                        //todo, make this use math instead of image.
+                        var tex = this.GetBackgroundWithOverlapsSK(ref _heatsk, ref _heatskGraphics2D, ref _heatbuffer, _baseheatbuffer, new SKColor(255, 255, 255, 255));
+                        var regions = UpdateMapTexturesUsingOverviewArea(tex);
+                        return DrawTextureRegionOnHeat(regions, ref _heatsk, ref _heatskGraphics2D, _heatbuffer, _heatbuffer, null);
+                    });
+                }
+                else
+                {
+                    _nexttextureusingheatregions_outofdate = true;
+                }
+            }
+        }
+
+        private List<RectangleDouble> UpdateMapTexturesUsingOverviewArea(RawImgData baseimg)
         {
             var buff = baseimg;
             var data = buff.Data;
@@ -245,7 +272,7 @@ namespace GeonBit.UI.Entities
             var xdividemin = 0;
             var xdividemax = buff.Width;
 
-            if (xmin == 0 && xmax == buff.Width-1)
+            if (xmin == 0 && xmax == buff.Width - 1)
             {
                 for (var j = 0; j < buff.Width; j++)
                 {
@@ -486,14 +513,35 @@ namespace GeonBit.UI.Entities
                 var extrazoomside = tiletopright.x - tilebottomleft.x; //better be a whole number, assuming square zoom for now
 
                 _mapsphere.SetHighResZone(tilebottomleft, tiletopright, zoom);
+
+                var viewbox = new RectangleDouble(xmin, ymin, xmax, ymax);
+                var viewboxtex = new RectangleDouble(left, bottom, right, top);
+
+                var result = new List<RectangleDouble>();
+
+                result.Add(viewbox);
+                result.Add(viewboxtex);
+
+                return result;
             }
             else
             {
                 //throw new NotImplementedException("need to implement split zoom");
             }
-            
+
+            return null;
+
+        }
+        RawImgData DrawTextureRegionOnHeat(List<RectangleDouble> viewbox, ref SKBitmap skb, ref SKCanvas skg, RawImgData outbuffer, RawImgData baseimg, SKColor? basecolor) 
+        {
+            if (viewbox == null)
+            {
+                return outbuffer;
+            }
 
             //update the overview with the viewbox
+            var buff = baseimg;
+            var data = buff.Data;
 
             //copy the texture over
             BeforeSkDraw(ref skb, ref skg, buff, null);
@@ -509,6 +557,51 @@ namespace GeonBit.UI.Entities
                 Style = SKPaintStyle.Stroke,
                 Color = SKColors.Red
             };
+
+            var split = false;
+            var found = true;
+
+            float xmin, ymin, xmax, ymax;
+            {
+                var rect = viewbox[0];
+                xmin = (float)rect.Left;
+                xmax = (float)rect.Right;
+                ymin = (float)rect.Bottom;
+                ymax = (float)rect.Top;
+            }
+
+            float xmin2, ymin2, xmax2, ymax2;
+            {
+                var rect = viewbox[1];
+                xmin2 = (float)rect.Left;
+                xmax2 = (float)rect.Right;
+                ymin2 = (float)rect.Bottom;
+                ymax2 = (float)rect.Top;
+            }
+
+            float xdividemin, xdividemax;
+            {
+                xdividemin = 0;
+                xdividemax = 0;
+            }
+
+            float xmin2_1, ymin2_1, xmax2_1, ymax2_1;
+            {
+                var rect = viewbox[0]; //TODO FIXME
+                xmin2_1 = (float)rect.Left;
+                xmax2_1 = (float)rect.Right;
+                ymin2_1 = (float)rect.Bottom;
+                ymax2_1 = (float)rect.Top;
+            }
+
+            float xmin2_2, ymin2_2, xmax2_2, ymax2_2;
+            {
+                var rect = viewbox[0]; //TODO FIXME
+                xmin2_2 = (float)rect.Left;
+                xmax2_2 = (float)rect.Right;
+                ymin2_2 = (float)rect.Bottom;
+                ymax2_2 = (float)rect.Top;
+            }
 
             if (split == false && found)
             {
@@ -847,21 +940,28 @@ namespace GeonBit.UI.Entities
                 ApplyRegionsToHeatView();
             }
 
-            if (_updatetexturesusingoverviewarea)
+            if (_nexttextureusingheatregions != null)
             {
-                var img = UpdateTexturesUsingOverviewArea(ref _heatsk, ref _heatskGraphics2D, _heatbuffer, _heatbuffer, null);
-
-                //assign to the overview texture
-                var tex = _overviewheat.Texture;
-                if (tex == null || tex.Width != img.Width || tex.Height != img.Height)
+                if (_nexttextureusingheatregions != null && _nexttextureusingheatregions.IsCompleted)
                 {
-                    tex = new Texture2D(GoodOrBadGame.Active.GraphicsDevice, img.Width, img.Height);
-                    _overview.Texture = tex;
+                    var img = _nexttextureusingheatregions.Result; //UpdateTexturesUsingOverviewArea(ref _heatsk, ref _heatskGraphics2D, _heatbuffer, _heatbuffer, null);
+
+                    //assign to the overview texture
+                    var tex = _overviewheat.Texture;
+                    if (tex == null || tex.Width != img.Width || tex.Height != img.Height)
+                    {
+                        tex = new Texture2D(GoodOrBadGame.Active.GraphicsDevice, img.Width, img.Height);
+                        _overview.Texture = tex;
+                    }
+
+                    tex.SetData(img.Data);
+
+                    _nexttextureusingheatregions = null;
                 }
-
-                tex.SetData(img.Data);
-
-                _updatetexturesusingoverviewarea = false;
+            }
+            else if (_nexttextureusingheatregions_outofdate)
+            {
+                UpdateMapTextureUsingHeatRegions();
             }
 
             _fpslabel.Text = "FPS: " + (int)(1.0 / gameTime.GetElapsedSeconds());
@@ -1047,7 +1147,7 @@ namespace GeonBit.UI.Entities
 
                 if (oldkeystate.IsKeyDown(Keys.Space) && keystate.IsKeyUp(Keys.Space))
                 {
-                    _updatetexturesusingoverviewarea = true;
+                    UpdateMapTextureUsingHeatRegions();
                 }
             }
             base.DoBeforeUpdate();
