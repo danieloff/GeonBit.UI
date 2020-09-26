@@ -303,21 +303,21 @@ namespace GeonBit.UI.Entities
                 var cw = bw;
                 var ch = bh;
 
-                while (cw / 2 >= w && ch / 2 >= h) //square textures for now...
+                while (cw / 2 > w && ch / 2 > h) //square textures for now...
                 {
                     cw /= 2;
+                    ch /= 2;
                     zoom += 1;
                     //}
 
                     //while (ch/2 >= h)
                     //{
-                    ch /= 2;
                     //zoomy += 1;
                 }
 
-                zoom += 1;
-                var byfourw = (int)Math.Ceiling(cw / 2.0); //find the by four width, watch for zero
-                var byfourh = (int)Math.Ceiling(ch / 2.0);
+                zoom += 2;
+                var byfourw = (int)Math.Ceiling(cw / 4.0); //find the by four width, watch for zero
+                var byfourh = (int)Math.Ceiling(ch / 4.0);
 
                 //found the power of two box, now find the actual boxes needed.
                 var cx = xmin;
@@ -384,21 +384,16 @@ namespace GeonBit.UI.Entities
                     var cw = bw;
                     var ch = bh;
 
-                    while (cw / 2 >= w && ch / 2 >= h) //square textures for now...
+                    while (cw / 2 > w && ch / 2 > h) //square textures for now...
                     {
                         cw /= 2;
-                        zoom += 1;
-                        //}
-
-                        //while (ch/2 >= h)
-                        //{
                         ch /= 2;
-                        //zoomy += 1;
+                        zoom += 1;
                     }
 
-                    zoom += 1;
-                    var byfourw = (int)Math.Ceiling(cw / 2.0); //find the by four width, watch for zero
-                    var byfourh = (int)Math.Ceiling(ch / 2.0);
+                    zoom += 2;
+                    var byfourw = (int)Math.Ceiling(cw / 4.0); //find the by four width, watch for zero
+                    var byfourh = (int)Math.Ceiling(ch / 4.0);
 
                     //found the power of two box, now find the actual boxes needed.
                     var cx = xdividemax + 1;
@@ -466,6 +461,8 @@ namespace GeonBit.UI.Entities
                 tilebottomleft = new Point2D((int)(bl.X * Math.Pow(2, zoom)), (int)(bl.Y * Math.Pow(2, zoom)));
                 tiletopright = new Point2D((int)(tr.X * Math.Pow(2, zoom)), (int)(tr.Y * Math.Pow(2, zoom))); //inclusive 
 
+
+                var extrazoomside = tiletopright.x + 1 - tilebottomleft.x; //better be a whole number, assuming square zoom for now
 
                 _mapsphere.SetHighResZone(tilebottomleft, tiletopright, zoom);
             }
