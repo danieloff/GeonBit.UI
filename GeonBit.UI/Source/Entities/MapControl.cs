@@ -352,8 +352,8 @@ namespace GeonBit.UI.Entities
                 var cx = xmin;
                 var cy = ymin;
 
-                var floorcx = cx / byfourw;
-                var floorcy = cy / byfourh;
+                var floorcx = (int)(cx / byfourw);
+                var floorcy = (int)(cy / byfourh);
 
                 left = byfourw * floorcx;
                 bottom = byfourh * floorcy;
