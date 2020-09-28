@@ -82,14 +82,14 @@ namespace GeonBit.UI.Entities
         public void Init(GoodOrBadGame game)
         {
             _overview = new Image();
-            _overview.Size = new Xna.Vector2(256, 256);
+            _overview.Size = new Xna.Vector2(512, 512);
             _overview.Anchor = Anchor.BottomRight;
             _overview.Visible = false;
 
             this.AddChild(_overview);
 
             _overviewheat = new Image();
-            _overviewheat.Size = new Xna.Vector2(256, 256);
+            _overviewheat.Size = new Xna.Vector2(512, 512);
             _overviewheat.Anchor = Anchor.BottomRight;
             _overviewheat.Offset = new Xna.Vector2(_overview.Size.X + _overview.Size.X / 4, 0);
             _overviewheat.Visible = false;
@@ -344,45 +344,75 @@ namespace GeonBit.UI.Entities
                     zoom += 1;
                 }
 
-                zoom += 2;
-                var byfourw = (cw / 4.0); //find the by four width, watch for zero
-                var byfourh = (ch / 4.0);
+                //zoom += 2;
+                //var byfourw = (cw / 4.0); //find the by four width, watch for zero
+                //var byfourh = (ch / 4.0);
+
+                zoom += 1;
+                var bynw = (cw / 2.0);
+                var bynh = (ch / 2.0);
 
                 //found the power of two box, now find the actual boxes needed.
                 var cx = xmin;
                 var cy = ymin;
 
-                var floorcx = (int)(cx / byfourw);
-                var floorcy = (int)(cy / byfourh);
+                //var floorcx = (int)(cx / byfourw);
+                //var floorcy = (int)(cy / byfourh);
+                var floorcx = (int)(cx / bynw);
+                var floorcy = (int)(cy / bynh);
 
-                left = byfourw * floorcx;
-                bottom = byfourh * floorcy;
+                left = bynw * floorcx;
+                bottom = bynh * floorcy;
+
+                //left = byfourw * floorcx;
+                //bottom = byfourh * floorcy;
 
                 right = left + cw;
                 top = bottom + ch;
 
                 //make it bigger if shifting it caused a problem
-                if (right < xmax)
+                while (right < xmax + 1)
                 {
                     //cx = left;
-                    //cw *= 2;
-                    //ch *= 2;
+                    cw *= 2;
+                    ch *= 2;
                     zoom -= 1;
-                    left -= byfourw;
-                    bottom -= byfourh;
-                    right = left + byfourw;
-                    top = bottom + byfourh;
+
+                    bynw = (cw / 2.0);
+                    bynh = (ch / 2.0);
+
+                    floorcx = (int)(cx / bynw);
+                    floorcy = (int)(cy / bynh);
+
+                    left = bynw * floorcx;
+                    bottom = bynh * floorcy;
+
+                    //left = byfourw * floorcx;
+                    //bottom = byfourh * floorcy;
+
+                    right = left + cw;
+                    top = bottom + ch;
                 }
-                if (top < ymax)
+                while (top < ymax + 1)
                 {
-                    //cy = bottom;
-                    //ch *= 2;
-                    //cw *= 2;
+                    cw *= 2;
+                    ch *= 2;
                     zoom -= 1;
-                    left -= byfourw;
-                    bottom -= byfourh;
-                    top = bottom + byfourw;
-                    right = left + byfourh;
+
+                    bynw = (cw / 2.0);
+                    bynh = (ch / 2.0);
+
+                    floorcx = (int)(cx / bynw);
+                    floorcy = (int)(cy / bynh);
+
+                    left = bynw * floorcx;
+                    bottom = bynh * floorcy;
+
+                    //left = byfourw * floorcx;
+                    //bottom = byfourh * floorcy;
+
+                    right = left + cw;
+                    top = bottom + ch;
                 }
 
                 if (left < 0)
@@ -507,7 +537,22 @@ namespace GeonBit.UI.Entities
                 var tr = new Vector2(right / (double)buff.Width, top / (double)buff.Height);
 
                 tilebottomleft = new Point2D((int)(bl.X * Math.Pow(2, zoom)), (int)(bl.Y * Math.Pow(2, zoom)));
-                tiletopright = new Point2D((int)(tr.X * Math.Pow(2, zoom)), (int)(tr.Y * Math.Pow(2, zoom))); //exclusive 
+                tiletopright = new Point2D((int)(tr.X * Math.Pow(2, zoom)), (int)(tr.Y * Math.Pow(2, zoom))); //exclusive
+
+                //ok got a good zoom two detail tile, lets get a good couple tiles of padding around
+                var doubleit = false;
+                if (tilebottomleft.x > 0 && tilebottomleft.y > 0)
+                {
+                    tilebottomleft.x--;
+                    tilebottomleft.y--;
+                    doubleit = true;
+                }
+                //TODO check bounds on seam better
+                if (doubleit)
+                {
+                    tiletopright.x += 1;
+                    tiletopright.y += 1;
+                }
 
 
                 var extrazoomside = tiletopright.x - tilebottomleft.x; //better be a whole number, assuming square zoom for now
