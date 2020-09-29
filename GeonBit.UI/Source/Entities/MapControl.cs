@@ -1,22 +1,25 @@
-﻿using GoodOrBad.Framework;
+﻿using ClipperLib;
+using GoodOrBad.Framework;
 using MatterHackers.Agg;
 using MatterHackers.VectorMath;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
+using MonoGame.Extended.Screens.Transitions;
 using Routes.Graphics;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Security.Policy;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using GameTime = Microsoft.Xna.Framework.GameTime;
 using Xna = Microsoft.Xna.Framework;
 
+
 namespace GeonBit.UI.Entities
 {
+    using Path = List<IntPoint>;
+    using Paths = List<List<IntPoint>>;
+
     public class MapControl : Panel
     {
         private const double REGIONS_WAIT_TIME = 0; //0.05; //max 20/sec
@@ -47,7 +50,7 @@ namespace GeonBit.UI.Entities
         //private Graphics2D _curGraphics2DAGG;
 
         private bool _regionsdirty;
-        private List<CylinderTextureInvisibleRegion> _regions;
+        private CameraCylinderTextureInvisibleRegions _regions;
         private double _waitregions;
         private bool _earthtexturechanged;
         private double _nextoverviewtimer = 0.0;
@@ -69,7 +72,7 @@ namespace GeonBit.UI.Entities
 
             FillColor = mcolor;
 
-            _regions = new List<CylinderTextureInvisibleRegion>();
+            _regions = new CameraCylinderTextureInvisibleRegions();
             _regionsdirty = false;
             _earthtexturechanged = false;
             _waitregions = 0.0;
@@ -196,6 +199,202 @@ namespace GeonBit.UI.Entities
             }
         }
 
+        private List<List<Vector2>> GetVisibleWithOverlaps(double working_size)
+        {
+            Paths clip = new Paths(5); //left top right bottom and back
+            Paths subj = new Paths(1);
+            for (var idx = 3; idx < 5; idx++)
+            {
+                CylinderTextureInvisibleRegion entry = null;
+                bool isclipping = true;
+                switch (idx)
+                {
+                    case 0:
+                        entry = _regions.Left;
+                        break;
+                    case 1:
+                        entry = _regions.Top;
+                        break;
+                    case 2:
+                        entry = _regions.Right;
+                        break;
+                    case 3:
+                        entry = _regions.Bottom;
+                        break;
+                    case 4:
+                        entry = _regions.Back;
+                        isclipping = false;
+                        break;
+                };
+
+                if (isclipping)
+                {
+                    clip.Add(new Path(entry.points.Count));
+                }
+                else
+                {
+                    subj.Add(new Path(entry.points.Count));
+                }
+                // overlaps are holes
+                //poly.FillType = SKPathFillType.EvenOdd;
+
+                var points = entry.points;
+                var edgetexdir = entry.edgedirs;
+
+                var two = new Vector2(2, 2);
+
+                for (var i = 0; i < points.Count - 1; i++)
+                {
+
+                    if (idx == 4 && edgetexdir[i] == two && i > 0)
+                    {
+                        subj[subj.Count - 1].RemoveAt(subj[subj.Count-1].Count - 1); //get rid of duplicate point
+                        break; //only care about the main loop for this
+                    }
+
+                    if (edgetexdir[i] == two && i > 0)
+                    {
+                        clip[clip.Count - 1].RemoveAt(clip[clip.Count - 1].Count - 1); //get rid of duplicate point
+                        clip.Add(new Path(entry.points.Count)); //start another path, this happens with splits on the sides
+                    }
+
+                    var pt = points[i];
+                    if (Double.IsNaN(pt.X))
+                    {
+                        //this ring is no good.
+                        break;
+                    }
+                    pt.X *= working_size;
+                    pt.Y *= working_size;
+
+                    if (isclipping)
+                    {
+                        clip[clip.Count - 1].Add(new IntPoint(Math.Round(pt.X), Math.Round(pt.Y)));
+                    }
+                    else
+                    {
+                        subj[subj.Count - 1].Add(new IntPoint(Math.Round(pt.X), Math.Round(pt.Y)));
+                    }
+                    /*
+                    if (edgetexdir[i] == two)
+                    {
+                        poly.MoveTo((float)pt.X, (float)pt.Y);
+                    }
+                    else
+                    {
+                        poly.LineTo((float)pt.X, (float)pt.Y);
+                    }*/
+
+                }
+            }
+
+            Paths solution = new Paths();
+            
+            {
+                Clipper c = new Clipper();
+                c.AddPaths(subj, PolyType.ptSubject, true);
+                c.AddPaths(clip, PolyType.ptClip, true);
+                c.Execute(ClipType.ctDifference, solution,
+                  PolyFillType.pftNonZero, PolyFillType.pftNonZero);
+
+                subj = solution;
+                solution = new Paths();
+            }
+
+            for (var idx = 0; idx < 3; idx++)
+            {
+                clip.Clear();
+
+                CylinderTextureInvisibleRegion entry = null;
+                bool isclipping = true;
+                switch (idx)
+                {
+                    case 0:
+                        entry = _regions.Left;
+                        break;
+                    case 1:
+                        entry = _regions.Top;
+                        break;
+                    case 2:
+                        entry = _regions.Right;
+                        break;
+                    case 3:
+                        entry = _regions.Bottom;
+                        break;
+                    case 4:
+                        entry = _regions.Back;
+                        isclipping = false;
+                        break;
+                };
+
+                if (isclipping)
+                {
+                    clip.Add(new Path(entry.points.Count));
+                }
+                // overlaps are holes
+                //poly.FillType = SKPathFillType.EvenOdd;
+
+                var points = entry.points;
+                var edgetexdir = entry.edgedirs;
+
+                var two = new Vector2(2, 2);
+
+                for (var i = 0; i < points.Count - 1; i++)
+                {
+                    if (edgetexdir[i] == two && i > 0)
+                    {
+                        clip[clip.Count - 1].RemoveAt(clip[clip.Count - 1].Count - 1); //get rid of duplicate point
+                        clip.Add(new Path(entry.points.Count)); //start another path, this happens with splits on the sides
+                    }
+
+                    var pt = points[i];
+                    if (Double.IsNaN(pt.X))
+                    {
+                        //this ring is no good.
+                        break;
+                    }
+                    pt.X *= working_size;
+                    pt.Y *= working_size;
+
+                    if (isclipping)
+                    {
+                        clip[clip.Count - 1].Add(new IntPoint(Math.Round(pt.X), Math.Round(pt.Y)));
+                    }
+                    /*
+                    if (edgetexdir[i] == two)
+                    {
+                        poly.MoveTo((float)pt.X, (float)pt.Y);
+                    }
+                    else
+                    {
+                        poly.LineTo((float)pt.X, (float)pt.Y);
+                    }*/
+
+                }
+
+                Clipper c = new Clipper();
+                c.AddPaths(subj, PolyType.ptSubject, true);
+                c.AddPaths(clip, PolyType.ptClip, true);
+                c.Execute(ClipType.ctDifference, solution,
+                  PolyFillType.pftNonZero, PolyFillType.pftNonZero);
+
+                subj = solution;
+                solution = new Paths();
+            }
+
+            List<List<Vector2>> result = new List<List<Vector2>>();
+            foreach (var path in subj)
+            {
+                result.Add(new List<Vector2>());
+                foreach (var pt in path)
+                {
+                    result[result.Count - 1].Add(new Vector2(pt.X, pt.Y));
+                }
+            }
+
+            return result;
+        }
+
         private void UpdateMapTextureUsingHeatRegions()
         {
             //if (_overviewheat.Visible)
@@ -205,8 +404,14 @@ namespace GeonBit.UI.Entities
                     _nexttextureusingheatregions_outofdate = false;
                     _nexttextureusingheatregions = Task.Run(() => {
                         //todo, make this use math instead of image.
-                        var tex = this.GetBackgroundWithOverlapsSK(ref _heatsk, ref _heatskGraphics2D, ref _heatbuffer, _baseheatbuffer, new SKColor(255, 255, 255, 255));
-                        var regions = UpdateMapTexturesUsingOverviewArea(tex);
+                        var tex = new RawImgData(512, 512, null);
+                        
+                        var working_size = 4096 * 4.0;
+                        var visible = this.GetVisibleWithOverlaps(working_size);
+                        var regions = UpdateMapTexturesUsingOverviewArea(working_size, visible);
+
+
+                        var tex2 = this.GetBackgroundWithOverlapsSK(ref _heatsk, ref _heatskGraphics2D, ref _heatbuffer, _baseheatbuffer, new SKColor(255, 255, 255, 255));
                         return DrawTextureRegionOnHeat(regions, ref _heatsk, ref _heatskGraphics2D, _heatbuffer, _heatbuffer, null);
                     });
                 }
@@ -217,19 +422,70 @@ namespace GeonBit.UI.Entities
             }
         }
 
-        private List<RectangleDouble> UpdateMapTexturesUsingOverviewArea(RawImgData baseimg)
+        private List<RectangleDouble> UpdateMapTexturesUsingOverviewArea(double working_size, List<List<Vector2>> visible)
         {
-            var buff = baseimg;
-            var data = buff.Data;
+            //var buff = baseimg;
+            //var data = buff.Data;
+
+            var buff_Width = working_size;
+            var buff_Height = working_size;
 
             var zoom = 0;
 
-            var xmin = buff.Width;
-            var xmax = 0;
-            var ymin = buff.Height;
-            var ymax = 0;
+            double xmin = buff_Width;
+            double xmax = 0;
+            double ymin = buff_Height;
+            double ymax = 0;
 
             bool found = false;
+
+            foreach (var path in visible)
+            {
+                foreach (var pt in path)
+                {
+                    var pt2 = new Vector2(pt.X, pt.Y);
+
+                    if (pt2.X < xmin)
+                    {
+                        xmin = pt2.X;
+                    }
+                    if (pt2.X > xmax)
+                    {
+                        xmax = pt2.X;
+                    }
+                    if (pt2.Y < ymin)
+                    {
+                        ymin = pt2.Y;
+                    }
+                    if (pt2.Y > ymax)
+                    {
+                        ymax = pt2.Y;
+                    }
+
+                    //some clamping while I try the new system
+                    if (ymin < 0)
+                    {
+                        ymin = 0;
+                    }
+                    if (ymax > buff_Height)
+                    {
+                        ymax = buff_Height;
+                    }
+                    if (xmin < 0)
+                    {
+                        xmin = 0;
+                    }
+                    if (xmax > buff_Width)
+                    {
+                        xmax = buff_Width;
+                    }
+
+                    found = true;
+                }
+                //break;
+            }
+
+            /*
             for (var i = 0; i < buff.Height; i++)
             {
                 for (var j = 0; j < buff.Width; j++)
@@ -261,6 +517,7 @@ namespace GeonBit.UI.Entities
                     }
                 }
             }
+            */
             //if (!found)
             {
                 //that would be a problem
@@ -270,11 +527,11 @@ namespace GeonBit.UI.Entities
             bool split = false;
 
             var xdividemin = 0;
-            var xdividemax = buff.Width;
+            var xdividemax = buff_Width;
 
-            if (xmin == 0 && xmax == buff.Width - 1)
+            if (xmin == 0 && xmax == buff_Width - 1)
             {
-                for (var j = 0; j < buff.Width; j++)
+                /*for (var j = 0; j < buff.Width; j++)
                 {
                     bool verticaldivider = true;
                     for (var i = 0; i < buff.Height; i++)
@@ -300,7 +557,7 @@ namespace GeonBit.UI.Entities
                         xdividemax = j;
                         split = true;
                     }
-                }
+                }*/
             }
 
             var xmin2 = xmin;
@@ -328,11 +585,11 @@ namespace GeonBit.UI.Entities
             //find power of two that covers the area
             if (!split && found)
             {
-                var w = xmax - xmin + 1;
-                var h = ymax - ymin + 1;
+                var w = xmax - xmin;
+                var h = ymax - ymin;
 
-                var bw = buff.Width;
-                var bh = buff.Height;
+                var bw = buff_Width;
+                var bh = buff_Height;
 
                 var cw = bw;
                 var ch = bh;
@@ -344,13 +601,13 @@ namespace GeonBit.UI.Entities
                     zoom += 1;
                 }
 
-                //zoom += 2;
-                //var byfourw = (cw / 4.0); //find the by four width, watch for zero
-                //var byfourh = (ch / 4.0);
+                zoom += 2;
+                var bynw = (cw / 4.0); //find the by four width, watch for zero
+                var bynh = (ch / 4.0);
 
-                zoom += 1;
-                var bynw = (cw / 2.0);
-                var bynh = (ch / 2.0);
+                //zoom += 1;
+                //var bynw = (cw / 2.0);
+                //var bynh = (ch / 2.0);
 
                 //found the power of two box, now find the actual boxes needed.
                 var cx = xmin;
@@ -371,15 +628,15 @@ namespace GeonBit.UI.Entities
                 top = bottom + ch;
 
                 //make it bigger if shifting it caused a problem
-                while (right < xmax + 1)
+                while (right < xmax)
                 {
                     //cx = left;
                     cw *= 2;
                     ch *= 2;
                     zoom -= 1;
 
-                    bynw = (cw / 2.0);
-                    bynh = (ch / 2.0);
+                    bynw = (cw / 4.0);
+                    bynh = (ch / 4.0);
 
                     floorcx = (int)(cx / bynw);
                     floorcy = (int)(cy / bynh);
@@ -393,14 +650,14 @@ namespace GeonBit.UI.Entities
                     right = left + cw;
                     top = bottom + ch;
                 }
-                while (top < ymax + 1)
+                while (top < ymax)
                 {
                     cw *= 2;
                     ch *= 2;
                     zoom -= 1;
 
-                    bynw = (cw / 2.0);
-                    bynh = (ch / 2.0);
+                    bynw = (cw / 4.0);
+                    bynh = (ch / 4.0);
 
                     floorcx = (int)(cx / bynw);
                     floorcy = (int)(cy / bynh);
@@ -429,16 +686,16 @@ namespace GeonBit.UI.Entities
                     bottom += diff;
                 }
 
-                if (top > buff.Height)
+                if (top > buff_Height)
                 {
-                    var diff = (buff.Height) - top;
+                    var diff = (buff_Height) - top;
                     top += diff;
                     bottom += diff;
                 }
 
-                if (right > buff.Width)
+                if (right > buff_Width)
                 {
-                    var diff = (buff.Width) - right;
+                    var diff = (buff_Width) - right;
                     right += diff;
                     left += diff;
                 }
@@ -451,6 +708,7 @@ namespace GeonBit.UI.Entities
             }
             else if (found)
             {
+                /*
                 //find power of two that covers each area
                 { //left
                     var w = xdividemin + (buff.Width - (xdividemax + 1));
@@ -523,6 +781,7 @@ namespace GeonBit.UI.Entities
                     xmax2_1 = (int)right - buff.Width - 1;
                     ymax2_1 = (int)top - 1;
                 }
+                */
             }
 
             //request more detail
@@ -533,25 +792,30 @@ namespace GeonBit.UI.Entities
 
             if (!split && found)
             {
-                var bl = new Vector2(left / (double)buff.Width, bottom / (double)buff.Height);
-                var tr = new Vector2(right / (double)buff.Width, top / (double)buff.Height);
+                var bl = new Vector2(left / (double)buff_Width, bottom / (double)buff_Height);
+                var tr = new Vector2(right / (double)buff_Width, top / (double)buff_Height);
+
+                //zoom += 1; //sharpen things up, no padding this way
 
                 tilebottomleft = new Point2D((int)(bl.X * Math.Pow(2, zoom)), (int)(bl.Y * Math.Pow(2, zoom)));
                 tiletopright = new Point2D((int)(tr.X * Math.Pow(2, zoom)), (int)(tr.Y * Math.Pow(2, zoom))); //exclusive
 
                 //ok got a good zoom two detail tile, lets get a good couple tiles of padding around
-                var doubleit = false;
-                if (tilebottomleft.x > 0 && tilebottomleft.y > 0)
+                if (false)
                 {
-                    tilebottomleft.x--;
-                    tilebottomleft.y--;
-                    doubleit = true;
-                }
-                //TODO check bounds on seam better
-                if (doubleit)
-                {
-                    tiletopright.x += 1;
-                    tiletopright.y += 1;
+                    var doubleit = false;
+                    if (tilebottomleft.x > 0 && tilebottomleft.y > 0)
+                    {
+                        tilebottomleft.x--;
+                        tilebottomleft.y--;
+                        doubleit = true;
+                    }
+                    //TODO check bounds on seam better
+                    if (doubleit)
+                    {
+                        tiletopright.x += 1;
+                        tiletopright.y += 1;
+                    }
                 }
 
 
@@ -561,6 +825,9 @@ namespace GeonBit.UI.Entities
 
                 var viewbox = new RectangleDouble(xmin, ymin, xmax, ymax);
                 var viewboxtex = new RectangleDouble(left, bottom, right, top);
+
+                viewbox *= 512.0 / working_size;
+                viewboxtex *= 512 / working_size;
 
                 var result = new List<RectangleDouble>();
 
@@ -815,8 +1082,12 @@ namespace GeonBit.UI.Entities
             BeforeSkDraw(ref skb, ref skg, baseimg, basecolor);
    
             //draw on the regions
-            foreach (var entry in _regions)
+            foreach (var entry in _regions.AsList())
             {
+                //if (!(entry == _regions.Left || entry == _regions.Back))
+                {
+                //    continue;
+                }
                 SKPath poly = new SKPath();
                 // overlaps are holes
                 poly.FillType = SKPathFillType.EvenOdd;
@@ -843,9 +1114,10 @@ namespace GeonBit.UI.Entities
 
                 SKPaint paint = new SKPaint()
                 {
-                    Style = SKPaintStyle.Fill,
-                    Color = SKColors.Cyan
+                    Style = SKPaintStyle.Stroke,
+                    Color = SKColors.Red
                 };
+                
 
                 skg.DrawPath(poly, paint);
             }
