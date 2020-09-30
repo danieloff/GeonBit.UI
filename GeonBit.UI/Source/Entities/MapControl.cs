@@ -406,7 +406,7 @@ namespace GeonBit.UI.Entities
                         //todo, make this use math instead of image.
                         var tex = new RawImgData(512, 512, null);
                         
-                        var working_size = 4096 * 4.0;
+                        var working_size = 4096 * 256.0;
                         var visible = this.GetVisibleWithOverlaps(working_size);
                         var regions = UpdateMapTexturesUsingOverviewArea(working_size, visible);
 
