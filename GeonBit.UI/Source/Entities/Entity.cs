@@ -1629,6 +1629,8 @@ namespace GeonBit.UI.Entities
                 throw new Exceptions.InvalidStateException("Child element to add already got a parent!");
             }
 
+            UserInterface.Active.GameUI.AddChild(child);
+
             // need to sort children
             _needToSortChildren = true;
 

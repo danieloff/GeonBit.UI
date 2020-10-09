@@ -8,7 +8,9 @@ namespace GeonBit.UI
 {
     public interface IGameUI
     {
-        Entity AddEntity(Entity entity);
+        //Entity AddEntity(Entity entity);
+
+        void AddChild(Entity child);
 
         GoodOrBadGame Game
         {

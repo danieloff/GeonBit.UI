@@ -508,10 +508,10 @@ namespace GeonBit.UI
         /// <param name="entity">Entity to add.</param>
         public Entity AddEntity(Entity entity)
         {
-            if (GameUI != null)
-            {
-                entity = GameUI.AddEntity(entity);
-            }
+            //if (GameUI != null)
+            //{
+            //    entity = GameUI.AddEntity(entity);
+            //}
             return Root.AddChild(entity);
         }
 
