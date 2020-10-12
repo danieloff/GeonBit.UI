@@ -1,4 +1,4 @@
-﻿#region File Description
+#region File Description
 //-----------------------------------------------------------------------------
 // TextInput are entities that allow the user to type in free text using the keyboard.
 //
@@ -114,7 +114,7 @@ namespace GeonBit.UI.Entities
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
         /// <param name="skin">TextInput skin, eg which texture to use.</param>
-        public GrowTextInput(bool multiline, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null, PanelSkin skin = PanelSkin.ListBackground, Boolean growx = false) :
+        public GrowTextInput(bool multiline, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null, PanelSkin skin = PanelSkin.ListBackground, bool growx = false) :
             base(size, skin, anchor, offset)
         {
             // set multiline mode
@@ -467,7 +467,7 @@ namespace GeonBit.UI.Entities
             Paragraph currParagraph = showPlaceholder ? PlaceholderParagraph : TextParagraph;
 
             // get actual processed string
-            _actualDisplayText = PrepareInputTextForDisplay(showPlaceholder, IsFocused);
+            _actualDisplayText = PrepareInputTextForDisplay(showPlaceholder, false);
 
             // for multiline only - handle scrollbar visibility and max
             if (_multiLine && (_actualDisplayText != null) && (_destRectInternal.Height > 0))
@@ -499,7 +499,6 @@ namespace GeonBit.UI.Entities
                         Size = new Vector2(maxlen + diff, Size.Y);
                     }
                 }
-
 
                 // if there are more lines than can fit, show scrollbar and manage scrolling:
                 if (linesInText >= 1 && linesFit != linesInText)

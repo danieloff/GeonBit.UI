@@ -390,6 +390,10 @@ namespace GeonBit.UI
                     _currCharacterInput = isShiftDown ? '|' : '\\';
                     return;
 
+                case Keys.OemPipe:
+                    _currCharacterInput = isShiftDown ? '|' : '\\';
+                    return;
+
                 // comma
                 case Keys.OemComma:
                     _currCharacterInput = isShiftDown ? '<' : ',';
