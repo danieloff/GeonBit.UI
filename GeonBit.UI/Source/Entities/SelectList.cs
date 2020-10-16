@@ -390,7 +390,7 @@ namespace GeonBit.UI.Entities
                 paragraph.ExtraMargin.Y = ExtraSpaceBetweenLines / 2 + 3;
                 paragraph.AttachedData = new ParagraphData(this, i++);
                 paragraph.UseActualSizeForCollision = false;
-                paragraph.Size = new Vector2(0, paragraph.LineHeightY() + ExtraSpaceBetweenLines);
+                paragraph.Size = new Vector2(0, (float)paragraph.LineHeightY() + ExtraSpaceBetweenLines);
                 paragraph.BackgroundColorPadding = new Point((int)Padding.X, 5);
                 paragraph.BackgroundColorUseBoxSize = true;
                 paragraph._hiddenInternalEntity = true;

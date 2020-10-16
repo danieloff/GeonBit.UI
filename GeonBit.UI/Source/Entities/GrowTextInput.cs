@@ -504,7 +504,7 @@ namespace GeonBit.UI.Entities
                 if (linesInText >= 1 && linesFit != linesInText)
                 {
                     int changelines = linesInText - linesFit;
-                    Size = new Vector2(Size.X, Size.Y + changelines * currParagraph.LineHeightY());
+                    Size = new Vector2(Size.X, (float)(Size.Y + changelines * currParagraph.LineHeightY()));
 
                     /*
                     // fix paragraph width to leave room for the scrollbar

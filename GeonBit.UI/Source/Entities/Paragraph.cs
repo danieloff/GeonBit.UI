@@ -73,10 +73,14 @@ namespace GeonBit.UI.Entities
 
         public Vector2 EndingOffset = Vector2.Zero;
         
-        public List<float> LineHeights = new List<float>();
+        public List<double> LineHeights = new List<double>();
 
-        public int LineHeightY() {
-            return _currFont.Size;
+        public double LineHeightY() {
+            if (_text == null || _text == string.Empty)
+            {
+                return _currFont.GetLineHeightBasic(" ");
+            }
+            return _currFont.GetLineHeightBasic(_text);
         }
 
         /// <summary>Default styling for paragraphs. Note: loaded from UI theme xml file.</summary>
@@ -144,6 +148,7 @@ namespace GeonBit.UI.Entities
         /// Actual processed text to display (after word-wrap etc).
         /// </summary>
         protected string _processedText;
+        protected string[] _processedlines;
         
         /// <summary>
         /// Glyph rectangles of actual processed text to display (after word-wrap etc).
@@ -455,7 +460,16 @@ namespace GeonBit.UI.Entities
             //shift up if continuation
             if (ParagraphContinuation && _currFont != null)
             {
-                var height = _currFont.Size; //TODO _currFont.LineSpacing; //TODO allow multiple fonts and heights
+                double height;
+                if (_text == null || _text == string.Empty)
+                {
+                    height = _currFont.GetLineHeightBasic(" ");
+                }
+                else
+                {
+                    height = _currFont.GetLineHeightBasic(_text);
+                }
+                 //TODO _currFont.LineSpacing; //TODO allow multiple fonts and heights
                 rect.Y -=  (int) (height * Scale + _scaledSpaceBefore.Y + _scaledSpaceAfter.Y);
                 //_fontOrigin.Y -= size.Y * (LineHeights[0] * Scale + _scaledSpaceBefore.Y + _scaledSpaceAfter.Y) /
                 //                 _destRect.Height;
@@ -512,6 +526,7 @@ namespace GeonBit.UI.Entities
             if (newProcessedText != _processedText)
             {
                 _processedText = newProcessedText;
+                _processedlines = _processedText.Split('\n');
                 _processedGlyphRects = CalculateGlyphOffsets(_processedText);
                 MarkAsDirty();
             }
@@ -523,13 +538,13 @@ namespace GeonBit.UI.Entities
             _position = new Vector2(_destRect.X, _destRect.Y);
             
             //get needed positions
-            var processedlines = _processedText.Split('\n');
+            //var processedlines = _processedText.Split('\n');
             LineHeights.Clear();
 
             var sizex = 0.0f;
             bool first = true;
-            for (int i=0; i<processedlines.Length; i++) {
-                var line = processedlines[i];
+            for (int i=0; i<_processedlines.Length; i++) {
+                var line = _processedlines[i];
                 
                 var string_size = _currFont.MeasureString(line);
 
@@ -541,7 +556,7 @@ namespace GeonBit.UI.Entities
                 //}
                 */
                 //TODO this is zero with the dynamic font LineHeights.Add(_currFont.LineSpacing); //This appears to be constant
-                LineHeights.Add(_currFont.Size);
+                LineHeights.Add(_currFont.GetLineHeightBasic(line));
                 if (first) {
                     sizex = Math.Max(sizex, string_size.X + (ParagraphContinuation? StartingOffset.X : 0.0f));
                     first = false;
@@ -549,24 +564,24 @@ namespace GeonBit.UI.Entities
                 sizex = Math.Max(sizex, string_size.X);
             }
 
-            var lasty = 0.0f;
+            var lasty = 0.0;
             for (int i = 0; i < LineHeights.Count - 1; i++) {
                 lasty += LineHeights[i];
             }
 
-            var ending1 = _currFont.MeasureString(processedlines.Last()).X;
-            if (processedlines.Length == 1) { //where the word hasn't even wrapped once...
+            var ending1 = _currFont.MeasureString(_processedlines.Last()).X;
+            if (_processedlines.Length == 1) { //where the word hasn't even wrapped once...
                 ending1 += ParagraphContinuation? StartingOffset.X: 0.0f;
             }
 
-            if (processedlines.Length > 0 && processedlines.Last().Length == 0)
+            if (_processedlines.Length > 0 && _processedlines.Last().Length == 0)
             {
                 ending1 = 0; //special case of newline ending putting it on the next row.
             }
             EndingOffset = new Vector2(ending1,
                 0);
 
-            float sizey = 0;
+            var sizey = 0.0;
             for (int i = 0; i < LineHeights.Count; i++)
             {
                 //if (_processedText.EndsWith("\n") && i + 1 == LineHeights.Count)
@@ -576,7 +591,7 @@ namespace GeonBit.UI.Entities
                 var entry = LineHeights[i];
                 sizey += entry;
             }
-            Vector2 size = new Vector2(sizex, sizey);
+            Vector2 size = new Vector2(sizex, (float)sizey);
 
             // set position and origin based on anchor.
             // note: no top-left here because thats the default set above.
@@ -711,18 +726,17 @@ namespace GeonBit.UI.Entities
             Color fillCol = UserInterface.Active.DrawUtils.FixColorOpacity(FillColor);
 
             // draw text itself
-            var lines = _processedText.Split('\n');
-            
-            var offsety = 0.0f;
+
+            var offsety = 0.0;
 
             //spriteBatch.DrawString(_currFont, lines[0], _position + new Vector2(ParagraphContinuation? StartingOffset.X : 0.0f, offsety), fillCol,
             //    0, _fontOrigin, _actualScale, SpriteEffects.None, 0.5f);
-            spriteBatch.DrawString(_currFont, lines[0], _position + new Vector2(ParagraphContinuation ? StartingOffset.X : 0.0f, offsety) -_fontOrigin, fillCol, new Vector2(_actualScale));
-            for (int i = 1; i < lines.Length; i++) {
+            spriteBatch.DrawString(_currFont, _processedlines[0], _position + new Vector2(ParagraphContinuation ? StartingOffset.X : 0.0f, (float)offsety) -_fontOrigin, fillCol, new Vector2(_actualScale));
+            for (int i = 1; i < _processedlines.Length; i++) {
                 offsety += LineHeights[i] * Scale;
                 //spriteBatch.DrawString(_currFont, lines[i], _position + new Vector2(0, offsety), fillCol,
                 //    0, _fontOrigin, _actualScale, SpriteEffects.None, 0.5f);
-                spriteBatch.DrawString(_currFont, lines[i], _position + new Vector2(0, offsety) - _fontOrigin, fillCol, new Vector2(_actualScale));
+                spriteBatch.DrawString(_currFont, _processedlines[i], _position + new Vector2(0, (float)offsety) - _fontOrigin, fillCol, new Vector2(_actualScale));
             }
 
             // call base draw function
