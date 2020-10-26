@@ -369,7 +369,7 @@ namespace GeonBit.UI.Entities
                 for(int i=0; i<_processedText.Length; i++) {
                     char currCharacter = _processedText[i];
                     Rectangle currRectangle = _processedGlyphRects[i];
-                    Rectangle prevRectangle = new Rectangle(0, 0, 0, (int)System.Math.Round(_currFont.PixelSize));
+                    Rectangle prevRectangle = new Rectangle(0, 0, 0, (int)System.Math.Round(_currFont.Size));
                     if (i > 0) {
                         prevRectangle = _processedGlyphRects[i - 1];
                     }
