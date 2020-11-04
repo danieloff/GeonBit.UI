@@ -43,6 +43,12 @@ namespace GeonBit.UI.Animators
         /// How much the entity moves up and down.
         /// </summary>
         public int FloatingDistance = 5;
+        private UserInterface _userinterface;
+
+        public FloatUpDownAnimator(UserInterface ui)
+        {
+            _userinterface = ui;
+        }
 
         /// <summary>
         /// Do animation.
@@ -50,7 +56,7 @@ namespace GeonBit.UI.Animators
         public override void Update()
         {
             // update animation and set floating factor
-            var dt = (float)UserInterface.Active.CurrGameTime.ElapsedGameTime.TotalSeconds;
+            var dt = (float)_userinterface.Active.CurrGameTime.ElapsedGameTime.TotalSeconds;
             _step += dt * SpeedFactor;
             var currVal = (float)System.Math.Sin(_step) * (float)FloatingDistance;
 

@@ -30,7 +30,8 @@ namespace GeonBit.UI.Animators
         /// Should play this animation in a loop?
         /// </summary>
         public bool Loop = true;
-        
+        private UserInterface _userinterface;
+
         /// <summary>
         /// Return if an entity type is compatible with this animator.
         /// </summary>
@@ -39,6 +40,11 @@ namespace GeonBit.UI.Animators
         public override bool CheckEntityCompatibility(Entities.Entity entity)
         {
             return entity is Entities.RichParagraph;
+        }
+
+        public TextWaveAnimator(UserInterface ui)
+        {
+            _userinterface = ui;
         }
 
         /// <summary>
@@ -56,7 +62,7 @@ namespace GeonBit.UI.Animators
             var paragraph = TargetEntity as Entities.RichParagraph;
 
             // update animation
-            var dt = (float)UserInterface.Active.CurrGameTime.ElapsedGameTime.TotalSeconds;
+            var dt = (float)_userinterface.Active.CurrGameTime.ElapsedGameTime.TotalSeconds;
             _currPosition += dt * SpeedFactor;
 
             // wrap position

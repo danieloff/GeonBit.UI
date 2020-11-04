@@ -128,6 +128,7 @@ namespace GeonBit.UI.Utils.Forms
         /// Extra space to set between fields.
         /// </summary>
         public static int ExtraSpaceBetweenFields = 10;
+        private UserInterface _userinterface;
 
         /// <summary>
         /// Form's root panel.
@@ -143,8 +144,10 @@ namespace GeonBit.UI.Utils.Forms
         /// <param name="parent">Optional panel to contain the result form.</param>
         public Form(IEnumerable<FormFieldData> fields, Panel parent)
         {
+            _userinterface = parent._userinterface;
+
             // create root panel
-            FormPanel = new Panel(new Vector2(0, -1), PanelSkin.None, Anchor.Auto);
+            FormPanel = new Panel(_userinterface, new Vector2(0, -1), PanelSkin.None, Anchor.Auto);
             FormPanel.Padding = Vector2.Zero;
 
             // create fields
@@ -165,7 +168,7 @@ namespace GeonBit.UI.Utils.Forms
                 // add label
                 if (needLabel)
                 {
-                    var label = FormPanel.AddChild(new Label(field.FieldLabel));
+                    var label = FormPanel.AddChild(new Label(_userinterface, field.FieldLabel));
                     label.Identifier = "form-entity-label-" + field.FieldId;
                 }
 
@@ -204,13 +207,13 @@ namespace GeonBit.UI.Utils.Forms
                 // create checkbox
                 case FormFieldType.Checkbox:
                     needLabel = false;
-                    return new CheckBox(fieldData.FieldLabel, isChecked: fieldData.DefaultValue != null && (bool)(fieldData.DefaultValue));
+                    return new CheckBox(_userinterface, fieldData.FieldLabel, isChecked: fieldData.DefaultValue != null && (bool)(fieldData.DefaultValue));
 
                 // create dropdown
                 case FormFieldType.DropDown:
 
                     // create entity and set choices
-                    var dropdown = new DropDown(new Vector2(0, -1));
+                    var dropdown = new DropDown(_userinterface, new Vector2(0, -1));
                     foreach (var choice in fieldData.Choices)
                     {
                         dropdown.AddItem(choice);
@@ -232,19 +235,19 @@ namespace GeonBit.UI.Utils.Forms
 
                 // create multi-line text input
                 case FormFieldType.MultilineTextInput:
-                    var multiText = new TextInput(true);
+                    var multiText = new TextInput(_userinterface, true);
                     multiText.Value = fieldData.DefaultValue as string;
                     return multiText;
 
                 // create single-line text input
                 case FormFieldType.TextInput:
-                    var text = new TextInput(false);
+                    var text = new TextInput(_userinterface, false);
                     if (fieldData.DefaultValue != null) { text.Value = fieldData.DefaultValue as string; }
                     return text;
 
                 // create slider input
                 case FormFieldType.Slider:
-                    var slider = new Slider((uint)fieldData.Min, (uint)fieldData.Max);
+                    var slider = new Slider(_userinterface, (uint)fieldData.Min, (uint)fieldData.Max);
                     if (fieldData.DefaultValue is int)
                     {
                         slider.Value = (int)fieldData.DefaultValue;
@@ -255,7 +258,7 @@ namespace GeonBit.UI.Utils.Forms
                 case FormFieldType.SelectList:
                     
                     // create the entity itself
-                    var selectlist = new SelectList(new Vector2(0, -1));
+                    var selectlist = new SelectList(_userinterface, new Vector2(0, -1));
                     foreach (var choice in fieldData.Choices)
                     {
                         selectlist.AddItem(choice);
@@ -277,21 +280,21 @@ namespace GeonBit.UI.Utils.Forms
 
                 // create radio buttons
                 case FormFieldType.RadioButtons:
-                    var radiosPanel = new Panel(new Vector2(0, -1), PanelSkin.None, Anchor.Auto);
+                    var radiosPanel = new Panel(_userinterface, new Vector2(0, -1), PanelSkin.None, Anchor.Auto);
                     radiosPanel.Padding = Vector2.Zero;
                     foreach (var choice in fieldData.Choices)
                     {
-                        var radio = new RadioButton(choice, isChecked: (fieldData.DefaultValue as string) == choice);
+                        var radio = new RadioButton(_userinterface, choice, isChecked: (fieldData.DefaultValue as string) == choice);
                         radiosPanel.AddChild(radio);
                     }
                     return radiosPanel;
 
                 // create a new secion
                 case FormFieldType.Section:
-                    var containerPanel = new Panel(new Vector2(0, -1), PanelSkin.None, Anchor.Auto);
+                    var containerPanel = new Panel(_userinterface, new Vector2(0, -1), PanelSkin.None, Anchor.Auto);
                     containerPanel.Padding = Vector2.Zero;
-                    if (needLabel) { containerPanel.AddChild(new Paragraph(fieldData.FieldLabel)); }
-                    containerPanel.AddChild(new HorizontalLine());
+                    if (needLabel) { containerPanel.AddChild(new Paragraph(_userinterface, fieldData.FieldLabel)); }
+                    containerPanel.AddChild(new HorizontalLine(_userinterface));
                     needLabel = false;
                     return containerPanel;
 

@@ -56,16 +56,16 @@ namespace GeonBit.UI.Entities
         /// <param name="size">CheckBox size.</param>
         /// <param name="offset">Offset from anchor position.</param>
         /// <param name="isChecked">If true, this checkbox will be created as 'checked'.</param>
-        public CheckBox(string text, Anchor anchor = Anchor.Auto, Vector2? size = null, Vector2? offset = null, bool isChecked = false) :
-            base(size, anchor, offset)
+        public CheckBox(UserInterface ui, string text, Anchor anchor = Anchor.Auto, Vector2? size = null, Vector2? offset = null, bool isChecked = false) :
+            base(ui, size, anchor, offset)
         {
             // update default style
             UpdateStyle(DefaultStyle);
 
             // create and set checkbox paragraph
-            if (!UserInterface.Active._isDeserializing)
+            if (!_userinterface.Active._isDeserializing)
             {
-                TextParagraph = UserInterface.DefaultParagraph(text, Anchor.CenterLeft);
+                TextParagraph = _userinterface.DefaultParagraph(text, Anchor.CenterLeft);
                 TextParagraph.UpdateStyle(DefaultParagraphStyle);
                 TextParagraph.Offset = new Vector2(25, 0);
                 TextParagraph._hiddenInternalEntity = true;
@@ -83,7 +83,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create checkbox without text.
         /// </summary>
-        public CheckBox() : this(string.Empty)
+        public CheckBox(UserInterface ui) : this(ui, string.Empty)
         {
         }
 
@@ -145,7 +145,7 @@ namespace GeonBit.UI.Entities
                                 (int)(_destRect.Y + _destRect.Height / 2 - actualSize.Y / 2),
                                 (int)(actualSize.X),
                                 (int)(actualSize.Y));
-            dest = UserInterface.Active.DrawUtils.ScaleRect(dest, Scale);
+            dest = _userinterface.Active.DrawUtils.ScaleRect(dest, Scale);
 
             // source rect
             Rectangle src = new Rectangle(0, 0, texture.Width, texture.Height);

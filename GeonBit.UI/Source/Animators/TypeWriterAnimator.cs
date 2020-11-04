@@ -33,7 +33,8 @@ namespace GeonBit.UI.Animators
         /// If value = 1f it means it will take a second to type each character.
         /// </summary>
         public float SpeedFactor = 10f;
-        
+        private UserInterface _userinterface;
+
         /// <summary>
         /// Return if an entity type is compatible with this animator.
         /// </summary>
@@ -42,6 +43,11 @@ namespace GeonBit.UI.Animators
         public override bool CheckEntityCompatibility(Entities.Entity entity)
         {
             return entity is Entities.Paragraph;
+        }
+
+        public TypeWriterAnimator(UserInterface ui)
+        {
+            _userinterface = ui;
         }
 
         /// <summary>
@@ -62,7 +68,7 @@ namespace GeonBit.UI.Animators
             }
 
             // update animation and calc new position
-            var dt = (float)UserInterface.Active.CurrGameTime.ElapsedGameTime.TotalSeconds;
+            var dt = (float)_userinterface.Active.CurrGameTime.ElapsedGameTime.TotalSeconds;
             _timeForNextChar -= dt * SpeedFactor;
             if (_timeForNextChar <= 0f)
             {

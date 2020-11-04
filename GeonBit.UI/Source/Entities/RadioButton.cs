@@ -54,8 +54,8 @@ namespace GeonBit.UI.Entities
         /// <param name="size">Radio button size.</param>
         /// <param name="offset">Offset from anchor position.</param>
         /// <param name="isChecked">If true, radio button will be created as checked.</param>
-        public RadioButton(string text, Anchor anchor = Anchor.Auto, Vector2? size = null, Vector2? offset = null, bool isChecked = false) :
-            base(text, anchor, size, offset, isChecked)
+        public RadioButton(UserInterface ui, string text, Anchor anchor = Anchor.Auto, Vector2? size = null, Vector2? offset = null, bool isChecked = false) :
+            base(ui, text, anchor, size, offset, isChecked)
         {
             UpdateStyle(DefaultStyle);
             if (TextParagraph != null)
@@ -67,7 +67,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create radiobutton without text.
         /// </summary>
-        public RadioButton() : this(string.Empty)
+        public RadioButton(UserInterface ui) : this(ui, string.Empty)
         {
         }
 

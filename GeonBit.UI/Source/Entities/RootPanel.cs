@@ -33,8 +33,8 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create the root panel.
         /// </summary>
-        public RootPanel() :
-            base(Vector2.Zero, PanelSkin.None, Anchor.Center, Vector2.Zero)
+        public RootPanel(UserInterface ui) :
+            base(ui, Vector2.Zero, PanelSkin.None, Anchor.Center, Vector2.Zero)
         {
             Padding = Vector2.Zero;
             ShadowColor = Color.Transparent;
@@ -48,8 +48,8 @@ namespace GeonBit.UI.Entities
         /// <returns>Rectangle in the size of the whole screen.</returns>
         override public Rectangle CalcDestRect()
         {
-            int width = UserInterface.Active.ScreenWidth;
-            int height = UserInterface.Active.ScreenHeight;
+            int width = _userinterface.Active.ScreenWidth;
+            int height = _userinterface.Active.ScreenHeight;
             return new Rectangle(0, 0, width, height);
         }
 

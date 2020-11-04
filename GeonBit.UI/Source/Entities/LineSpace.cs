@@ -35,8 +35,8 @@ namespace GeonBit.UI.Entities
         /// Create a new Line Space entity.
         /// </summary>
         /// <param name="spacesCount">How many spaces to create.</param>
-        public LineSpace(int spacesCount) :
-            base(Vector2.One, Anchor.Auto, Vector2.Zero)
+        public LineSpace(UserInterface ui, int spacesCount) :
+            base(ui, Vector2.One, Anchor.Auto, Vector2.Zero)
         {
             // by default locked so it won't do events
             Locked = true;
@@ -54,7 +54,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create default line space.
         /// </summary>
-        public LineSpace() : this(1)
+        public LineSpace(UserInterface ui) : this(ui, 1)
         {
         }
 

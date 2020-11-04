@@ -93,7 +93,7 @@ namespace GeonBit.UI.Entities
         /// Create the panel tabs.
         /// </summary>
         /// <param name="buttonsBackground">Optional buttons background panel.</param>
-        public PanelTabs(PanelSkin buttonsBackground = PanelSkin.None) : base(new Vector2(0, 0), Anchor.TopCenter, Vector2.Zero)
+        public PanelTabs(UserInterface ui, PanelSkin buttonsBackground = PanelSkin.None) : base(ui, new Vector2(0, 0), Anchor.TopCenter, Vector2.Zero)
         {
             // update style
             UpdateStyle(DefaultStyle);
@@ -101,22 +101,22 @@ namespace GeonBit.UI.Entities
             // remove self padding
             Padding = Vector2.Zero;
 
-            if (!UserInterface.Active._isDeserializing)
+            if (!_userinterface.Active._isDeserializing)
             {
                 // create the internal panel that contains everything - buttons + panels
-                _internalRoot = new Panel(Vector2.Zero, PanelSkin.None, Anchor.TopCenter);
+                _internalRoot = new Panel(_userinterface, Vector2.Zero, PanelSkin.None, Anchor.TopCenter);
                 _internalRoot.SpaceBefore = _internalRoot.SpaceAfter = _internalRoot.Padding = Vector2.Zero;
                 _internalRoot.Identifier = "_internalRoot";
                 AddChild(_internalRoot);
 
                 // create the panel to hold the tab buttons
-                _buttonsPanel = new Panel(Vector2.Zero, buttonsBackground, Anchor.TopCenter);
+                _buttonsPanel = new Panel(_userinterface, Vector2.Zero, buttonsBackground, Anchor.TopCenter);
                 _buttonsPanel.SpaceBefore = _buttonsPanel.SpaceAfter = _buttonsPanel.Padding = Vector2.Zero;
                 _buttonsPanel.Identifier = "_buttonsPanel";
                 _internalRoot.AddChild(_buttonsPanel);
 
                 // create the panel to hold the tab panels
-                _panelsPanel = new Panel(Vector2.Zero, PanelSkin.None, Anchor.TopCenter, new Vector2(0, 0));
+                _panelsPanel = new Panel(_userinterface, Vector2.Zero, PanelSkin.None, Anchor.TopCenter, new Vector2(0, 0));
                 _panelsPanel.SpaceBefore = _panelsPanel.SpaceAfter = _panelsPanel.Padding = Vector2.Zero;
                 _panelsPanel.Identifier = "_panelsPanel";
                 _internalRoot.AddChild(_panelsPanel);
@@ -218,7 +218,7 @@ namespace GeonBit.UI.Entities
             }
 
             // tab not found?
-            if (UserInterface.Active.SilentSoftErrors) return;
+            if (_userinterface.Active.SilentSoftErrors) return;
             throw new Exceptions.NotFoundException("Tab not found!");
         }
 
@@ -230,8 +230,8 @@ namespace GeonBit.UI.Entities
         /// <returns>The new tab we created - contains the panel and the button to switch it.</returns>
         public TabData AddTab(string name, PanelSkin panelSkin = PanelSkin.None)
         {
-            Panel newPanel = new Panel(Vector2.Zero, panelSkin, Anchor.TopCenter);
-            Button newButton = new Button(name, ButtonSkin.Default, Anchor.AutoInlineNoBreak, new Vector2(-1, -1));
+            Panel newPanel = new Panel(_userinterface, Vector2.Zero, panelSkin, Anchor.TopCenter);
+            Button newButton = new Button(_userinterface, name, ButtonSkin.Default, Anchor.AutoInlineNoBreak, new Vector2(-1, -1));
             newPanel.Identifier = name;
             return AddTab(newPanel, newButton);
         }

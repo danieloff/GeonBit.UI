@@ -107,8 +107,8 @@ namespace GeonBit.UI.Entities
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
         /// <param name="skin">TextInput skin, eg which texture to use.</param>
-        public TextInput(bool multiline, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null, PanelSkin skin = PanelSkin.ListBackground) :
-            base(size, skin, anchor, offset)
+        public TextInput(UserInterface ui, bool multiline, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null, PanelSkin skin = PanelSkin.ListBackground) :
+            base(ui, size, skin, anchor, offset)
         {
             // set multiline mode
             _multiLine = multiline;
@@ -125,18 +125,18 @@ namespace GeonBit.UI.Entities
             // set limit by size - default true in single-line, default false in multi-line
             LimitBySize = !_multiLine;
 
-            if (!UserInterface.Active._isDeserializing)
+            if (!_userinterface.Active._isDeserializing)
             {
 
                 // create paragraph to show current value
-                TextParagraph = UserInterface.DefaultParagraph(string.Empty, Anchor.TopLeft);
+                TextParagraph = _userinterface.DefaultParagraph(string.Empty, Anchor.TopLeft);
                 TextParagraph.UpdateStyle(DefaultParagraphStyle);
                 TextParagraph._hiddenInternalEntity = true;
                 TextParagraph.Identifier = "_TextParagraph";
                 AddChild(TextParagraph, true);
 
                 // create the placeholder paragraph
-                PlaceholderParagraph = UserInterface.DefaultParagraph(string.Empty, Anchor.TopLeft);
+                PlaceholderParagraph = _userinterface.DefaultParagraph(string.Empty, Anchor.TopLeft);
                 PlaceholderParagraph.UpdateStyle(DefaultPlaceholderStyle);
                 PlaceholderParagraph._hiddenInternalEntity = true;
                 PlaceholderParagraph.Identifier = "_PlaceholderParagraph";
@@ -162,7 +162,7 @@ namespace GeonBit.UI.Entities
             // we are now multiline
             if (_multiLine)
             {
-                _scrollbar = new VerticalScrollbar(0, 0, Anchor.CenterRight, offset: new Vector2(-8, 0));
+                _scrollbar = new VerticalScrollbar(_userinterface, 0, 0, Anchor.CenterRight, offset: new Vector2(-8, 0));
                 _scrollbar.Value = 0;
                 _scrollbar.Visible = false;
                 _scrollbar._hiddenInternalEntity = true;
@@ -215,15 +215,15 @@ namespace GeonBit.UI.Entities
         /// <param name="multiline">If true, text input will accept multiple lines.</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public TextInput(bool multiline, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
-           this(multiline, USE_DEFAULT_SIZE, anchor, offset)
+        public TextInput(UserInterface ui, bool multiline, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
+           this(ui, multiline, USE_DEFAULT_SIZE, anchor, offset)
         {
         }
 
         /// <summary>
         /// Create default single-line text input.
         /// </summary>
-        public TextInput() : this(false)
+        public TextInput(UserInterface ui) : this(ui, false)
         {
         }
 
@@ -552,7 +552,7 @@ namespace GeonBit.UI.Entities
         override protected void DoBeforeUpdate()
         {
             // animate caret
-            _caretAnim += (float)UserInterface.Active.CurrGameTime.ElapsedGameTime.TotalSeconds * CaretBlinkingSpeed;
+            _caretAnim += (float)_userinterface.Active.CurrGameTime.ElapsedGameTime.TotalSeconds * CaretBlinkingSpeed;
 
             // if focused, and got character input in this frame..
             if (IsFocused)

@@ -242,15 +242,15 @@ namespace GeonBit.UI.Entities
         /// <param name="size">Paragraph size (note: not font size, but the region that will contain the paragraph).</param>
         /// <param name="offset">Offset from anchor position.</param>
         /// <param name="scale">Optional font size.</param>
-        public RichParagraph(string text, Anchor anchor = Anchor.Auto, Vector2? size = null, Vector2? offset = null, float? scale = null) :
-            base(text, anchor, size, offset, scale)
+        public RichParagraph(UserInterface ui, string text, Anchor anchor = Anchor.Auto, Vector2? size = null, Vector2? offset = null, float? scale = null) :
+            base(ui, text, anchor, size, offset, scale)
         {
         }
 
         /// <summary>
         /// Create default multicolor paragraph with empty text.
         /// </summary>
-        public RichParagraph() : this(string.Empty)
+        public RichParagraph(UserInterface ui) : this(ui, string.Empty)
         {
         }
 
@@ -263,8 +263,8 @@ namespace GeonBit.UI.Entities
         /// <param name="scale">Optional font size.</param>
         /// <param name="size">Paragraph size (note: not font size, but the region that will contain the paragraph).</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public RichParagraph(string text, Anchor anchor, Color color, float? scale = null, Vector2? size = null, Vector2? offset = null) :
-            base(text, anchor, color, scale, size, offset)
+        public RichParagraph(UserInterface ui, string text, Anchor anchor, Color color, float? scale = null, Vector2? size = null, Vector2? offset = null) :
+            base(ui, text, anchor, color, scale, size, offset)
         {
         }
 
@@ -357,10 +357,10 @@ namespace GeonBit.UI.Entities
                 // function to reset styles back to defaults
                 System.Action ResetToDefaults = () =>
                 {
-                    currColor = UserInterface.Active.DrawUtils.FixColorOpacity(FillColor);
+                    currColor = _userinterface.Active.DrawUtils.FixColorOpacity(FillColor);
                     currFont = _currFont;
                     currOutlineWidth = OutlineWidth;
-                    currOutlineColor = UserInterface.Active.DrawUtils.FixColorOpacity(OutlineColor);
+                    currOutlineColor = _userinterface.Active.DrawUtils.FixColorOpacity(OutlineColor);
                     //characterSize = GetCharacterActualSize();
                     //csize = new Vector2(_processedGlyphRects[0].Width, _processedGlyphRects[0].Height);
                 };
@@ -387,7 +387,7 @@ namespace GeonBit.UI.Entities
                         // set fill color
                         if (styleInstruction.FillColor.HasValue)
                         {
-                            currColor = UserInterface.Active.DrawUtils.FixColorOpacity(styleInstruction.FillColor.Value);
+                            currColor = _userinterface.Active.DrawUtils.FixColorOpacity(styleInstruction.FillColor.Value);
                         }
 
                         // set font style
@@ -405,7 +405,7 @@ namespace GeonBit.UI.Entities
                         // set outline color
                         if (styleInstruction.OutlineColor.HasValue)
                         {
-                            currOutlineColor = UserInterface.Active.DrawUtils.FixColorOpacity(styleInstruction.OutlineColor.Value);
+                            currOutlineColor = _userinterface.Active.DrawUtils.FixColorOpacity(styleInstruction.OutlineColor.Value);
                         }
                     }
 

@@ -56,24 +56,24 @@ namespace GeonBit.UI.Entities
         /// <param name="size">Entity size.</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public ProgressBar(uint min, uint max, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
-            base(min, max, size, SliderSkin.Default, anchor, offset)
+        public ProgressBar(UserInterface ui, uint min, uint max, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
+            base(ui, min, max, size, SliderSkin.Default, anchor, offset)
         {
             // update default styles
             UpdateStyle(DefaultStyle);
 
-            if (!UserInterface.Active._isDeserializing)
+            if (!_userinterface.Active._isDeserializing)
             {
                 // create the fill part
                 Padding = Vector2.Zero;
-                ProgressFill = new Image(Resources.ProgressBarFillTexture, Vector2.Zero, ImageDrawMode.Stretch, Anchor.CenterLeft);
+                ProgressFill = new Image(_userinterface, Resources.ProgressBarFillTexture, Vector2.Zero, ImageDrawMode.Stretch, Anchor.CenterLeft);
                 ProgressFill.UpdateStyle(DefaultFillStyle);
                 ProgressFill._hiddenInternalEntity = true;
                 ProgressFill.Identifier = "_progress_fill";
                 AddChild(ProgressFill, true);
 
                 // create caption on progressbar
-                Caption = new Label(string.Empty, Anchor.Center);
+                Caption = new Label(_userinterface, string.Empty, Anchor.Center);
                 Caption.ClickThrough = true;
                 Caption._hiddenInternalEntity = true;
                 Caption.Identifier = "_progress_caption";
@@ -88,14 +88,14 @@ namespace GeonBit.UI.Entities
         /// <param name="max">Max value.</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public ProgressBar(uint min, uint max, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
-            this(min, max, USE_DEFAULT_SIZE, anchor, offset)
+        public ProgressBar(UserInterface ui, uint min, uint max, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
+            this(ui, min, max, USE_DEFAULT_SIZE, anchor, offset)
         { }
 
         /// <summary>
         /// Create progressbar with default params.
         /// </summary>
-        public ProgressBar() : this(0, 10)
+        public ProgressBar(UserInterface ui) : this(ui, 0, 10)
         {
         }
 
@@ -123,7 +123,7 @@ namespace GeonBit.UI.Entities
 
             // draw progress bar frame
             Texture2D barTexture = Resources.ProgressBarTexture;
-            UserInterface.Active.DrawUtils.DrawSurface(spriteBatch, barTexture, _destRect, new Vector2(progressbarFrameWidth, 0f), 1, FillColor);
+            _userinterface.Active.DrawUtils.DrawSurface(spriteBatch, _userinterface, barTexture, _destRect, new Vector2(progressbarFrameWidth, 0f), 1, FillColor);
 
             // calc frame actual height and scaling factor (this is needed to calc frame width in pixels)
             Vector2 frameSizeTexture = new Vector2(barTexture.Width * progressbarFrameWidth, barTexture.Height);

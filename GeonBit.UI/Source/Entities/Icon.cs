@@ -172,8 +172,8 @@ namespace GeonBit.UI.Entities
         /// <param name="scale">Icon default scale.</param>
         /// <param name="background">Whether or not to show icon inventory-like background.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public Icon(IconType icon, Anchor anchor = Anchor.Auto, float scale = 1.0f, bool background = false, Vector2? offset = null) :
-            base(null, USE_DEFAULT_SIZE, ImageDrawMode.Stretch, anchor, offset)
+        public Icon(UserInterface ui, IconType icon, Anchor anchor = Anchor.Auto, float scale = 1.0f, bool background = false, Vector2? offset = null) :
+            base(ui, null, USE_DEFAULT_SIZE, ImageDrawMode.Stretch, anchor, offset)
         {
             // set scale and basic properties
             Scale = scale;
@@ -196,7 +196,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create default icon.
         /// </summary>
-        public Icon() : this (IconType.Apple)
+        public Icon(UserInterface ui) : this (ui, IconType.Apple)
         {
         }
 
@@ -232,7 +232,7 @@ namespace GeonBit.UI.Entities
                 dest.X -= BackgroundSize / 2; dest.Y -= BackgroundSize / 2; dest.Width += BackgroundSize; dest.Height += BackgroundSize;
 
                 // draw background
-                UserInterface.Active.DrawUtils.DrawImage(spriteBatch, Resources.IconBackgroundTexture, dest, backColor);
+                _userinterface.Active.DrawUtils.DrawImage(spriteBatch, Resources.IconBackgroundTexture, dest, backColor);
             }
 
             // now draw the image itself

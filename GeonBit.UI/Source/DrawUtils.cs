@@ -61,10 +61,10 @@ namespace GeonBit.UI
         /// Add a render target to the render targets stack.
         /// </summary>
         /// <param name="target"></param>
-        public void PushRenderTarget(RenderTarget2D target)
+        public void PushRenderTarget(UserInterface _userinterface, RenderTarget2D target)
         {
             // sanity check - make sure we are in use-render-target mode
-            if (!UserInterface.Active.UseRenderTarget)
+            if (!_userinterface.Active.UseRenderTarget)
             {
                 throw new Exceptions.InvalidStateException("UserInterface.Active.UseRenderTarget must be 'true' to use render-target features!");
             }
@@ -178,7 +178,7 @@ namespace GeonBit.UI
         /// <param name="scale">Optional scale factor.</param>
         /// <param name="color">Optional color tint.</param>
         /// <param name="frameScale">Optional scale factor for the frame parts.</param>
-        public virtual void DrawSurface(SpriteBatch spriteBatch, Texture2D texture, Rectangle destination, Vector2 textureFrameWidth, float scale = 1f, Color? color = null, float frameScale = 1f)
+        public virtual void DrawSurface(SpriteBatch spriteBatch, UserInterface _userinterface, Texture2D texture, Rectangle destination, Vector2 textureFrameWidth, float scale = 1f, Color? color = null, float frameScale = 1f)
         {
             // default color
             color = FixColorOpacity(color);
@@ -205,7 +205,7 @@ namespace GeonBit.UI
             Rectangle destRect = new Rectangle();
 
             // factor used to scale between source in texture file and dest on the screen
-            float ScaleFactor = UserInterface.Active.GlobalScale * frameScale;
+            float ScaleFactor = _userinterface.Active.GlobalScale * frameScale;
 
             // calc the surface frame size in texture file (Src) and for drawing destination (Dest)
             Vector2 frameSizeSrcVec = new Vector2(texture.Width, texture.Height) * textureFrameWidth;
@@ -574,36 +574,36 @@ namespace GeonBit.UI
         /// </summary>
         /// <param name="spriteBatch">SpriteBatch to draw on.</param>
         /// <param name="isDisabled">If true, will use the greyscale 'disabled' effect.</param>
-        public virtual void StartDraw(SpriteBatch spriteBatch, bool isDisabled)
+        public virtual void StartDraw(SpriteBatch spriteBatch, UserInterface _userinterface, bool isDisabled)
         {
             // start drawing
-            spriteBatch.Begin(SpriteSortMode.Deferred, UserInterface.Active.BlendState, UserInterface.Active.SamplerState,
-                DepthStencilState.None, UserInterface.Active.CurrentRasterizerState != null ? UserInterface.Active.CurrentRasterizerState : RasterizerState.CullCounterClockwise,
-                isDisabled ? Resources.DisabledEffect : null, UserInterface.Active.CurrentTransformMatrix);
+            spriteBatch.Begin(SpriteSortMode.Deferred, _userinterface.Active.BlendState, _userinterface.Active.SamplerState,
+                DepthStencilState.None, _userinterface.Active.CurrentRasterizerState != null ? _userinterface.Active.CurrentRasterizerState : RasterizerState.CullCounterClockwise,
+                isDisabled ? Resources.DisabledEffect : null, _userinterface.Active.CurrentTransformMatrix);
 
             // update drawing target
-            UpdateRenderTarget(spriteBatch);
+            UpdateRenderTarget(spriteBatch, _userinterface);
         }
 
         /// <summary>
         /// Start drawing on a given SpriteBatch, but only draw colored Silhouette of the texture.
         /// </summary>
         /// <param name="spriteBatch">SpriteBatch to draw on.</param>
-        public virtual void StartDrawSilhouette(SpriteBatch spriteBatch)
+        public virtual void StartDrawSilhouette(SpriteBatch spriteBatch, UserInterface _userinterface)
         {
             // start drawing silhouette
-            spriteBatch.Begin(SpriteSortMode.Deferred, UserInterface.Active.BlendState, UserInterface.Active.SamplerState,
+            spriteBatch.Begin(SpriteSortMode.Deferred, _userinterface.Active.BlendState, _userinterface.Active.SamplerState,
                 DepthStencilState.None, RasterizerState.CullCounterClockwise, Resources.SilhouetteEffect);
 
             // update drawing target
-            UpdateRenderTarget(spriteBatch);
+            UpdateRenderTarget(spriteBatch, _userinterface);
         }
 
         /// <summary>
         /// Update the current rendering target.
         /// </summary>
         /// <param name="spriteBatch">Current spritebatch we are using.</param>
-        protected virtual void UpdateRenderTarget(SpriteBatch spriteBatch)
+        protected virtual void UpdateRenderTarget(SpriteBatch spriteBatch, UserInterface _userinterface)
         {
             // get current render target
             RenderTarget2D newRenderTarget = null;
@@ -613,7 +613,7 @@ namespace GeonBit.UI
             }
             else
             {
-                newRenderTarget = UserInterface.Active.RenderTarget;
+                newRenderTarget = _userinterface.Active.RenderTarget;
             }
 
             // only if changed, set render target (costly function)

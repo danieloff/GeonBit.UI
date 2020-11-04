@@ -113,8 +113,8 @@ namespace GeonBit.UI.Entities
         /// <param name="skin">Panel skin (texture to use). Use PanelSkin.None for invisible panels.</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public Panel(Vector2 size, PanelSkin skin, Anchor anchor = Anchor.Center, Vector2? offset = null, Vector2? innermargin = null) :
-            base(size, skin, anchor, offset)
+        public Panel(UserInterface ui, Vector2 size, PanelSkin skin, Anchor anchor = Anchor.Center, Vector2? offset = null, Vector2? innermargin = null) :
+            base(ui, size, skin, anchor, offset)
         {
             UpdateStyle(DefaultStyle);
             if (size.Y == -1)
@@ -159,8 +159,8 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create the panel with default params.
         /// </summary>
-        public Panel(PanelSkin skin) :
-            this(new Vector2(500, 500), skin)
+        public Panel(UserInterface ui, PanelSkin skin) :
+            this(ui, new Vector2(500, 500), skin)
         {
         }
 
@@ -252,7 +252,7 @@ namespace GeonBit.UI.Entities
             spriteBatch.GraphicsDevice.Clear(Color.Transparent);
 
             // bind the render target
-            UserInterface.Active.DrawUtils.PushRenderTarget(_renderTarget);
+            _userinterface.Active.DrawUtils.PushRenderTarget(_userinterface, _renderTarget);
 
             // set internal dest rect
             _originalInternalDestRect = _destRectInternal;
@@ -330,12 +330,12 @@ namespace GeonBit.UI.Entities
             if (_renderTarget != null)
             {
                 // unbind the render target
-                UserInterface.Active.DrawUtils.PopRenderTarget();
+                _userinterface.Active.DrawUtils.PopRenderTarget();
                 
                 // draw the render target itself
-                UserInterface.Active.DrawUtils.StartDraw(spriteBatch, IsDisabled());
+                _userinterface.Active.DrawUtils.StartDraw(spriteBatch, _userinterface, IsDisabled());
                 spriteBatch.Draw(_renderTarget, GetRenderTargetRect(), Color.White);
-                UserInterface.Active.DrawUtils.EndDraw(spriteBatch);
+                _userinterface.Active.DrawUtils.EndDraw(spriteBatch);
 
                 // fix scrollbar positioning
                 if (_scrollbar != null)
@@ -362,7 +362,7 @@ namespace GeonBit.UI.Entities
                 if (_scrollbar == null)
                 {
                     // create scrollbar
-                    _scrollbar = new VerticalScrollbar(0, 0, Anchor.TopRight)
+                    _scrollbar = new VerticalScrollbar(_userinterface, 0, 0, Anchor.TopRight)
                     {
                         Padding = Vector2.Zero,
                         AdjustMaxAutomatically = true,

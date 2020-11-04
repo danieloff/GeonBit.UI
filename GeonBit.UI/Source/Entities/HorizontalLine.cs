@@ -39,8 +39,8 @@ namespace GeonBit.UI.Entities
         /// </summary>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public HorizontalLine(Anchor anchor, Vector2? offset = null) :
-            base(Vector2.Zero, anchor, offset)
+        public HorizontalLine(UserInterface ui, Anchor anchor, Vector2? offset = null) :
+            base(ui, Vector2.Zero, anchor, offset)
         {
 			// locked by default, so we won't do events etc.
 			Locked = true;
@@ -56,7 +56,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create default horizontal line.
         /// </summary>
-        public HorizontalLine() : this(Anchor.Auto)
+        public HorizontalLine(UserInterface ui) : this(ui, Anchor.Auto)
         {
         }
 
@@ -71,7 +71,7 @@ namespace GeonBit.UI.Entities
             Texture2D texture = Resources.HorizontalLineTexture;
 
             // draw panel
-            UserInterface.Active.DrawUtils.DrawSurface(spriteBatch, texture, _destRect, FRAME_WIDTH, 1, FillColor);
+            _userinterface.Active.DrawUtils.DrawSurface(spriteBatch, _userinterface, texture, _destRect, FRAME_WIDTH, 1, FillColor);
 
             // call base draw function
             base.DrawEntity(spriteBatch, phase);

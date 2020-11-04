@@ -100,7 +100,7 @@ namespace GeonBit.UI
         /// <summary>
         /// The currently active user interface instance.
         /// </summary>
-        public static UserInterface Active = null;
+        public UserInterface Active = null;
         public GraphicsDeviceManager Graphics;
         public IGameUI GameUI;
 
@@ -153,14 +153,21 @@ namespace GeonBit.UI
         /// GeonBit.UI entities use this method when need to create a paragraph, so you can override this to change which paragraph type the built-in
         /// entities will use by-default (for example Buttons text, SelectList items, etc.).
         /// </summary>
-        static public DefaultParagraphGenerator DefaultParagraph =
-            (string text, Anchor anchor, Color? color, float? scale, Vector2? size, Vector2? offset) => {
-                if (color != null)
+        public DefaultParagraphGenerator DefaultParagraph
+        {
+            get
+            {
+                return
+                (string text, Anchor anchor, Color? color, float? scale, Vector2? size, Vector2? offset) =>
                 {
-                    return new RichParagraph(text, anchor, color.Value, scale, size, offset);
-                }
-                return new RichParagraph(text, anchor, size, offset, scale);
-            };
+                    if (color != null)
+                    {
+                        return new RichParagraph(this, text, anchor, color.Value, scale, size, offset);
+                    }
+                    return new RichParagraph(this, text, anchor, size, offset, scale);
+                };
+            }
+        }
 
         /// <summary>
         /// If true, will draw the UI on a render target before drawing on screen.
@@ -349,20 +356,28 @@ namespace GeonBit.UI
         /// </summary>
         /// <param name="contentManager">Content manager.</param>
         /// <param name="theme">Which UI theme to use (see options in Content/GeonBit.UI/themes/). This affect the appearance of all textures and effects.</param>
-        static public void Initialize(IGameUI igame, ContentManager contentManager, string program, string theme, GraphicsDeviceManager graphics)
+        static public UserInterface Initialize(IGameUI igame, ContentManager contentManager, string program, string theme, GraphicsDeviceManager graphics)
         {
-            // store the content manager
-            _content = contentManager;
+            if (_content == null) //static
+            {
+                // store the content manager
+                _content = contentManager;
 
-            // init resources (textures etc)
-            Resources.LoadContent(_content, program, igame.Game, theme);
+                // init resources (textures etc)
+                Resources.LoadContent(_content, program, igame.Game, theme);
+            }
+
+            var ui = new UserInterface();
 
             // create a default active user interface
-            Active = new UserInterface();
 
-            Active.Graphics = graphics;
+            ui.Active = ui;
 
-            Active.GameUI = igame;
+            ui.Active.Graphics = graphics;
+
+            ui.Active.GameUI = igame;
+
+            return ui;
         }
 
         /// <summary>
@@ -392,7 +407,7 @@ namespace GeonBit.UI
             if (source.ToolTipText == null) return null;
 
             // create tooltip paragraph
-            var tooltip = new Paragraph(source.ToolTipText, size: new Vector2(500, -1));
+            var tooltip = new Paragraph(source._userinterface, source.ToolTipText, size: new Vector2(500, -1));
             tooltip.BackgroundColor = Color.Black;
 
             // add callback to update tooltip position
@@ -400,17 +415,17 @@ namespace GeonBit.UI
             {
                 // get dest rect and calculate tooltip position based on size and mouse position
                 var destRect = tooltip.GetActualDestRect();
-                var position = UserInterface.Active.GetTransformedCursorPos(new Vector2(-destRect.Width / 2, -destRect.Height - 20));
+                var position = source._userinterface.Active.GetTransformedCursorPos(new Vector2(-destRect.Width / 2, -destRect.Height - 20));
 
                 // make sure tooltip is not out of screen boundaries
-                var screenBounds = Active.Root.GetActualDestRect();
+                var screenBounds = source._userinterface.Active.Root.GetActualDestRect();
                 if (position.Y < screenBounds.Top) position.Y = screenBounds.Top;
                 if (position.Y > screenBounds.Bottom - destRect.Height) position.Y = screenBounds.Bottom - destRect.Height;
                 if (position.X < screenBounds.Left) position.X = screenBounds.Left;
                 if (position.X > screenBounds.Right - destRect.Width) position.X = screenBounds.Right - destRect.Width;
 
                 // update tooltip position
-                tooltip.SetAnchorAndOffset(Anchor.TopLeft, position / Active.GlobalScale);
+                tooltip.SetAnchorAndOffset(Anchor.TopLeft, position / source._userinterface.Active.GlobalScale);
             };
             tooltip.CalcTextActualRectWithWrap();
             tooltip.BeforeDraw(tooltip);
@@ -449,7 +464,7 @@ namespace GeonBit.UI
             DrawUtils = new DrawUtils();
 
             // create the root panel
-            Root = new RootPanel();
+            Root = new RootPanel(this);
 
             // set default cursor
             SetCursor(CursorType.Default);

@@ -124,14 +124,14 @@ namespace GeonBit.UI.Entities
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
         /// <param name="skin">SelectList skin, eg which texture to use.</param>
-        public SelectList(Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null, PanelSkin skin = PanelSkin.ListBackground) :
-            base(size, skin, anchor, offset)
+        public SelectList(UserInterface ui, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null, PanelSkin skin = PanelSkin.ListBackground) :
+            base(ui, size, skin, anchor, offset)
         {
             // update style and set default padding
             UpdateStyle(DefaultStyle);
 
             // create the scrollbar
-            _scrollbar = new VerticalScrollbar(0, 10, Anchor.CenterRight, offset: new Vector2(-8, 0));
+            _scrollbar = new VerticalScrollbar(_userinterface, 0, 10, Anchor.CenterRight, offset: new Vector2(-8, 0));
             _scrollbar.Value = 0;
             _scrollbar.Visible = false;
             _scrollbar._hiddenInternalEntity = true;
@@ -143,8 +143,8 @@ namespace GeonBit.UI.Entities
         /// </summary>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public SelectList(Anchor anchor, Vector2? offset = null) :
-           this(USE_DEFAULT_SIZE, anchor, offset)
+        public SelectList(UserInterface ui, Anchor anchor, Vector2? offset = null) :
+           this(ui, USE_DEFAULT_SIZE, anchor, offset)
         {
         }
 
@@ -160,7 +160,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create emprt select list with default params.
         /// </summary>
-        public SelectList() : this (Anchor.Auto)
+        public SelectList(UserInterface ui) : this (ui, Anchor.Auto)
         {
         }
 
@@ -381,7 +381,7 @@ namespace GeonBit.UI.Entities
             while (true)
             {
                 // create and add new paragraph
-                Paragraph paragraph = UserInterface.DefaultParagraph(".", Anchor.Auto);
+                Paragraph paragraph = _userinterface.DefaultParagraph(".", Anchor.Auto);
                 paragraph.PromiscuousClicksMode = true;
                 paragraph.WrapWords = false;
                 paragraph.UpdateStyle(DefaultParagraphStyle);
@@ -536,7 +536,7 @@ namespace GeonBit.UI.Entities
             if (_index == -1)
             {
                 _value = null;
-                if (UserInterface.Active.SilentSoftErrors) return;
+                if (_userinterface.Active.SilentSoftErrors) return;
                 throw new Exceptions.NotFoundException("Value to set not found in list!");
             }
 
@@ -566,7 +566,7 @@ namespace GeonBit.UI.Entities
             // make sure legal index
             if (index >= -1 && index >= _list.Count)
             {
-                if (UserInterface.Active.SilentSoftErrors) return;
+                if (_userinterface.Active.SilentSoftErrors) return;
                 throw new Exceptions.NotFoundException("Invalid list index to select!");
             }
 

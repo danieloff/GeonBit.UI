@@ -221,8 +221,8 @@ namespace GeonBit.UI.Entities
         /// <param name="size">Paragraph size (note: not font size, but the region that will contain the paragraph).</param>
         /// <param name="offset">Offset from anchor position.</param>
         /// <param name="scale">Optional font size.</param>
-        public Paragraph(string text, Anchor anchor = Anchor.Auto, Vector2? size = null, Vector2? offset = null, float? scale = null) :
-            base(size, anchor, offset)
+        public Paragraph(UserInterface ui, string text, Anchor anchor = Anchor.Auto, Vector2? size = null, Vector2? offset = null, float? scale = null) :
+            base(ui, size, anchor, offset)
         {
             Text = text;
             UpdateStyle(DefaultStyle);
@@ -239,8 +239,8 @@ namespace GeonBit.UI.Entities
         /// <param name="scale">Optional font size.</param>
         /// <param name="size">Paragraph size (note: not font size, but the region that will contain the paragraph).</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public Paragraph(string text, Anchor anchor, Color color, float? scale = null, Vector2? size = null, Vector2? offset = null) :
-            this(text, anchor, size, offset) {
+        public Paragraph(UserInterface ui, string text, Anchor anchor, Color color, float? scale = null, Vector2? size = null, Vector2? offset = null) :
+            this(ui, text, anchor, size, offset) {
             SetStyleProperty(StylePropertyIds.FillColor, new StyleProperty(color));
             if (scale != null) { SetStyleProperty(StylePropertyIds.Scale, new StyleProperty((float)scale)); }
             UpdateFontPropertiesIfNeeded();
@@ -249,7 +249,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create default paragraph without text.
         /// </summary>
-        public Paragraph() : this(string.Empty)
+        public Paragraph(UserInterface ui) : this(ui, string.Empty)
         {
         }
 
@@ -695,7 +695,7 @@ namespace GeonBit.UI.Entities
             if (BackgroundColor.A > 0)
             {
                 // get background color
-                Color backColor = UserInterface.Active.DrawUtils.FixColorOpacity(BackgroundColor);
+                Color backColor = _userinterface.Active.DrawUtils.FixColorOpacity(BackgroundColor);
 
                 // get destination rect to draw it
                 var rect = BackgroundColorUseBoxSize ? _destRect : _actualDestRect;
@@ -723,7 +723,7 @@ namespace GeonBit.UI.Entities
             }
 
             // get fill color
-            Color fillCol = UserInterface.Active.DrawUtils.FixColorOpacity(FillColor);
+            Color fillCol = _userinterface.Active.DrawUtils.FixColorOpacity(FillColor);
 
             // draw text itself
 
@@ -751,7 +751,7 @@ namespace GeonBit.UI.Entities
         protected void DrawTextOutline(SpriteBatch spriteBatch, int outlineWidth)
         {
             // get outline color
-            Color outlineColor = UserInterface.Active.DrawUtils.FixColorOpacity(OutlineColor);
+            Color outlineColor = _userinterface.Active.DrawUtils.FixColorOpacity(OutlineColor);
             
             
             // draw text itself

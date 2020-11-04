@@ -39,8 +39,8 @@ namespace GeonBit.UI.Entities
         /// <param name="anchor">Position anchor.</param>
         /// <param name="size">Optional label size.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public Label(string text, Anchor anchor = Anchor.Auto, Vector2? size = null, Vector2? offset = null) :
-            base(text, anchor, size: size, offset: offset)
+        public Label(UserInterface ui, string text, Anchor anchor = Anchor.Auto, Vector2? size = null, Vector2? offset = null) :
+            base(ui, text, anchor, size: size, offset: offset)
         {
             UpdateStyle(DefaultStyle);
         }
@@ -48,7 +48,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create label with default params and empty text.
         /// </summary>
-        public Label() : this(string.Empty)
+        public Label(UserInterface ui) : this(ui, string.Empty)
         {
         }
     }

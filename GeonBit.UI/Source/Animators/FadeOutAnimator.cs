@@ -16,6 +16,12 @@ namespace GeonBit.UI.Animators
         /// Fading animation speed.
         /// </summary>
         public float SpeedFactor = 1f;
+        private UserInterface _userinterface;
+
+        public FadeOutAnimator(UserInterface ui)
+        {
+            _userinterface = ui;
+        }
 
         /// <summary>
         /// Do animation.
@@ -23,7 +29,7 @@ namespace GeonBit.UI.Animators
         public override void Update()
         {
             // update animation and calc new opacity
-            var dt = (float)UserInterface.Active.CurrGameTime.ElapsedGameTime.TotalSeconds;
+            var dt = (float)_userinterface.CurrGameTime.ElapsedGameTime.TotalSeconds;
             _timeLeft -= dt * SpeedFactor;
             var newOpacity = System.Math.Max(0f, _timeLeft);
 

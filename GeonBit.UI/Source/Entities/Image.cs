@@ -80,8 +80,8 @@ namespace GeonBit.UI.Entities
         /// <param name="drawMode">How to draw the image (see ImageDrawMode for more info).</param>
         /// <param name="anchor">Poisition anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public Image(Texture2D texture, Vector2? size = null, ImageDrawMode drawMode = ImageDrawMode.Stretch, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
-            base(size, anchor, offset)
+        public Image(UserInterface ui, Texture2D texture, Vector2? size = null, ImageDrawMode drawMode = ImageDrawMode.Stretch, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
+            base(ui, size, anchor, offset)
         {
             // store image DrawMode and texture
             DrawMode = drawMode;
@@ -94,7 +94,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create image without texture.
         /// </summary>
-        public Image() : this(null)
+        public Image(UserInterface ui) : this(ui, null)
         {
         }
 
@@ -193,13 +193,13 @@ namespace GeonBit.UI.Entities
                 {
                     // panel mode
                     case ImageDrawMode.Panel:
-                        UserInterface.Active.DrawUtils.DrawSurface(spriteBatch, Texture, _destRect, FrameWidth, Scale,
+                        _userinterface.Active.DrawUtils.DrawSurface(spriteBatch, _userinterface, Texture, _destRect, FrameWidth, Scale,
                             FillColor);
                         break;
 
                     // stretch mode
                     case ImageDrawMode.Stretch:
-                        UserInterface.Active.DrawUtils.DrawImage(spriteBatch, Texture, _destRect, FillColor, Scale,
+                        _userinterface.Active.DrawUtils.DrawImage(spriteBatch, Texture, _destRect, FillColor, Scale,
                             SourceRectangle);
                         break;
 
@@ -209,7 +209,7 @@ namespace GeonBit.UI.Entities
                             var rectDest = new Rectangle(rectSource.X, rectSource.Y, rectSource.Width, rectSource.Height);
 
                             rectDest.Location += _destRect.Location;
-                            UserInterface.Active.DrawUtils.DrawImage(spriteBatch, Texture, rectDest, FillColor, Scale, rectSource);
+                            _userinterface.Active.DrawUtils.DrawImage(spriteBatch, Texture, rectDest, FillColor, Scale, rectSource);
                         }
                         break;
 
@@ -248,7 +248,7 @@ namespace GeonBit.UI.Entities
                             var rectSource = new Rectangle((sizew - destw) / 2, (sizeh - desth) / 2, destw, desth);
 
                             rectDest.Location += _destRect.Location;
-                            UserInterface.Active.DrawUtils.DrawImage(spriteBatch, Texture, rectDest, FillColor, Scale,
+                            _userinterface.Active.DrawUtils.DrawImage(spriteBatch, Texture, rectDest, FillColor, Scale,
                                 rectSource);
                         }
                         //spriteBatch.Draw(Texture, rectDest, rectSource, Color.White) 'rectSource, Color.White)

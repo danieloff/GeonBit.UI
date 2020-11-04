@@ -40,8 +40,8 @@ namespace GeonBit.UI.Entities
         /// <param name="text">Header text.</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public Header(string text, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
-            base(text, anchor, offset: offset)
+        public Header(UserInterface ui, string text, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
+            base(ui, text, anchor, offset: offset)
         {
             UpdateStyle(DefaultStyle);
         }
@@ -49,7 +49,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create default header without text.
         /// </summary>
-        public Header() : this(string.Empty)
+        public Header(UserInterface ui) : this(ui, string.Empty)
         {
         }
     }

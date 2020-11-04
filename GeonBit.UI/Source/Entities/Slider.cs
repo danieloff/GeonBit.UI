@@ -72,8 +72,8 @@ namespace GeonBit.UI.Entities
         /// <param name="skin">Slider skin (texture).</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public Slider(uint min, uint max, Vector2 size, SliderSkin skin = SliderSkin.Default, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
-            base(size, anchor, offset)
+        public Slider(UserInterface ui, uint min, uint max, Vector2 size, SliderSkin skin = SliderSkin.Default, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
+            base(ui, size, anchor, offset)
         {
             // store style
             _skin = skin;
@@ -100,15 +100,15 @@ namespace GeonBit.UI.Entities
         /// <param name="skin">Slider skin (texture).</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public Slider(uint min, uint max, SliderSkin skin = SliderSkin.Default, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
-            this(min, max, USE_DEFAULT_SIZE, skin, anchor, offset)
+        public Slider(UserInterface ui, uint min, uint max, SliderSkin skin = SliderSkin.Default, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
+            this(ui, min, max, USE_DEFAULT_SIZE, skin, anchor, offset)
         {
         }
 
         /// <summary>
         /// Create default slider.
         /// </summary>
-        public Slider() : this(0, 10)
+        public Slider(UserInterface ui) : this(ui, 0, 10)
         {
         }
 
@@ -148,7 +148,7 @@ namespace GeonBit.UI.Entities
         /// <returns>Normalized value.</returns>
         protected int NormalizeValue(int value)
         {
-            if (!UserInterface.Active._isDeserializing)
+            if (!_userinterface.Active._isDeserializing)
             {
                 // round to steps
                 float stepSize = (float)GetStepSize();
@@ -278,7 +278,7 @@ namespace GeonBit.UI.Entities
             float frameWidth = data.FrameWidth;
 
             // draw slider body
-            UserInterface.Active.DrawUtils.DrawSurface(spriteBatch, texture, _destRect, new Vector2(frameWidth, 0f), 1, FillColor);
+            _userinterface.Active.DrawUtils.DrawSurface(spriteBatch, _userinterface, texture, _destRect, new Vector2(frameWidth, 0f), 1, FillColor);
 
             // calc frame actual height and scaling factor (this is needed to calc frame width in pixels)
             Vector2 frameSizeTexture = new Vector2(texture.Width * frameWidth, texture.Height);
@@ -295,7 +295,7 @@ namespace GeonBit.UI.Entities
             // now draw mark
             float markX = _destRect.X + _frameActualWidth + _markWidth * 0.5f + (_destRect.Width - _frameActualWidth * 2 - _markWidth) * GetValueAsPercent();
             Rectangle markDest = new Rectangle((int)System.Math.Round(markX) - _markWidth / 2, _destRect.Y, _markWidth, markHeight);
-            UserInterface.Active.DrawUtils.DrawImage(spriteBatch, markTexture, markDest, FillColor);
+            _userinterface.Active.DrawUtils.DrawImage(spriteBatch, markTexture, markDest, FillColor);
 
             // call base draw function
             base.DrawEntity(spriteBatch, phase);

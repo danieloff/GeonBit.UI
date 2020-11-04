@@ -269,7 +269,7 @@ namespace GeonBit.UI
         /// <param name="content">Content manager to use.</param>
         /// <param name="program">Program name to use for runtime resources</param>
         /// <param name="theme">Which theme to load resources from.</param>
-        static public void LoadContent(ContentManager content, String program, GoodOrBadGame game, string theme = "default")
+        public static void LoadContent(ContentManager content, String program, GoodOrBadGame game, string theme = "default")
         {
             InitialiseCharStringDict();
 

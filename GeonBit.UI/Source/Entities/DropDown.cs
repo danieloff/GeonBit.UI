@@ -143,8 +143,8 @@ namespace GeonBit.UI.Entities
         /// <param name="skin">Panel skin to use for this DropDown list and header.</param>
         /// <param name="listSkin">An optional skin to use for the dropdown list only (if you want a different skin for the list).</param>
         /// <param name="showArrow">If true, will show an up/down arrow next to the dropdown text.</param>
-        public DropDown(Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null, PanelSkin skin = PanelSkin.ListBackground, PanelSkin? listSkin = null, bool showArrow = true) :
-            base(size, anchor, offset)
+        public DropDown(UserInterface ui, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null, PanelSkin skin = PanelSkin.ListBackground, PanelSkin? listSkin = null, bool showArrow = true) :
+            base(ui, size, anchor, offset)
         {
             // default padding of self is 0
             Padding = Vector2.Zero;
@@ -152,12 +152,12 @@ namespace GeonBit.UI.Entities
             // to get collision right when list is opened
             UseActualSizeForCollision = true;
 
-            if (!UserInterface.Active._isDeserializing)
+            if (!_userinterface.Active._isDeserializing)
             {
 
                 // create the panel and paragraph used to show currently selected value (what's shown when drop-down is closed)
-                _selectedTextPanel = new Panel(new Vector2(0, SelectedPanelHeight), skin, Anchor.TopLeft);
-                _selectedTextParagraph = UserInterface.DefaultParagraph(string.Empty, Anchor.CenterLeft);
+                _selectedTextPanel = new Panel(_userinterface, new Vector2(0, SelectedPanelHeight), skin, Anchor.TopLeft);
+                _selectedTextParagraph = _userinterface.DefaultParagraph(string.Empty, Anchor.CenterLeft);
                 _selectedTextParagraph.UseActualSizeForCollision = false;
                 _selectedTextParagraph.UpdateStyle(SelectList.DefaultParagraphStyle);
                 _selectedTextParagraph.UpdateStyle(DefaultParagraphStyle);
@@ -168,14 +168,14 @@ namespace GeonBit.UI.Entities
                 _selectedTextPanel.Identifier = "_selectedTextPanel";
 
                 // create the arrow down icon
-                _arrowDownImage = new Image(Resources.ArrowDown, new Vector2(ArrowSize, ArrowSize), ImageDrawMode.Stretch, Anchor.CenterRight, new Vector2(-10, 0));
+                _arrowDownImage = new Image(_userinterface, Resources.ArrowDown, new Vector2(ArrowSize, ArrowSize), ImageDrawMode.Stretch, Anchor.CenterRight, new Vector2(-10, 0));
                 _selectedTextPanel.AddChild(_arrowDownImage, true);
                 _arrowDownImage._hiddenInternalEntity = true;
                 _arrowDownImage.Identifier = "_arrowDownImage";
                 _arrowDownImage.Visible = showArrow;
 
                 // create the list component
-                _selectList = new SelectList(new Vector2(0f, size.Y), Anchor.TopCenter, Vector2.Zero, listSkin ?? skin);
+                _selectList = new SelectList(_userinterface, new Vector2(0f, size.Y), Anchor.TopCenter, Vector2.Zero, listSkin ?? skin);
 
                 // update list offset and space before
                 _selectList.Offset = new Vector2(0, SelectedPanelHeight);
@@ -192,14 +192,14 @@ namespace GeonBit.UI.Entities
             // if during serialization create just a temp placeholder
             else
             {
-                _selectList = new SelectList(new Vector2(0f, size.Y), Anchor.TopCenter, Vector2.Zero, listSkin ?? skin);
+                _selectList = new SelectList(_userinterface, new Vector2(0f, size.Y), Anchor.TopCenter, Vector2.Zero, listSkin ?? skin);
             }
         }
 
         /// <summary>
         /// Create default dropdown.
         /// </summary>
-        public DropDown() : this(new Vector2(0, 200))
+        public DropDown(UserInterface ui) : this(ui, new Vector2(0, 200))
         {
         }
 
@@ -368,7 +368,7 @@ namespace GeonBit.UI.Entities
         private void OnDropDownVisibilityChange()
         {
             // if during deserialize, skip
-            if (UserInterface.Active._isDeserializing)
+            if (_userinterface.Active._isDeserializing)
                 return;
 
             // update arrow image
@@ -376,7 +376,7 @@ namespace GeonBit.UI.Entities
 
             // focus on selectlist
             _selectList.IsFocused = true;
-            UserInterface.Active.ActiveEntity = _selectList;
+            _userinterface.Active.ActiveEntity = _selectList;
 
             // update destination rectangles
             _selectList.UpdateDestinationRects();

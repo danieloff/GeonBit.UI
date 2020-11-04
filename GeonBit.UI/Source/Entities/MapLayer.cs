@@ -14,7 +14,7 @@ namespace GeonBit.UI.Entities
         public Point TIleId;
         public Texture2D Texture;
     }
-    class MapLayer : Entity
+    /*class MapLayer : Entity
     {
         public List<MapLayerTile> Tiles;
         protected override void DrawEntity(SpriteBatch spriteBatch, DrawPhase phase)
@@ -27,11 +27,11 @@ namespace GeonBit.UI.Entities
                     var rectDest = new Rectangle(rectSource.X, rectSource.Y, rectSource.Width, rectSource.Height);
 
                     rectDest.Location += _destRect.Location;
-                    UserInterface.Active.DrawUtils.DrawImage(spriteBatch, tile.Texture, rectDest, FillColor, Scale, rectSource);
+                    _userinterface.Active.DrawUtils.DrawImage(spriteBatch, tile.Texture, rectDest, FillColor, Scale, rectSource);
 
                 }
             }
             base.DrawEntity(spriteBatch, phase);
         }
-    }
+    }*/
 }

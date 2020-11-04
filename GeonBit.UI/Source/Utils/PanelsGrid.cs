@@ -30,7 +30,7 @@ namespace GeonBit.UI.Utils
             // create panels
             for (int i = 0; i < amount; ++i)
             {
-                Panel currPanel = new Panel(columnSize.Value, skin, Anchor.AutoInlineNoBreak);
+                Panel currPanel = new Panel(parent._userinterface, columnSize.Value, skin, Anchor.AutoInlineNoBreak);
                 currPanel.Padding = Vector2.Zero;
                 retList.Add(currPanel);
                 if (parent != null) { parent.AddChild(currPanel); }
@@ -56,7 +56,7 @@ namespace GeonBit.UI.Utils
             // create panels
             foreach (var currSize in panelSizes)
             {
-                Panel currPanel = new Panel(currSize, skin, Anchor.AutoInlineNoBreak);
+                Panel currPanel = new Panel(parent._userinterface, currSize, skin, Anchor.AutoInlineNoBreak);
                 currPanel.Padding = Vector2.Zero;
                 retList.Add(currPanel);
                 if (parent != null) { parent.AddChild(currPanel); }

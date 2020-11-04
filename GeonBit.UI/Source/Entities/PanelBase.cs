@@ -89,8 +89,8 @@ namespace GeonBit.UI.Entities
         /// <param name="skin">Panel skin (texture to use). Use PanelSkin.None for invisible panels.</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public PanelBase(Vector2 size, PanelSkin skin, Anchor anchor = Anchor.Center, Vector2? offset = null) :
-            base(size, anchor, offset)
+        public PanelBase(UserInterface ui, Vector2 size, PanelSkin skin, Anchor anchor = Anchor.Center, Vector2? offset = null) :
+            base(ui, size, anchor, offset)
         {
             _skin = skin;
             UpdateStyle(Panel.DefaultStyle);
@@ -99,8 +99,8 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create the panel with default params.
         /// </summary>
-        public PanelBase(PanelSkin skin) :
-            this(new Vector2(500, 500), skin)
+        public PanelBase(UserInterface ui, PanelSkin skin) :
+            this(ui, new Vector2(500, 500), skin)
         {
         }
 
@@ -175,7 +175,7 @@ namespace GeonBit.UI.Entities
             if ((InternalSize().Y != maxHeight))
             {
 
-                Size = new Vector2(Size.X, maxHeight / UserInterface.Active.GlobalScale + (Size.Y - InternalSize().Y) / 2 );
+                Size = new Vector2(Size.X, maxHeight / _userinterface.Active.GlobalScale + (Size.Y - InternalSize().Y) / 2 );
                 UpdateDestinationRects();
                 foreach (var child in _children)
                 {
@@ -224,7 +224,7 @@ namespace GeonBit.UI.Entities
                 Vector2 frameSize = _customFrame ?? new Vector2(data.FrameWidth, data.FrameHeight);
 
                 // draw panel
-                UserInterface.Active.DrawUtils.DrawSurface(spriteBatch, texture, _destRect, frameSize, 1f, FillColor, Scale);
+                _userinterface.Active.DrawUtils.DrawSurface(spriteBatch, _userinterface, texture, _destRect, frameSize, 1f, FillColor, Scale);
             }
 
             // call base draw function

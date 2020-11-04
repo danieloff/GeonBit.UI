@@ -44,8 +44,8 @@ namespace GeonBit.UI.Entities
         /// <param name="size">Rectangle size in pixels.</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from position anchor.</param>
-        public ColoredRectangle(Color fillColor, Color? outlineColor = null, int outlineWidth = 1, Vector2? size = null, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
-            base(size, anchor, offset)
+        public ColoredRectangle(UserInterface ui, Color fillColor, Color? outlineColor = null, int outlineWidth = 1, Vector2? size = null, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
+            base(ui, size, anchor, offset)
         {
             UpdateStyle(DefaultStyle);
             FillColor = fillColor;
@@ -61,8 +61,8 @@ namespace GeonBit.UI.Entities
         /// <param name="size">Rectangle size in pixels.</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from position anchor.</param>
-        public ColoredRectangle(Color fillColor, Color outlineColor, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
-            base(size, anchor, offset)
+        public ColoredRectangle(UserInterface ui, Color fillColor, Color outlineColor, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
+            base(ui, size, anchor, offset)
         {
             UpdateStyle(DefaultStyle);
             FillColor = fillColor;
@@ -76,8 +76,8 @@ namespace GeonBit.UI.Entities
         /// <param name="size">Rectangle size in pixels.</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from position anchor.</param>
-        public ColoredRectangle(Color fillColor, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
-            base(size, anchor, offset)
+        public ColoredRectangle(UserInterface ui, Color fillColor, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
+            base(ui, size, anchor, offset)
         {
             UpdateStyle(DefaultStyle);
             FillColor = fillColor;
@@ -87,7 +87,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create default colored rectangle.
         /// </summary>
-        public ColoredRectangle() : this(Color.White)
+        public ColoredRectangle(UserInterface ui) : this(ui, Color.White)
         {
         }
 
@@ -97,8 +97,8 @@ namespace GeonBit.UI.Entities
         /// <param name="size">Rectangle size in pixels.</param>
         /// <param name="anchor">Position anchor.</param>
         /// <param name="offset">Offset from position anchor.</param>
-        public ColoredRectangle(Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
-            base(size, anchor, offset)
+        public ColoredRectangle(UserInterface ui, Vector2 size, Anchor anchor = Anchor.Auto, Vector2? offset = null) :
+            base(ui, size, anchor, offset)
         {
             UpdateStyle(DefaultStyle);
         }

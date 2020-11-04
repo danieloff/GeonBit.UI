@@ -122,18 +122,18 @@ namespace GeonBit.UI.Utils
         /// <param name="onDone">Optional callback to call when this msgbox closes.</param>
         /// <param name="parent">Parent to add message box to (if not defined will use root)</param>
         /// <returns>Message box handle.</returns>
-        public static MessageBoxHandle ShowMsgBox(string header, string text, MsgBoxOption[] options, Entities.PanelSkin skin, Entities.Entity[] extraEntities = null, Vector2? size = null, System.Action onDone = null, Entities.Entity parent = null)
+        public static MessageBoxHandle ShowMsgBox(UserInterface _userinterface, string header, string text, MsgBoxOption[] options, Entities.PanelSkin skin, Entities.Entity[] extraEntities = null, Vector2? size = null, System.Action onDone = null, Entities.Entity parent = null)
         {
             // object to return
             MessageBoxHandle ret = new MessageBoxHandle();
 
             // create panel for messagebox
             size = size ?? new Vector2(500, -1);
-            var panel = new Entities.Panel(size.Value, skin);
+            var panel = new Entities.Panel(_userinterface, size.Value, skin);
             ret.Panel = panel;
-            panel.AddChild(new Entities.Header(header));
-            panel.AddChild(new Entities.HorizontalLine());
-            panel.AddChild(new Entities.RichParagraph(text));
+            panel.AddChild(new Entities.Header(_userinterface, header));
+            panel.AddChild(new Entities.HorizontalLine(_userinterface));
+            panel.AddChild(new Entities.RichParagraph(_userinterface, text));
 
             // add to opened boxes counter
             OpenedMsgBoxesCount++;
@@ -142,11 +142,11 @@ namespace GeonBit.UI.Utils
             Entities.ColoredRectangle fader = null;
             if (BackgroundFaderColor.A != 0)
             {
-                fader = new Entities.ColoredRectangle(Vector2.Zero, Entities.Anchor.Center);
+                fader = new Entities.ColoredRectangle(_userinterface, Vector2.Zero, Entities.Anchor.Center);
                 fader.FillColor = new Color(0, 0, 0, 100);
                 fader.OutlineWidth = 0;
                 fader.ClickThrough = false;
-                UserInterface.Active.AddEntity(fader);
+                _userinterface.Active.AddEntity(fader);
                 ret.BackgroundFader = fader;
             }
 
@@ -160,7 +160,7 @@ namespace GeonBit.UI.Utils
             }
 
             // add bottom buttons panel
-            var buttonsPanel = new Entities.Panel(new Vector2(0, 70), 
+            var buttonsPanel = new Entities.Panel(_userinterface, new Vector2(0, 70), 
                 Entities.PanelSkin.None, size.Value.Y == -1 ? Entities.Anchor.Auto : Entities.Anchor.BottomCenter);
             buttonsPanel.Padding = Vector2.Zero;
             panel.AddChild(buttonsPanel);
@@ -171,7 +171,7 @@ namespace GeonBit.UI.Utils
             foreach (var option in options)
             {
                 // add button entity
-                var button = new Entities.Button(option.Title, anchor: Entities.Anchor.AutoInline, size: btnSize);
+                var button = new Entities.Button(_userinterface, option.Title, anchor: Entities.Anchor.AutoInline, size: btnSize);
 
                 // set click event
                 button.OnClick += (Entities.Entity ent) =>
@@ -203,7 +203,7 @@ namespace GeonBit.UI.Utils
             // add panel to active ui root
             else
             {
-                UserInterface.Active.AddEntity(panel);
+                _userinterface.Active.AddEntity(panel);
             }
             return ret;
         }
@@ -218,9 +218,9 @@ namespace GeonBit.UI.Utils
         /// <param name="extraEntities">Optional array of entities to add to msg box under the text and above the buttons.</param>
         /// <param name="onDone">Optional callback to call when this msgbox closes.</param>
         /// <returns>Message box panel.</returns>
-        public static MessageBoxHandle ShowMsgBox(string header, string text, Entities.PanelSkin skin, string closeButtonTxt = null, Vector2? size = null, Entities.Entity[] extraEntities = null, System.Action onDone = null)
+        public static MessageBoxHandle ShowMsgBox(UserInterface _userinterface, string header, string text, Entities.PanelSkin skin, string closeButtonTxt = null, Vector2? size = null, Entities.Entity[] extraEntities = null, System.Action onDone = null)
         {
-            return ShowMsgBox(header, text, new MsgBoxOption[]
+            return ShowMsgBox(_userinterface, header, text, new MsgBoxOption[]
             {
                 new MsgBoxOption(closeButtonTxt ?? DefaultOkButtonText, null)
             }, skin, size: size ?? DefaultMsgBoxSize, extraEntities: extraEntities, onDone: onDone);

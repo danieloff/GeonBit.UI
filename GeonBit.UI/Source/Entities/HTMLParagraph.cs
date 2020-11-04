@@ -28,7 +28,7 @@ namespace GeonBit.UI.Entities {
             //CalculateOffsets();
         }*/
 
-        public HTMLParagraph() : base(new Vector2(-1, -1), Anchor.Auto, Vector2.Zero) { //grows infinitely if I don't specify a size?
+        public HTMLParagraph(UserInterface ui) : base(ui, new Vector2(-1, -1), Anchor.Auto, Vector2.Zero) { //grows infinitely if I don't specify a size?
             
         }
         

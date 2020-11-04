@@ -147,6 +147,7 @@ namespace GeonBit.UI.Entities
     [System.Serializable]
     public abstract class Entity
     {
+        public UserInterface _userinterface;
         /// <summary>
         /// Static ctor.
         /// </summary>
@@ -592,8 +593,9 @@ namespace GeonBit.UI.Entities
         /// <param name="size">Entity size, in pixels.</param>
         /// <param name="anchor">Poisition anchor.</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public Entity(Vector2? size = null, Anchor anchor = Anchor.Auto, Vector2? offset = null)
+        public Entity(UserInterface userinterface, Vector2? size = null, Anchor anchor = Anchor.Auto, Vector2? offset = null)
         {
+            _userinterface = userinterface;
             // set as dirty (eg need to recalculate destination rect)
             MarkAsDirty();
 
@@ -625,7 +627,7 @@ namespace GeonBit.UI.Entities
         /// <returns>Mouse position.</returns>
         protected Vector2 GetMousePos(Vector2? addVector = null)
         {
-            return UserInterface.Active.GetTransformedCursorPos(addVector);
+            return _userinterface.Active.GetTransformedCursorPos(addVector);
         }
 
         /// <summary>
@@ -633,7 +635,7 @@ namespace GeonBit.UI.Entities
         /// </summary>
         protected IMouseInput MouseInput
         {
-            get { return UserInterface.Active.MouseInputProvider; }
+            get { return _userinterface.Active.MouseInputProvider; }
         }
 
         /// <summary>
@@ -641,7 +643,7 @@ namespace GeonBit.UI.Entities
         /// </summary>
         protected IKeyboardInput KeyboardInput
         {
-            get { return UserInterface.Active.KeyboardInputProvider; }
+            get { return _userinterface.Active.KeyboardInputProvider; }
         }
 
         /// <summary>
@@ -649,7 +651,7 @@ namespace GeonBit.UI.Entities
         /// </summary>
         protected float GlobalScale
         {
-            get { return UserInterface.Active.GlobalScale; }
+            get { return _userinterface.Active.GlobalScale; }
         }
 
         /// <summary>
@@ -657,7 +659,7 @@ namespace GeonBit.UI.Entities
         /// </summary>
         protected bool DebugDraw
         {
-            get { return UserInterface.Active.DebugDraw; }
+            get { return _userinterface.Active.DebugDraw; }
         }
 
         /// <summary>
@@ -666,7 +668,7 @@ namespace GeonBit.UI.Entities
         protected virtual void DoOnFirstUpdate()
         {
             // call the spawn event
-            UserInterface.Active.OnEntitySpawn?.Invoke(this);
+            _userinterface.Active.OnEntitySpawn?.Invoke(this);
 
             // make parent dirty
             if (_parent != null)
@@ -1303,9 +1305,9 @@ namespace GeonBit.UI.Entities
             DrawEntityOutline(spriteBatch);
 
             // draw the entity itself
-            UserInterface.Active.DrawUtils.StartDraw(spriteBatch, _isCurrentlyDisabled);
+            _userinterface.Active.DrawUtils.StartDraw(spriteBatch, _userinterface, _isCurrentlyDisabled);
             DrawEntity(spriteBatch, DrawPhase.Base);
-            UserInterface.Active.DrawUtils.EndDraw(spriteBatch);
+            _userinterface.Active.DrawUtils.EndDraw(spriteBatch);
 
             // do debug drawing
             if (DebugDraw)
@@ -1500,9 +1502,9 @@ namespace GeonBit.UI.Entities
             }
 
             // draw with shadow effect
-            UserInterface.Active.DrawUtils.StartDrawSilhouette(spriteBatch);
+            _userinterface.Active.DrawUtils.StartDrawSilhouette(spriteBatch, _userinterface);
             DrawEntity(spriteBatch, DrawPhase.Shadow);
-            UserInterface.Active.DrawUtils.EndDraw(spriteBatch);
+            _userinterface.Active.DrawUtils.EndDraw(spriteBatch);
 
             // return position and colors back to what they were
             _destRect.X -= (int)ShadowOffset.X;
@@ -1550,7 +1552,7 @@ namespace GeonBit.UI.Entities
             SetStyleProperty(StylePropertyIds.FillColor, new StyleProperty(outlineColor), oldState, markAsDirty: false);
 
             // draw the entity outline
-            UserInterface.Active.DrawUtils.StartDrawSilhouette(spriteBatch);
+            _userinterface.Active.DrawUtils.StartDrawSilhouette(spriteBatch, _userinterface);
             _destRect.Location = originalDest.Location + new Point(-outlineWidth, 0);
             DrawEntity(spriteBatch, DrawPhase.Outline);
             _destRect.Location = originalDest.Location + new Point(0, -outlineWidth);
@@ -1559,7 +1561,7 @@ namespace GeonBit.UI.Entities
             DrawEntity(spriteBatch, DrawPhase.Outline);
             _destRect.Location = originalDest.Location + new Point(0, outlineWidth);
             DrawEntity(spriteBatch, DrawPhase.Outline);
-            UserInterface.Active.DrawUtils.EndDraw(spriteBatch);
+            _userinterface.Active.DrawUtils.EndDraw(spriteBatch);
 
             // turn back to previous fill color
             SetStyleProperty(StylePropertyIds.FillColor, new StyleProperty(oldFill), oldState, markAsDirty: false);
@@ -1591,7 +1593,7 @@ namespace GeonBit.UI.Entities
         virtual protected void OnAfterDraw(SpriteBatch spriteBatch)
         {
             AfterDraw?.Invoke(this);
-            UserInterface.Active.AfterDraw?.Invoke(this);
+            _userinterface.Active.AfterDraw?.Invoke(this);
             IsPainted = true;
         }
 
@@ -1602,7 +1604,7 @@ namespace GeonBit.UI.Entities
         virtual protected void OnBeforeDraw(SpriteBatch spriteBatch)
         {
             BeforeDraw?.Invoke(this);
-            UserInterface.Active.BeforeDraw?.Invoke(this);
+            _userinterface.Active.BeforeDraw?.Invoke(this);
         }
 
         /// <summary>
@@ -1625,11 +1627,11 @@ namespace GeonBit.UI.Entities
             // make sure don't already have a parent
             if (child._parent != null)
             {
-                if (UserInterface.Active.SilentSoftErrors) return child;
+                if (_userinterface.Active.SilentSoftErrors) return child;
                 throw new Exceptions.InvalidStateException("Child element to add already got a parent!");
             }
 
-            UserInterface.Active.GameUI.AddChild(child);
+            _userinterface.Active.GameUI.AddChild(child);
 
             // need to sort children
             _needToSortChildren = true;
@@ -1697,7 +1699,7 @@ namespace GeonBit.UI.Entities
             // make sure don't already have a parent
             if (child._parent != this)
             {
-                if (UserInterface.Active.SilentSoftErrors) return;
+                if (_userinterface.Active.SilentSoftErrors) return;
                 throw new Exceptions.InvalidStateException("Child element to remove does not belong to this entity!");
             }
 
@@ -1795,7 +1797,7 @@ namespace GeonBit.UI.Entities
             }
 
             // get parent internal destination rectangle
-            var parentDest = UserInterface.Active.Root._destRect;
+            var parentDest = _userinterface.Active.Root._destRect;
             if (_parent != null)
             {
                 _parent.UpdateDestinationRectsIfDirty();
@@ -1821,7 +1823,7 @@ namespace GeonBit.UI.Entities
             var parent = _parent;
             if (parent == null)
             {
-                parent = UserInterface.Active.Root;
+                parent = _userinterface.Active.Root;
             }
 
             // set default size
@@ -2176,7 +2178,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoOnMouseDown()
         {
             OnMouseDown?.Invoke(this);
-            UserInterface.Active.OnMouseDown?.Invoke(this);
+            _userinterface.Active.OnMouseDown?.Invoke(this);
         }
 
         /// <summary>
@@ -2185,7 +2187,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoOnMouseReleased()
         {
             OnMouseReleased?.Invoke(this);
-            UserInterface.Active.OnMouseReleased?.Invoke(this);
+            _userinterface.Active.OnMouseReleased?.Invoke(this);
         }
 
         /// <summary>
@@ -2194,7 +2196,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoOnClick()
         {
             OnClick?.Invoke(this);
-            UserInterface.Active.OnClick?.Invoke(this);
+            _userinterface.Active.OnClick?.Invoke(this);
         }
 
         /// <summary>
@@ -2203,7 +2205,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoWhileMouseDown()
         {
             WhileMouseDown?.Invoke(this);
-            UserInterface.Active.WhileMouseDown?.Invoke(this);
+            _userinterface.Active.WhileMouseDown?.Invoke(this);
         }
 
         /// <summary>
@@ -2212,7 +2214,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoWhileMouseHover()
         {
             WhileMouseHover?.Invoke(this);
-            UserInterface.Active.WhileMouseHover?.Invoke(this);
+            _userinterface.Active.WhileMouseHover?.Invoke(this);
         }
 
         /// <summary>
@@ -2222,25 +2224,25 @@ namespace GeonBit.UI.Entities
         {
             // invoke callback and global callback
             WhileMouseHoverOrDown?.Invoke(this);
-            UserInterface.Active.WhileMouseHoverOrDown?.Invoke(this);
+            _userinterface.Active.WhileMouseHoverOrDown?.Invoke(this);
 
             // do right mouse click event
             if (MouseInput.MouseButtonClick(MouseButton.Right))
             {
                 OnRightClick?.Invoke(this);
-                UserInterface.Active.OnRightClick?.Invoke(this);
+                _userinterface.Active.OnRightClick?.Invoke(this);
             }
             // do right mouse down event
             else if (MouseInput.MouseButtonPressed(MouseButton.Right))
             {
                 OnRightMouseDown?.Invoke(this);
-                UserInterface.Active.OnRightMouseDown?.Invoke(this);
+                _userinterface.Active.OnRightMouseDown?.Invoke(this);
             }
             // do while right mouse down even
             else if (MouseInput.MouseButtonDown(MouseButton.Right))
             {
                 WhileRightMouseDown?.Invoke(this);
-                UserInterface.Active.WhileRightMouseDown?.Invoke(this);
+                _userinterface.Active.WhileRightMouseDown?.Invoke(this);
             }
         }
 
@@ -2250,7 +2252,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoOnValueChange()
         {
             OnValueChange?.Invoke(this);
-            UserInterface.Active.OnValueChange?.Invoke(this);
+            _userinterface.Active.OnValueChange?.Invoke(this);
         }
 
         /// <summary>
@@ -2259,7 +2261,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoOnMouseEnter()
         {
             OnMouseEnter?.Invoke(this);
-            UserInterface.Active.OnMouseEnter?.Invoke(this);
+            _userinterface.Active.OnMouseEnter?.Invoke(this);
         }
 
         /// <summary>
@@ -2268,7 +2270,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoOnMouseLeave()
         {
             OnMouseLeave?.Invoke(this);
-            UserInterface.Active.OnMouseLeave?.Invoke(this);
+            _userinterface.Active.OnMouseLeave?.Invoke(this);
         }
 
         /// <summary>
@@ -2277,7 +2279,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoOnStartDrag()
         {
             OnStartDrag?.Invoke(this);
-            UserInterface.Active.OnStartDrag?.Invoke(this);
+            _userinterface.Active.OnStartDrag?.Invoke(this);
         }
 
         /// <summary>
@@ -2286,7 +2288,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoOnStopDrag()
         {
             OnStopDrag?.Invoke(this);
-            UserInterface.Active.OnStopDrag?.Invoke(this);
+            _userinterface.Active.OnStopDrag?.Invoke(this);
         }
 
         /// <summary>
@@ -2295,7 +2297,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoWhileDragging()
         {
             WhileDragging?.Invoke(this);
-            UserInterface.Active.WhileDragging?.Invoke(this);
+            _userinterface.Active.WhileDragging?.Invoke(this);
         }
 
         /// <summary>
@@ -2304,7 +2306,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoOnMouseWheelScroll()
         {
             OnMouseWheelScroll?.Invoke(this);
-            UserInterface.Active.OnMouseWheelScroll?.Invoke(this);
+            _userinterface.Active.OnMouseWheelScroll?.Invoke(this);
         }
 
         /// <summary>
@@ -2313,7 +2315,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoAfterUpdate()
         {
             AfterUpdate?.Invoke(this);
-            UserInterface.Active.AfterUpdate?.Invoke(this);
+            _userinterface.Active.AfterUpdate?.Invoke(this);
         }
 
         /// <summary>
@@ -2323,7 +2325,7 @@ namespace GeonBit.UI.Entities
         {
             // invoke callbacks
             OnVisiblityChange?.Invoke(this);
-            UserInterface.Active.OnVisiblityChange?.Invoke(this);
+            _userinterface.Active.OnVisiblityChange?.Invoke(this);
         }
 
         /// <summary>
@@ -2332,7 +2334,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoBeforeUpdate()
         {
             BeforeUpdate?.Invoke(this);
-            UserInterface.Active.BeforeUpdate?.Invoke(this);
+            _userinterface.Active.BeforeUpdate?.Invoke(this);
         }
 
         /// <summary>
@@ -2341,7 +2343,7 @@ namespace GeonBit.UI.Entities
         virtual protected void DoOnFocusChange()
         {
             OnFocusChange?.Invoke(this);
-            UserInterface.Active.OnFocusChange?.Invoke(this);
+            _userinterface.Active.OnFocusChange?.Invoke(this);
         }
 
         /// <summary>
@@ -2666,7 +2668,7 @@ namespace GeonBit.UI.Entities
             }
 
             // handle mouse wheel scroll over this entity
-            if (targetEntity == this || UserInterface.Active.ActiveEntity == this)
+            if (targetEntity == this || _userinterface.Active.ActiveEntity == this)
             {
                 if (MouseInput.MouseWheelChange != 0)
                 {

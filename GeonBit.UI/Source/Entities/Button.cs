@@ -83,8 +83,8 @@ namespace GeonBit.UI.Entities
         /// <param name="anchor">Position anchor.</param>
         /// <param name="size">Button size (if not defined will use default size).</param>
         /// <param name="offset">Offset from anchor position.</param>
-        public Button(string text, ButtonSkin skin = ButtonSkin.Default, Anchor anchor = Anchor.Auto, Vector2? size = null, Vector2? offset = null) :
-            base(size, anchor, offset)
+        public Button(UserInterface ui, string text, ButtonSkin skin = ButtonSkin.Default, Anchor anchor = Anchor.Auto, Vector2? size = null, Vector2? offset = null) :
+            base(ui, size, anchor, offset)
         {
             // store style
             _skin = skin;
@@ -92,10 +92,10 @@ namespace GeonBit.UI.Entities
             // update styles
             UpdateStyle(DefaultStyle);
 
-            if (!UserInterface.Active._isDeserializing)
+            if (!_userinterface.Active._isDeserializing)
             {
                 // create and set button paragraph
-                ButtonParagraph = UserInterface.DefaultParagraph(text, Anchor.Center);
+                ButtonParagraph = _userinterface.DefaultParagraph(text, Anchor.Center);
                 ButtonParagraph._hiddenInternalEntity = true;
                 ButtonParagraph.UpdateStyle(DefaultParagraphStyle);
                 ButtonParagraph.Identifier = "_button_caption";
@@ -106,7 +106,7 @@ namespace GeonBit.UI.Entities
         /// <summary>
         /// Create button with default params and without text.
         /// </summary>
-        public Button() : this(string.Empty)
+        public Button(UserInterface ui) : this(ui, string.Empty)
         {
         }
 
@@ -220,12 +220,12 @@ namespace GeonBit.UI.Entities
                 if (frameSize.Length() > 0)
                 {
                     float scale = frameSize.Y > 0 ? Scale : 1f;
-                    UserInterface.Active.DrawUtils.DrawSurface(spriteBatch, texture, _destRect, frameSize, 1, FillColor, scale);
+                    _userinterface.Active.DrawUtils.DrawSurface(spriteBatch, _userinterface, texture, _destRect, frameSize, 1, FillColor, scale);
                 }
                 // draw the button background without frame (just stretch texture)
                 else
                 {
-                    UserInterface.Active.DrawUtils.DrawImage(spriteBatch, texture, _destRect, FillColor, 1);
+                    _userinterface.Active.DrawUtils.DrawImage(spriteBatch, texture, _destRect, FillColor, 1);
                 }
             }
 
