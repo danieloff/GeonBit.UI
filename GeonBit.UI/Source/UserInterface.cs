@@ -657,6 +657,126 @@ namespace GeonBit.UI
                 _renderTarget = null;
             }
         }
+/// <summary>
+        /// Draw the UI. This function should be called from your Game 'Draw()' function.
+        /// Note: if UseRenderTarget is true, this function should be called FIRST in your draw function.
+        /// If UseRenderTarget is false, this function should be called LAST in your draw function.
+        /// </summary>
+        /// <param name="spriteBatch">SpriteBatch to draw on.</param>
+        public void DrawLayer(SpriteBatch spriteBatch, GameTime gameTime, Panel p)
+        {
+            int newScreenWidth = spriteBatch.GraphicsDevice.Viewport.Width;
+            int newScreenHeight = spriteBatch.GraphicsDevice.Viewport.Height;
+
+            // update screen size
+            if (ScreenWidth != newScreenWidth || ScreenHeight != newScreenHeight)
+            {
+                ScreenWidth = newScreenWidth;
+                ScreenHeight = newScreenHeight;
+                Root.MarkAsDirty();
+            }
+
+            // if using rendering targets
+            if (UseRenderTarget)
+            {
+                // check if screen size changed or don't have a render target yet. if so, create the render target.
+                if (_renderTarget == null ||
+                    _renderTarget.Width != ScreenWidth ||
+                    _renderTarget.Height != ScreenHeight)
+                {
+                    // recreate render target
+                    DisposeRenderTarget();
+                    _renderTarget = new RenderTarget2D(spriteBatch.GraphicsDevice,
+                        ScreenWidth, ScreenHeight, false,
+                        spriteBatch.GraphicsDevice.PresentationParameters.BackBufferFormat,
+                        spriteBatch.GraphicsDevice.PresentationParameters.DepthStencilFormat, 0,
+                        RenderTargetUsage.PreserveContents);
+                }
+                // if didn't create a new render target, clear it
+                else
+                {
+                    spriteBatch.GraphicsDevice.SetRenderTarget(_renderTarget);
+                    spriteBatch.GraphicsDevice.Clear(Color.Transparent);
+                }
+            }
+
+            // draw layer panel
+            p.Draw(spriteBatch, gameTime);
+
+            // draw cursor (unless using render targets and should draw cursor outside of it)
+            if (ShowCursor && (IncludeCursorInRenderTarget || !UseRenderTarget))
+            {
+                DrawCursor(spriteBatch);
+            }
+
+            // reset render target
+            if (UseRenderTarget)
+            {
+                spriteBatch.GraphicsDevice.SetRenderTarget(null);
+            }
+        }
+
+ /// <summary>
+        /// Draw the UI. This function should be called from your Game 'Draw()' function.
+        /// Note: if UseRenderTarget is true, this function should be called FIRST in your draw function.
+        /// If UseRenderTarget is false, this function should be called LAST in your draw function.
+        /// </summary>
+        /// <param name="spriteBatch">SpriteBatch to draw on.</param>
+        public void DrawDirty(SpriteBatch spriteBatch, GameTime gameTime)
+        {
+            int newScreenWidth = spriteBatch.GraphicsDevice.Viewport.Width;
+            int newScreenHeight = spriteBatch.GraphicsDevice.Viewport.Height;
+
+            // update screen size
+            if (ScreenWidth != newScreenWidth || ScreenHeight != newScreenHeight)
+            {
+                ScreenWidth = newScreenWidth;
+                ScreenHeight = newScreenHeight;
+                Root.MarkAsDirty();
+            }
+
+            // if using rendering targets
+            if (UseRenderTarget)
+            {
+                // check if screen size changed or don't have a render target yet. if so, create the render target.
+                if (_renderTarget == null ||
+                    _renderTarget.Width != ScreenWidth ||
+                    _renderTarget.Height != ScreenHeight)
+                {
+                    // recreate render target
+                    DisposeRenderTarget();
+                    _renderTarget = new RenderTarget2D(spriteBatch.GraphicsDevice,
+                        ScreenWidth, ScreenHeight, false,
+                        spriteBatch.GraphicsDevice.PresentationParameters.BackBufferFormat,
+                        spriteBatch.GraphicsDevice.PresentationParameters.DepthStencilFormat, 0,
+                        RenderTargetUsage.PreserveContents);
+                }
+                // if didn't create a new render target, clear it
+                else
+                {
+                    spriteBatch.GraphicsDevice.SetRenderTarget(_renderTarget);
+                    spriteBatch.GraphicsDevice.Clear(Color.Transparent);
+                }
+            }
+
+            // draw root panel
+            if (Root.IsDirty)
+            {
+                Root.Draw(spriteBatch, gameTime);
+            }
+
+            // draw cursor (unless using render targets and should draw cursor outside of it)
+            if (ShowCursor && (IncludeCursorInRenderTarget || !UseRenderTarget))
+            {
+                DrawCursor(spriteBatch);
+            }
+
+            // reset render target
+            if (UseRenderTarget)
+            {
+                spriteBatch.GraphicsDevice.SetRenderTarget(null);
+            }
+        }
 
         /// <summary>
         /// Draw the UI. This function should be called from your Game 'Draw()' function.
