@@ -213,6 +213,8 @@ namespace GeonBit.UI.Entities
         /// <summary>Base font size. Change this property to affect the size of all paragraphs and other text entities.</summary>
         public static float BaseSize = 1f;
 
+        private DynamicSpriteFont _basefont;
+
         /// <summary>
         /// Create the paragraph.
         /// </summary>
@@ -438,7 +440,11 @@ namespace GeonBit.UI.Entities
         /// <returns>Current font.</returns>
         protected DynamicSpriteFont GetCurrFont()
         {
-            return FontOverride ?? Resources.Fonts[(int)TextStyle];
+            if (_basefont == null)
+            {
+                _basefont = Resources.Fonts[(int) TextStyle].AddRef();
+            }
+            return FontOverride ?? _basefont;
         }
 
         /// <summary>

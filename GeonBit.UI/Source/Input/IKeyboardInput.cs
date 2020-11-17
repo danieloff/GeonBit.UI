@@ -62,6 +62,6 @@ namespace GeonBit.UI
         /// <param name="breakidx">list of where the current line breaks are for up and down movement in the text.</param>
         /// <param name="pos">Position to insert / remove characters. -1 to push at the end of string. After done, will contain actual new caret position.</param>
         /// <returns>String after text input applied on it.</returns>
-        string GetTextInput(string txt, List<bool> modifierstates, int[] breakidx, ref int pos);
+        string GetTextInput(string txt, ref List<bool> modifierstates, int[] breakidx, ref int pos);
     }
 }

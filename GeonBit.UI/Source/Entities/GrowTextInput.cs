@@ -662,7 +662,7 @@ namespace GeonBit.UI.Entities
                 string oldVal = _value;
                 List<bool> oldModifiers = new List<bool>(_valuemodifiers);
                 int[] breakidx = { }; //no breaks for now TODO
-                _value = KeyboardInput.GetTextInput(_value, _valuemodifiers, breakidx, ref pos);
+                _value = KeyboardInput.GetTextInput(_value, ref _valuemodifiers, breakidx, ref pos);
                 //TODO for when there are breaks: TextParagraph.TrimToFit(_value);
 
                 // update caret position

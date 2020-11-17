@@ -29,6 +29,7 @@ namespace GeonBit.UI.Entities
         }
 
         // current text value
+        private List<bool> _modifiers = new List<bool>();
         string _value = string.Empty;
 
         // current caret position (-1 is last character).
@@ -255,6 +256,7 @@ namespace GeonBit.UI.Entities
             {
                 value = value ?? string.Empty;
                 _value = _multiLine ? value : value.Replace("\n", string.Empty);
+                //trim down the modifiers here?
                 FixCaretPosition();
             }
         }
@@ -564,10 +566,11 @@ namespace GeonBit.UI.Entities
                 int pos = _caret;
 
                 // store old string and update based on user input
+                var oldModifiers = new List<bool>(_modifiers);
                 string oldVal = _value;
                 int[] breakidx = { }; //no breaks for now TODO
-                List<bool> modifiers = new List<bool>();
-                _value = KeyboardInput.GetTextInput(_value, modifiers, breakidx, ref pos);
+                //_modifiers = new List<bool>();
+                _value = KeyboardInput.GetTextInput(_value, ref _modifiers, breakidx, ref pos);
                 //TODO for when there are breaks: TextParagraph.TrimToFit(_value);
 
                 // update caret position
@@ -580,6 +583,7 @@ namespace GeonBit.UI.Entities
                     if (!ValidateInput(ref _value, oldVal))
                     {
                         _value = oldVal;
+                        _modifiers = oldModifiers;
                     }
 
                     // call change event

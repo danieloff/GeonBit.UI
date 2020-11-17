@@ -457,7 +457,7 @@ namespace GeonBit.UI
         /// <param name="breakidx">Where the current breaks are</param>
         /// <param name="pos">Position to insert / remove characters. -1 to push at the end of string. After done, will contain actual new caret position.</param>
         /// <returns>String after text input applied on it.</returns>
-        public string GetTextInput(string txt, List<bool> modifierstates, int[] breakidx, ref int pos)
+        public string GetTextInput(string txt, ref List<bool> modifierstates, int[] breakidx, ref int pos)
         {
             // if need to skip due to cooldown time
             if (!_newKeyIsPressed && _keyboardInputCooldown > 0f)
@@ -578,6 +578,7 @@ namespace GeonBit.UI
             {
                 var txt2 = txt.Insert(pos, _currCharacterInput.ToString());
                 modifierstates.Insert(pos, _currCharacterInputShiftDown);
+                
                 pos++;
                 return txt2;
             }
