@@ -84,6 +84,36 @@ namespace GeonBit.UI
         /// </summary>
         public int MouseWheelChange { get; private set; }
 
+        public bool IsTouchGestureDragStart()
+        {
+            return false;
+        }
+
+        public bool IsTouchGestureDragging()
+        {
+            return false;
+        }
+
+        public bool IsTouchGestureDragEnd()
+        {
+            return false;
+        }
+
+        public bool IsTouchGesturePinchStart()
+        {
+            return false;
+        }
+
+        public bool IsTouchGesturePinching()
+        {
+            return false;
+        }
+
+        public bool IsTouchGesturePinchEnd()
+        {
+            return false;
+        }
+
         /// <summary>
         /// Create the input helper.
         /// </summary>

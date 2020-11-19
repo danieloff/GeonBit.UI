@@ -125,5 +125,12 @@ namespace GeonBit.UI
         /// Mouse wheel change sign (eg 0, 1 or -1) since last frame.
         /// </summary>
         int MouseWheelChange { get; }
+
+        bool IsTouchGestureDragStart();
+        bool IsTouchGestureDragging();
+        bool IsTouchGestureDragEnd();
+        bool IsTouchGesturePinchStart();
+        bool IsTouchGesturePinching();
+        bool IsTouchGesturePinchEnd();
     }
 }
