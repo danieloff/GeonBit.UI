@@ -12,6 +12,10 @@ namespace GeonBit.UI
 
         void AddChild(Entity child);
 
+        IMouseInput GetMouseInputProvider();
+
+        IKeyboardInput GetKeyboardInputProvider();
+
         GoodOrBadGame Game
         {
             get;

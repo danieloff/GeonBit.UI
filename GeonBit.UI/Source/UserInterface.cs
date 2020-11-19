@@ -367,7 +367,7 @@ namespace GeonBit.UI
                 Resources.LoadContent(_content, program, igame.Game, theme);
             }
 
-            var ui = new UserInterface();
+            var ui = new UserInterface(igame.GetMouseInputProvider(), igame.GetKeyboardInputProvider());
 
             // create a default active user interface
 
@@ -448,7 +448,7 @@ namespace GeonBit.UI
         /// <summary>
         /// Create the user interface instance.
         /// </summary>
-        public UserInterface()
+        public UserInterface(IMouseInput mouseinputprovider, IKeyboardInput keyboardinputprovider)
         { 
             // sanity test
             if (_content == null)
@@ -457,8 +457,8 @@ namespace GeonBit.UI
             }
 
             // create default input providers
-            MouseInputProvider = new DefaultInputProvider();
-            KeyboardInputProvider = new DefaultInputProvider();
+            MouseInputProvider = mouseinputprovider; //new DefaultInputProvider();
+            KeyboardInputProvider = keyboardinputprovider; //new DefaultInputProvider();
 
             // create draw utils
             DrawUtils = new DrawUtils();

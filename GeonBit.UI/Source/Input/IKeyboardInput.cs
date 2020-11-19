@@ -20,7 +20,7 @@ namespace GeonBit.UI
     /// Some special characters input.
     /// Note: enum values are based on ascii table values for these special characters.
     /// </summary>
-    enum SpecialChars
+    public enum SpecialChars
     {
         Null = 0,           // no character input
         Delete = 127,       // delete char
