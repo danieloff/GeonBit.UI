@@ -126,6 +126,9 @@ namespace GeonBit.UI
         /// </summary>
         int MouseWheelChange { get; }
 
+        Vector2 TouchGestureDragStartPosition { get; }
+        Vector2 TouchGestureDragCurrentPosition { get; }
+
         bool IsTouchGestureDragStart();
         bool IsTouchGestureDragging();
         bool IsTouchGestureDragEnd();
