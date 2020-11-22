@@ -86,6 +86,10 @@ namespace GeonBit.UI
 
         public Vector2 TouchGestureDragStartPosition { get => Vector2.Zero; }
         public Vector2 TouchGestureDragCurrentPosition { get => Vector2.Zero; }
+        public Vector2 TouchGesturePinchStartPosition1 { get => Vector2.Zero; }
+        public Vector2 TouchGesturePinchCurrentPosition1 { get => Vector2.Zero; }
+        public Vector2 TouchGesturePinchStartPosition2 { get => Vector2.Zero; }
+        public Vector2 TouchGesturePinchCurrentPosition2 { get => Vector2.Zero; } 
 
         public bool IsTouchGestureDragStart()
         {
