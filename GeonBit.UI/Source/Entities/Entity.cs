@@ -1681,6 +1681,32 @@ namespace GeonBit.UI.Entities
         }
 
         /// <summary>
+        /// Bring this entity to be in a position (inside its parent).
+        /// </summary>
+        public void BringToPosition(int pos)
+        {
+            Entity parent = _parent;
+            for (var i=parent.Children.Count - 1; i >= 0; i--)
+            {
+                if (i == pos)
+                {
+                    if (parent.Children[i] != this) //pos is after current
+                    {
+                        parent.RemoveChild(this);
+                        parent.AddChild(this, InheritParentState, pos - 1);
+                    }
+                    break;
+                }
+                else if (parent.Children[i] == this) //pos is before current
+                {
+                    parent.RemoveChild(this);
+                    parent.AddChild(this, InheritParentState, pos);
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
         /// Push this entity to the back (inside its parent).
         /// </summary>
         public void SendToBack()
