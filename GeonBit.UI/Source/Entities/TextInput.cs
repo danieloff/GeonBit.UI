@@ -617,6 +617,11 @@ namespace GeonBit.UI.Entities
             {
                 Value = ValueWhenEmpty;
             }
+
+            if (IsFocused)
+            {
+                _userinterface.SummonKeyboard();
+            }
         }
     }
 }

@@ -15,6 +15,7 @@ using Microsoft.Xna.Framework.Content;
 using System.Runtime.Serialization;
 using System.Xml.Serialization;
 using GoodOrBad.Framework;
+using System;
 
 namespace GeonBit.UI
 {
@@ -644,6 +645,11 @@ namespace GeonBit.UI
                     }
                 }
             }
+        }
+
+        internal void SummonKeyboard()
+        {
+            GameUI.SummonKeyboard();
         }
 
         /// <summary>

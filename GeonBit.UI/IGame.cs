@@ -20,5 +20,7 @@ namespace GeonBit.UI
         {
             get;
         }
+
+        void SummonKeyboard();
     }
 }
