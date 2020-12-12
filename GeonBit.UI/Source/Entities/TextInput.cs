@@ -620,7 +620,10 @@ namespace GeonBit.UI.Entities
 
             if (IsFocused)
             {
-                _userinterface.SummonKeyboard();
+                var keyboardinterface = new SummonKeyboardInterface();
+                keyboardinterface.GetOriginalText = () => Value;
+                keyboardinterface.UpdateText = (string value) => Value = value;
+                _userinterface.SummonKeyboard(keyboardinterface);
             }
         }
     }

@@ -6,6 +6,12 @@ using System.Text;
 
 namespace GeonBit.UI
 {
+    public class SummonKeyboardInterface
+    {
+        public Func<string> GetOriginalText;
+        public Action<string> UpdateText;
+    }
+
     public interface IGameUI
     {
         //Entity AddEntity(Entity entity);
@@ -21,6 +27,6 @@ namespace GeonBit.UI
             get;
         }
 
-        void SummonKeyboard();
+        void SummonKeyboard(SummonKeyboardInterface keyboardinterface);
     }
 }

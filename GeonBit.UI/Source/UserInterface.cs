@@ -647,9 +647,9 @@ namespace GeonBit.UI
             }
         }
 
-        internal void SummonKeyboard()
+        internal void SummonKeyboard(SummonKeyboardInterface keyboardinterface)
         {
-            GameUI.SummonKeyboard();
+            GameUI.SummonKeyboard(keyboardinterface);
         }
 
         /// <summary>
