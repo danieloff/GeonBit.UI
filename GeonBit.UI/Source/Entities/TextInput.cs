@@ -621,7 +621,7 @@ namespace GeonBit.UI.Entities
             if (IsFocused)
             {
                 var keyboardinterface = new SummonKeyboardInterface();
-                keyboardinterface.GetOriginalText = () => Value;
+                keyboardinterface.RetrieveText = () => Value;
                 keyboardinterface.UpdateText = (string value) => Value = value;
                 _userinterface.SummonKeyboard(keyboardinterface);
             }

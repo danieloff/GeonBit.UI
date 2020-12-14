@@ -8,7 +8,7 @@ namespace GeonBit.UI
 {
     public class SummonKeyboardInterface
     {
-        public Func<string> GetOriginalText;
+        public Func<string> RetrieveText;
         public Action<string> UpdateText;
     }
 

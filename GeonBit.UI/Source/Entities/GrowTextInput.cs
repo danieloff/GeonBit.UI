@@ -709,6 +709,14 @@ namespace GeonBit.UI.Entities
             {
                 Value = ValueWhenEmpty;
             }
+
+            if (IsFocused)
+            {
+                var keyboardinterface = new SummonKeyboardInterface();
+                keyboardinterface.RetrieveText = () => Value;
+                keyboardinterface.UpdateText = (string value) => Value = value;
+                _userinterface.SummonKeyboard(keyboardinterface);
+            }
         }
     }
 }
