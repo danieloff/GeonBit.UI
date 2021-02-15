@@ -341,7 +341,7 @@ namespace GeonBit.UI
                 //TODO FIX THIS CALL TO SOMETHING CLEANER
                 using (var stream = game.FileOpenAppData(program + "fonts/" + proxydata.FontName, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    Fonts[(int)style] = DynamicSpriteFont.FromTtf(stream, 20); //TODO, default size?
+                    Fonts[(int)style] = DynamicSpriteFont.FromTtf(stream, 20, program + "fonts/" + proxydata.FontName); //TODO, default size?
                 }
             }
 
